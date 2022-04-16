@@ -1,0 +1,10 @@
+﻿main: org.csg.Fwmain
+author: 千千
+usuage: /csg
+version: 1
+name: Csg-Plus
+commands:
+  csg:
+    description: main command
+  seril:
+    description: make
