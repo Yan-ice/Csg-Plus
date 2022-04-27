@@ -2,6 +2,7 @@ package org.csg;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -16,7 +17,7 @@ public class Data {
 	public static String worldpath = "";
 	public static Location defaultLocation = new Location(Bukkit.getWorlds().get(0),0,80,0);
 
-	public static String Version = "Beta1.3";
+	public static String Version = "Beta1.4";
 
 	public static Random random = new Random();
 	public static boolean onDisable = false;
@@ -25,10 +26,11 @@ public class Data {
 
 	
 	public static boolean debug = false;
-	
+	public static boolean isPaper = false;
+
 	public static Fwmain fmain = null;
 
-	public static File bukkit_core;
+	public static List<File> bukkit_core = new ArrayList<>();
 
 	public static File lobbyDir;
 	public static File optionFile;
@@ -54,6 +56,11 @@ public class Data {
 			if(optionFileConf.contains("DefaultLoc")){
 				defaultLocation = (Location)optionFileConf.get("DefaultLoc");
 			}
+
+			if(optionFileConf.contains("IsPaperSpigot")){
+				isPaper = optionFileConf.getBoolean("IsPaperSpigot");
+			}
+
 			if(optionFileConf.contains("HighMCVersion")){
      	    	Data.HighMCVersion = optionFileConf.getBoolean("HighMCVersion");
      	    }

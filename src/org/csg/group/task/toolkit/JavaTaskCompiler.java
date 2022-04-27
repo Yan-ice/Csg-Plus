@@ -155,10 +155,11 @@ public class JavaTaskCompiler extends ClassLoader {
         output.close();
 
         JavaCompiler c = ToolProvider.getSystemJavaCompiler();
-        String depend = String.format("%s;%s;",
-                Data.bukkit_core.getPath(),
-                path);
 
+        String depend = String.format("%s;",path);
+        for(File core : Data.bukkit_core){
+            depend = depend.concat(String.format("%s;",core.getPath()));
+        }
         File dir = new File(path);
         if(c==null){
             Data.Debug("当前环境为jre，无法使用javatask！如果需要使用，请安装jdk。");
@@ -190,7 +191,9 @@ public class JavaTaskCompiler extends ClassLoader {
                 return this.defineClass("Temp",bt,0,length);
             }
         }
-        FileMng.deleteDir(dir);
+        Data.Debug("加载javatask脚本出现了错误。");
+
+        //FileMng.deleteDir(dir);
         return null;
     }
 

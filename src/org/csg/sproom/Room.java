@@ -102,7 +102,7 @@ public class Room {
 		//以上在替换世界名字
 		new Room(lobby,5);
 		sender.sendMessage(ChatColor.AQUA+"生成独立副本"+lobbyname+"成功!");
-		sender.sendMessage(ChatColor.AQUA+"输入 "+ChatColor.YELLOW+"/fwroom "+lobbyname+" join "+ChatColor.AQUA+"即可开始体验游戏了！");
+		sender.sendMessage(ChatColor.AQUA+"输入 "+ChatColor.YELLOW+"/csg "+lobbyname+" join "+ChatColor.AQUA+"即可开始体验游戏了！");
 		sender.sendMessage(ChatColor.AQUA+"啊对了，你可以随时继续使用 /seril "+lobbyname+" 更新这个独立副本噢~");
 
 		return 0;

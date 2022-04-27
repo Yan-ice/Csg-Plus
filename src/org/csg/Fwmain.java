@@ -403,10 +403,18 @@ public class Fwmain extends JavaPlugin implements Listener {
 		Data.fmain = this;
 		getServer().getPluginManager().registerEvents(this, this);
 		try{
-			loadWorldPath();
 
-			LoadFile();
 			SendToData();
+			loadWorldPath();
+			if(Data.isPaper){
+				File root = new File("./libraries");
+				LoadBukkitCore(root,true);
+			}else{
+				File root = new File("./");
+				LoadBukkitCore(root,false);
+			}
+
+
 
 			getLogger().info("插件启动成功！ [Csg-Plus " + Data.Version + " ]");
 
@@ -453,8 +461,23 @@ public class Fwmain extends JavaPlugin implements Listener {
 		HandlerList.unregisterAll((Plugin)this);
 		Data.data.Save();
 
-		LoadFile();
 		SendToData();
+		loadWorldPath();
+
+		File root = new File("./libraries");
+		if(root.exists()){
+			LoadBukkitCore(root,true);
+		}
+		root = new File("./");
+		LoadBukkitCore(root,false);
+
+//		if(Data.isPaper){
+//			File root = new File("./libraries");
+//			LoadBukkitCore(root,true);
+//		}else{
+//			File root = new File("./");
+//			LoadBukkitCore(root,false);
+//		}
 
 		Lobby.LoadAll(lobby);
 
@@ -552,29 +575,48 @@ public class Fwmain extends JavaPlugin implements Listener {
 
 		getServer().createWorld(WorldCreator.name("CustomGoTec"));
 	}
-	private void LoadFile() {
+	private void LoadBukkitCore(File root,boolean isPaper) {
+
+		if(!isPaper){
+			for(File f : root.listFiles()){
+				if(f.getName().endsWith(".jar") && f.getTotalSpace()>4*1024*1024){
+					Data.ConsoleInfo("识别到核心端 "+f.getName());
+					Data.bukkit_core.add(f);
+					break;
+				}
+			}
+		}else{
+			for(File f : root.listFiles()){
+				if(f.isDirectory()){
+					LoadBukkitCore(f,isPaper);
+				}else{
+					if(f.getName().endsWith(".jar")){
+						Data.ConsoleInfo("识别到API "+f.getName());
+						Data.bukkit_core.add(f);
+						break;
+					}
+				}
+			}
+		}
+
+
+	}
+
+	private void SendToData() {
+
+		Data.fmain = this;
+
 		if (!getDataFolder().exists()) {
 			getDataFolder().mkdir();
 		}
 		if (!lobby.exists()) {
 			lobby.mkdir();
 		}
-		File root = new File("./");
-		for(File f : root.listFiles()){
-			if(f.getName().endsWith(".jar") && f.getTotalSpace()>4*1024*1024){
-				Data.ConsoleInfo("识别到核心端 "+f.getName());
-				Data.bukkit_core = f;
-				break;
-			}
-		}
+
 		data = new File(getDataFolder(), "Data.yml");
 		option = new File(getDataFolder(), "Option.yml");
 		optionfile = load(option);
 		d = new ValueData(load(data));
-	}
-
-	private void SendToData() {
-		Data.fmain = this;
 
 		Data.optionFile = option;
 		Data.lobbyDir = lobby;

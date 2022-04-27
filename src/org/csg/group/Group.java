@@ -298,7 +298,7 @@ public class Group implements customgo.Group{
 		UUID uid = player.getUniqueId();
 
 		if(Group.SearchPlayerInGroup(player)!=null){
-			player.sendMessage(ChatColor.RED+"您已经在一个大厅中了！");
+			//player.sendMessage(ChatColor.RED+"您已经在一个大厅中了！");
 			return;
 		}
 

@@ -3,6 +3,9 @@ Debug: false
 HighMCVersion: true
 # 如果MC版本高于1.9，则将该项设为true。
 
+IsPaperSpigot: false
+# 如果您的核心端是PaperSpigot，请将该项设为true。
+
 DefaultLoc:
   ==: org.bukkit.Location
   world: world

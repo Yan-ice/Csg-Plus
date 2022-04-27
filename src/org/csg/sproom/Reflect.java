@@ -134,7 +134,6 @@ public class Reflect implements Listener {
 	@EventHandler(priority=EventPriority.MONITOR)
 	public void st(ChunkUnloadEvent evt){
 		if(evt.getWorld()==model){
-			Data.fmain.getLogger().info("ChunkSave Prevent");
 			evt.setSaveChunk(false);
 		}
 	}

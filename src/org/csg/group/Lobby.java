@@ -551,10 +551,8 @@ public class Lobby implements customgo.Lobby, CycleUpdate {
 		}
 
 		this.ChangeGroup(player,"Main");
-		System.out.println("leave call start");
 		PlayerLeaveLobbyEvent e = new PlayerLeaveLobbyEvent(player,this);
 		Data.fmain.getServer().getPluginManager().callEvent(e);
-		System.out.println("leave call end");
 		getDefaultGroup().LeaveGroup(player.getUniqueId(),"_outside_");
 	}
 
