@@ -2,8 +2,6 @@ package customgo;
 
 import org.bukkit.configuration.file.FileConfiguration;
 import org.csg.group.Group;
-import org.csg.group.task.toolkit.PlayerValueBoard;
-import org.csg.group.task.toolkit.ValueBoard;
 import org.bukkit.entity.Player;
 
 import java.util.List;
@@ -21,6 +19,14 @@ public interface Lobby {
      * @return
      */
     public boolean hasPlayer(Player p);
+
+    /**
+     * 触发脚本中的指定名字的function，触发的玩家自己指定。
+     * @param name function名字
+     * @param p 触发者（可为null）
+     * @param para 参数，如果参数列表不对应会报错。
+     */
+    public Object callFunction(String name, Player p, Object[] para);
 
     /**
      * 触发脚本中的指定名字的listener，触发的队列与玩家均自己指定。

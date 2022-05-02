@@ -1,4 +1,4 @@
-package org.csg.group.task.toolkit;
+package org.csg.group.task.value;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -9,6 +9,10 @@ import org.bukkit.entity.Player;
 
 public class PlayerValueBoard implements customgo.PlayerValueBoard {
 	Map<Player,ValueBoard> pvalue = new HashMap<>();
+
+	public Map<String,Double> getValueList(Player p){
+		return pvalue.get(p).value;
+	}
 
 	/**
 	 * 在计分板上给一个玩家记录新的变量。

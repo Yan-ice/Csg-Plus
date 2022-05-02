@@ -1,12 +1,15 @@
-package org.csg.group.task.toolkit;
+package org.csg.group.task.value;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
 public class ValueBoard implements customgo.ValueBoard  {
-	Map<String,Double> value = new HashMap<>();
+	public Map<String,Double> value = new HashMap<>();
 
+	public Map<String,Double> getValueList(){
+		return value;
+	}
 	public void Value(String Name,double Value){
 		if(value.containsKey(Name)){
 			value.remove(Name);

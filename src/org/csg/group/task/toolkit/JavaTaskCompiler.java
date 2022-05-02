@@ -66,9 +66,9 @@ public class JavaTaskCompiler extends ClassLoader {
             }
             File target = new File(current+"/"+paths[paths.length-1]+".class");
             if(!target.exists()){
-                FileMng.copyDir(file,target);
+                FileMng.deleteDir(target);
             }
-
+            FileMng.copyDir(file,target);
         }
     }
 

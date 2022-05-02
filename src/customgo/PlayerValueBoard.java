@@ -1,11 +1,18 @@
 package customgo;
 
+import java.util.Map;
 import java.util.Set;
 
 import org.bukkit.entity.Player;
 
 public interface PlayerValueBoard {
 
+    /**
+     * 获得一个玩家的分数列表。
+     * @param p 玩家
+     * @return
+     */
+    public Map<String,Double> getValueList(Player p);
     /**
      * 在计分板上给一个玩家记录新的变量。
      * 如果变量名已存在，则覆盖它。

@@ -3,6 +3,7 @@ package org.csg.group.task.toolkit;
 import org.csg.Data;
 import org.csg.group.Group;
 import org.csg.group.task.csgtask.Task;
+import org.csg.group.task.value.ValueBoard;
 import org.csg.location.Teleporter;
 import org.csg.update.CycleUpdate;
 import org.csg.update.MainCycle;
@@ -41,11 +42,11 @@ public class TaskExecuter implements CycleUpdate {
         try{
             temp_object.putAll(variables.values);
             temp_object.putAll(group.getLobby().macros.macros);
-            temp_object.putAll(group.getLobby().ValueBoard().value);
+            temp_object.putAll(group.getLobby().ValueBoard().getValueList());
             if(target!=null){
-                ValueBoard p = group.getLobby().PlayerValueBoard().pvalue.get(target);
+                Map<String,Double> p = group.getLobby().PlayerValueBoard().getValueList(target);
                 if(p!=null){
-                    temp_object.putAll(p.value);
+                    temp_object.putAll(p);
                 }
             }
         }catch(Exception e){

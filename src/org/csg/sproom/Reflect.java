@@ -35,6 +35,11 @@ public class Reflect implements Listener {
 	}
 
 	public ReflectStatu getStatu(){
+		if(statu==ReflectStatu.WAITING){
+			if("true".equals(lobby.macros.macros.get("isGaming"))){
+				statu = ReflectStatu.STARTED;
+			}
+		}
 		return statu;
 	}
 
@@ -143,8 +148,6 @@ public class Reflect implements Listener {
 		if(evt.getLobby()!=this.lobby){
 			return;
 		}
-		Data.fmain.getLogger().info("LISTENED: you leave "+lobby.getName()+" "+evt.getLobby().getPlayerAmount());
-		evt.getPlayer().sendMessage("LISTENED: you leave "+lobby.getName()+" "+evt.getLobby().getPlayerAmount());
 		if(evt.getLobby().getPlayerAmount()<=1){
 
 			statu = ReflectStatu.UNLOADING;

@@ -12,7 +12,6 @@ import customgo.event.ListenerCalledEvent;
 import customgo.event.PlayerJoinLobbyEvent;
 import customgo.event.PlayerLeaveLobbyEvent;
 import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.event.EventHandler;
 import org.csg.group.task.Macro;
 import org.csg.group.task.csgtask.FunctionTask;
 import org.csg.group.task.csgtask.ListenerTask;
@@ -23,6 +22,8 @@ import org.csg.Data;
 import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.csg.group.task.toolkit.*;
+import org.csg.group.task.value.PlayerValueBoard;
+import org.csg.group.task.value.ValueBoard;
 import org.csg.sproom.Room;
 import org.csg.update.CycleUpdate;
 import org.csg.update.MainCycle;
@@ -124,11 +125,11 @@ public class Lobby implements customgo.Lobby, CycleUpdate {
 		return dataBoard;
 	}
 
-	public ValueBoard ValueBoard(){
+	public customgo.ValueBoard ValueBoard(){
 		return Board;
 	}
 
-	public PlayerValueBoard PlayerValueBoard(){
+	public customgo.PlayerValueBoard PlayerValueBoard(){
 		return PlayerBoard;
 	}
 
@@ -150,6 +151,36 @@ public class Lobby implements customgo.Lobby, CycleUpdate {
 			}
 		}
 		return false;
+	}
+	public Object callFunction(String name, Player p, Object[] para){
+		for(Group gro : grouplist){
+			if(gro.hasPlayer(p)){
+				for(FunctionTask task : listener){
+					if(task.getName().equals(name)){
+						gro.runTask(task,p.getUniqueId(),para);
+					}
+				}
+				if(javaFunction==null){
+					return null;
+				}
+				try{
+					for(Method meth : javaFunction.getMethods()){
+						if(meth.getName().equals("_setMember")){
+							meth.invoke(instance,this,gro,p,p);
+						}
+					}
+					for(Method meth : javaFunction.getMethods()){
+						if(meth.getName().equals(name)){
+							return meth.invoke(instance,para);
+						}
+					}
+				}catch(IllegalAccessException | InvocationTargetException e){
+					e.printStackTrace();
+					Data.ConsoleInfo("尝试调取java函数"+name+"失败！");
+				}
+			}
+		}
+		return null;
 	}
 
 	public Object callFunction(String name, TaskExecuter executer, Player p, Object[] para){
@@ -372,7 +403,7 @@ public class Lobby implements customgo.Lobby, CycleUpdate {
 			macros.LoadMacro(Data.fmain.load(default_macro_file));
 		}else{
 			default_macro_file = new File(folder.getPath()+"/macro.yml");
-			default_macro_file.mkdir();
+			default_macro_file.createNewFile();
 		}
 
 		loadFileRecurse(folder,jcompiler);

@@ -7,6 +7,11 @@ import java.util.Set;
 public interface ValueBoard {
 
 	/**
+	 * 获得分数列表。
+	 * @return
+	 */
+	public Map<String,Double> getValueList();
+	/**
 	 * 设置分数
 	 * @param Name
 	 * @param Value

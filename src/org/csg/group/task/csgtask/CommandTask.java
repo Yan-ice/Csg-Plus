@@ -1,5 +1,7 @@
 package org.csg.group.task.csgtask;
 
+import customgo.PlayerValueBoard;
+import customgo.ValueBoard;
 import org.bukkit.Location;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -10,10 +12,8 @@ import org.csg.group.Group;
 import org.csg.group.Lobby;
 import org.csg.group.task.ItemCheck;
 import org.csg.group.task.toolkit.Calculater;
-import org.csg.group.task.toolkit.PlayerValueBoard;
 import org.csg.group.task.toolkit.TaskExecuter;
 
-import org.csg.group.task.toolkit.ValueBoard;
 import org.csg.location.FArena;
 import org.csg.location.Teleporter;
 import org.bukkit.Bukkit;
