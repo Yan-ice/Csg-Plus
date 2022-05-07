@@ -159,8 +159,6 @@ public class TaskCompiler {
                 r.close();
                 input.close();
 
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
             } catch (IOException e) {
                 e.printStackTrace();
             }
