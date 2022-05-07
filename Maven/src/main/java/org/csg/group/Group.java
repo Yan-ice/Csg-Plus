@@ -490,7 +490,7 @@ class GListener implements Listener {
 		}
 		if (g.hasPlayer(evt.getPlayer())) {
 			String Command = evt.getMessage().split(" ")[0];
-			if (Command.equalsIgnoreCase("/csg")) {
+			if (Command.equalsIgnoreCase("/org/csg")) {
 				return;
 			}
 			for (int a = 0; a < rule.WhiteListCommand().size(); a++) {

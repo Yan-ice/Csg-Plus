@@ -16,16 +16,16 @@ public class ValueBoard implements customgo.ValueBoard  {
 		}
 		value.put(Name, Value);
 	}
-	
+
 	public void ValueAdd(String Name,double Value){
 		if(value.containsKey(Name)){
-			
+
 			value.replace(Name, value.get(Name)+Value);
 		}else{
 			value.put(Name, Value);
 		}
 	}
-	
+
 
 	public double getValue(String Name){
 		if(value.containsKey(Name)){
@@ -33,14 +33,14 @@ public class ValueBoard implements customgo.ValueBoard  {
 		}
 		return 0;
 	}
-	
+
 
 	public void removeValue(String Name){
 		if(value.containsKey(Name)){
 			value.remove(Name);
 		}
 	}
-	
+
 	/**
 	 * ��üƷְ��ϵ����б�����
 	 * @return �����б�

@@ -7,13 +7,10 @@ import org.bukkit.entity.Player;
 import org.csg.Data;
 import org.csg.FileMng;
 import org.csg.group.Lobby;
-import org.csg.location.Teleporter;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 public class Room {
@@ -102,7 +99,7 @@ public class Room {
 		//以上在替换世界名字
 		new Room(lobby,5);
 		sender.sendMessage(ChatColor.AQUA+"生成独立副本"+lobbyname+"成功!");
-		sender.sendMessage(ChatColor.AQUA+"输入 "+ChatColor.YELLOW+"/csg "+lobbyname+" join "+ChatColor.AQUA+"即可开始体验游戏了！");
+		sender.sendMessage(ChatColor.AQUA+"输入 "+ChatColor.YELLOW+ "/org/csg " +lobbyname+" join "+ChatColor.AQUA+"即可开始体验游戏了！");
 		sender.sendMessage(ChatColor.AQUA+"啊对了，你可以随时继续使用 /seril "+lobbyname+" 更新这个独立副本噢~");
 
 		return 0;

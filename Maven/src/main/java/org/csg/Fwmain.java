@@ -503,7 +503,7 @@ public class Fwmain extends JavaPlugin implements Listener {
 		if(Data.debug){
 			if(CheckPerm(sender,"csg.debug")){
 				switch(label){
-					case "csg":
+					case "org/csg":
 						Fwcommands(sender, args);
 						break;
 				}
@@ -513,7 +513,7 @@ public class Fwmain extends JavaPlugin implements Listener {
 			}
 		}else{
 			switch(label){
-				case "csg":
+				case "org/csg":
 					Fwcommands(sender, args);
 					break;
 				case "seril":

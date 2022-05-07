@@ -25,15 +25,15 @@ public class FArena {
 		}catch(ArrayIndexOutOfBoundsException e){
 		}
 	}
-	
+
 	public FArena(Location LocA,Location LocB) {
 		this.LocA = LocA;
 		this.LocB = LocB;
 	}
-	
+
 	public FArena(){
 	}
-	
+
 	/**
 	 * �����걣��Ϊһ��X1,Y1,Z1,X2,Y2,Z2,World ��ʽ���ַ�����
 	 * @return ����õ��ַ���
@@ -72,7 +72,7 @@ public class FArena {
 	}
 
 
-	/** 
+	/**
 	 * ��������Ƿ�������
 	 * @return �����
 	 */
@@ -80,11 +80,11 @@ public class FArena {
 		if (LocA!=null && LocB!=null) {
 			return true;
 		}
-		
+
 		return false;
 	}
-	
-	
+
+
 	private boolean Dis(double T,double d,double e){
 		if(d>e){
 			return T<=d && T>=e;

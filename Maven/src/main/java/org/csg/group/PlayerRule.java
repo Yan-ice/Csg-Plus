@@ -83,11 +83,11 @@ public class PlayerRule {
 		
 		if(group.getFileConf().contains("PlayerRule.WhiteListCommand")){
 			this.WhiteListCommand = group.getFileConf().getStringList("PlayerRule.WhiteListCommand");
-			if(!WhiteListCommand.contains("csg")){
-				WhiteListCommand.add("csg");
+			if(!WhiteListCommand.contains("org/csg")){
+				WhiteListCommand.add("org/csg");
 			}
 		}else{
-			WhiteListCommand.add("csg");
+			WhiteListCommand.add("org/csg");
 		}
 		return true;
 	}

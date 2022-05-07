@@ -11,8 +11,8 @@ public class FwHologram {
 	
 
 	/**
-	 * лМ╪ср╩╦Ж╦║©увж║ё
-	 * хГ╧Ш╦║©увжжьцШё╛╩Аохи╬ЁЩт╜╦║©увжтысц╢клФ╢ЗкЭ║ё
+	 * О©╫О©╫О©╫р╩О©╫О©╫О©╫О©╫О©╫О©╫О©╫ж║О©╫
+	 * О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫и╬О©╫О©╫т╜О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫ц╢О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫
 	 * 
 	 */
 	public void AddHologram(Location loc,String Name,String message) {
@@ -24,8 +24,8 @@ public class FwHologram {
 		}
 	}
 	/**
-	 * лМ╪ср╩╦Ж╦║©увж║ё
-	 * хГ╧Ш╦║©увжжьцШё╛╩Аохи╬ЁЩт╜╦║©увжтысц╢клФ╢ЗкЭ║ё
+	 * О©╫О©╫О©╫р╩О©╫О©╫О©╫О©╫О©╫О©╫О©╫ж║О©╫
+	 * О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫и╬О©╫О©╫т╜О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫ц╢О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫
 	 * 
 	 */
 	public void EditHologram(String Name,String message) {
@@ -34,7 +34,7 @@ public class FwHologram {
 		}
 	}
 	/**
-	 * и╬ЁЩр╩╦Ж╦║©увж║ё
+	 * и╬О©╫О©╫р╩О©╫О©╫О©╫О©╫О©╫О©╫О©╫ж║О©╫
 	 */
 	public void DelHologram(String Name) {
 		if(hdlist.containsKey(Name)){
@@ -44,13 +44,13 @@ public class FwHologram {
 	}
 	
 	/**
-	 * гЕЁЩкЫсп╦║©увж║ё
+	 * О©╫О©╫О©╫О©╫О©╫О©╫п╦О©╫О©╫О©╫О©╫ж║О©╫
 	 */
 	public Map<String,ArmorStand> Holograms() {
 		return hdlist;
 	}
 	/**
-	 * гЕЁЩкЫсп╦║©увж║ё
+	 * О©╫О©╫О©╫О©╫О©╫О©╫п╦О©╫О©╫О©╫О©╫ж║О©╫
 	 */
 	public void ClearHologram() {
 		for(ArmorStand s : hdlist.values()){

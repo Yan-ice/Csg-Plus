@@ -1,10 +1,8 @@
 package org.csg.group.task.toolkit;
 
 import org.bukkit.event.entity.PlayerDeathEvent;
-import org.csg.Data;
 import org.csg.group.Group;
 import org.csg.group.Lobby;
-import org.csg.location.Teleporter;
 import org.csg.update.CycleUpdate;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
@@ -116,7 +114,7 @@ public class Trigger implements Listener, CycleUpdate {
 			if(!cooldown.contains(en_name)){
 				if(clear){
 					cooldown.add(en_name);
-					lobby.callListener("onKillAllEntity",Group.SearchPlayerInGroup(killer),null,new Object[]{en_name});
+					lobby.callListener("onKillAllEntity", Group.SearchPlayerInGroup(killer),null,new Object[]{en_name});
 				}
 				if(total_clear){
 					cooldown.add(en_name);
