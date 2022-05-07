@@ -3,7 +3,6 @@
 Csg-Plus是基于CustomGo重制的MineCraft开源副本插件。它在CustomGo的基础上大幅重做了配置文件，真正做到了可编程的副本房间。
 
 ## 阅读该项目代码
-插件的所有代码均在"master"分支中。  
 源码分为两个package：其中"customgo"包内包含插件的API，另一个包内为所有实现代码。
 
 ## 插件开发手册
