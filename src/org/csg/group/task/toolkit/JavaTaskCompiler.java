@@ -5,6 +5,7 @@ import lombok.var;
 import org.csg.Data;
 import org.csg.FileMng;
 import org.csg.Fwmain;
+import org.csg.SplitCharUtils;
 import org.csg.group.Group;
 import org.csg.group.Lobby;
 
@@ -161,14 +162,13 @@ public class JavaTaskCompiler extends ClassLoader {
         JavaCompiler c = ToolProvider.getSystemJavaCompiler();
 
         StringBuilder builder = new StringBuilder(path);
-        builder.append(";");
 
         for (File core : Data.bukkit_core) {
-            builder.append(core.getAbsolutePath()).append(";");
+            builder.append(SplitCharUtils.getSplitChar(Fwmain.getOsName())).append(core.getAbsolutePath());
         }
 
         //将配置文件中依赖路径写入编译路径
-        Fwmain.getOptionDepends().forEach(depend -> builder.append(depend).append(";"));
+        Fwmain.getOptionDepends().forEach(depend -> builder.append(SplitCharUtils.getSplitChar(Fwmain.getOsName())).append(depend));
 
         if (c == null) {
             Data.ConsoleInfo("当前环境为jre，无法使用javatask！如果需要使用，请安装jdk。");

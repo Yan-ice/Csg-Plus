@@ -404,6 +404,10 @@ public class Fwmain extends JavaPlugin implements Listener {
 	public void onEnable() {
 		Data.fmain = this;
 		getServer().getPluginManager().registerEvents(this, this);
+
+		//分析操作系统
+		analyseOs();
+
 		try{
 
 			SendToData();
@@ -534,6 +538,10 @@ public class Fwmain extends JavaPlugin implements Listener {
 
 	@Getter
 	@Setter
+	private static String osName;
+
+	@Getter
+	@Setter
 	private static List<String> optionDepends;
 
 	private void loadWorldPath(){
@@ -604,6 +612,12 @@ public class Fwmain extends JavaPlugin implements Listener {
 				}
 			}
 		}
+	}
+
+	public static void analyseOs() {
+		String os = System.getProperty("os.name");
+		if(os.toLowerCase().contains("windows")) setOsName("win");
+		else setOsName("linux");
 	}
 
 	private void SendToData() {
