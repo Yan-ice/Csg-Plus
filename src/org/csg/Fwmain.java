@@ -162,7 +162,7 @@ public class Fwmain extends JavaPlugin implements Listener {
 							sender.sendMessage("§a检测到可以进行教程模板加载/更新！");
 							sender.sendMessage("§a如果你是第一次使用插件，教程会对你有很大帮助哦~！");
 							sender.sendMessage("§a");
-							sender.sendMessage("想要加载/更新教程，请输入 §e/fw teach");
+							sender.sendMessage("想要加载/更新教程，请输入 §e/csg teach");
 							sender.sendMessage("§a");
 							sender.sendMessage("§7(附加提示：更新教程会重载插件~)");
 							sender.sendMessage("§a*************************************");
@@ -334,7 +334,7 @@ public class Fwmain extends JavaPlugin implements Listener {
 								}
 
 							}else {
-								sender.sendMessage("/fw <房间名> function <函数名> [触发者]");
+								sender.sendMessage("/csg <房间名> trigger <函数名> [触发者]");
 							}
 							break;
 						default:

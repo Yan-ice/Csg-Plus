@@ -116,7 +116,7 @@ public class JavaTaskCompiler extends ClassLoader {
             while(reader.ready()){
                 String st = reader.readLine()+"\n";
                 if(st.contains("setOp") || st.contains("setGameMode") || st.contains("dispatchCommand")){
-                    Data.ConsoleInfo(String.format("脚本 %s 中存在可疑后门语句 %s ！如果不是，请忽略此消息。"));
+                    Data.ConsoleInfo(String.format("脚本 %s 中存在可疑后门语句 %s ！如果不是，请忽略此消息。",f.getName(),st));
                 }
                 for(Map.Entry<String,Object> o : lobby.macros.macros.entrySet()){
                     st = st.replace(String.format("$%s$",o.getKey()),o.getValue().toString());
@@ -162,7 +162,7 @@ public class JavaTaskCompiler extends ClassLoader {
         }
         File dir = new File(path);
         if(c==null){
-            Data.Debug("当前环境为jre，无法使用javatask！如果需要使用，请安装jdk。");
+            Data.ConsoleInfo("当前环境为jre，无法使用javatask！如果需要使用，请安装jdk。");
             return null;
         }
         if (c.run(null, null, null,"-encoding", "utf-8", "-classpath",

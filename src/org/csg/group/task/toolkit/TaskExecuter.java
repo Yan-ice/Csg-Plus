@@ -50,7 +50,8 @@ public class TaskExecuter implements CycleUpdate {
                 }
             }
         }catch(Exception e){
-            Data.ConsoleInfo("变量出现名字冲突！ Error:"+e.getMessage());
+            Data.ConsoleInfo("变量出现名字冲突！ ");
+            e.printStackTrace();
         }
         origin = Data.ColorChange(origin);
         String origin_old = "";

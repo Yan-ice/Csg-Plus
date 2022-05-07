@@ -155,7 +155,7 @@ public class Lobby implements customgo.Lobby, CycleUpdate {
 	public Object callFunction(String name, Player p, Object[] para){
 		for(Group gro : grouplist){
 			if(gro.hasPlayer(p)){
-				for(FunctionTask task : listener){
+				for(FunctionTask task : functions){
 					if(task.getName().equals(name)){
 						gro.runTask(task,p.getUniqueId(),para);
 					}
@@ -207,6 +207,7 @@ public class Lobby implements customgo.Lobby, CycleUpdate {
 			e.printStackTrace();
 			Data.ConsoleInfo("尝试调取java函数"+name+"失败！");
 		}
+
 		return null;
 	}
 	public void callListener(String name, Group g, Player p, Object[] para){

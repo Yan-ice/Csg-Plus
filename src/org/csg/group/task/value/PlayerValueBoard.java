@@ -11,6 +11,9 @@ public class PlayerValueBoard implements customgo.PlayerValueBoard {
 	Map<Player,ValueBoard> pvalue = new HashMap<>();
 
 	public Map<String,Double> getValueList(Player p){
+		if(pvalue.get(p)==null){
+			pvalue.put(p, new ValueBoard());
+		}
 		return pvalue.get(p).value;
 	}
 
