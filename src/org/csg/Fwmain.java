@@ -5,6 +5,8 @@ import java.io.File;
 import java.util.*;
 
 //import org.black_ixx.playerpoints.PlayerPoints;
+import lombok.Getter;
+import lombok.Setter;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.World;
@@ -530,6 +532,10 @@ public class Fwmain extends JavaPlugin implements Listener {
 	protected static FileConfiguration optionfile;
 	protected static ValueData d;
 
+	@Getter
+	@Setter
+	private static List<String> optionDepends;
+
 	private void loadWorldPath(){
 		boolean in_world = false;
 		String default_worldname = "world";
@@ -575,13 +581,13 @@ public class Fwmain extends JavaPlugin implements Listener {
 
 		getServer().createWorld(WorldCreator.name("CustomGoTec"));
 	}
-	private void LoadBukkitCore(File root,boolean isPaper) {
-
+	private void LoadBukkitCore(File root, boolean isPaper) {
 		if(!isPaper){
 			for(File f : root.listFiles()){
 				if(f.getName().endsWith(".jar") && f.getTotalSpace()>4*1024*1024){
 					Data.ConsoleInfo("识别到核心端 "+f.getName());
 					Data.bukkit_core.add(f);
+					System.out.print(f.getAbsolutePath());
 					break;
 				}
 			}
@@ -598,8 +604,6 @@ public class Fwmain extends JavaPlugin implements Listener {
 				}
 			}
 		}
-
-
 	}
 
 	private void SendToData() {

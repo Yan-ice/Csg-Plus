@@ -66,6 +66,10 @@ public class Data {
      	    }
 			LoadWhenJoin = false;
 			//LoadWhenJoin = optionFileConf.getBoolean("LoadWhenJoin");
+
+			//获取配置文件中的Depends
+			Fwmain.setOptionDepends(optionFileConf.getStringList("Depends"));
+
 		} catch (NullPointerException x) {
 			return;
 		}

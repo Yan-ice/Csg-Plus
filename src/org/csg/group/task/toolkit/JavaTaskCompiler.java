@@ -1,7 +1,10 @@
 package org.csg.group.task.toolkit;
 
+import lombok.Cleanup;
+import lombok.var;
 import org.csg.Data;
 import org.csg.FileMng;
+import org.csg.Fwmain;
 import org.csg.group.Group;
 import org.csg.group.Lobby;
 
@@ -26,7 +29,7 @@ public class JavaTaskCompiler extends ClassLoader {
     public JavaTaskCompiler(Lobby lobby) {
         super(Group.class.getClassLoader());
         this.lobby = lobby;
-        path = lobby.getTempFolder().getPath();
+        path = lobby.getTempFolder().getAbsolutePath();
 
         imports.add("customgo.*");
         imports.add("org.bukkit.entity.Player");
@@ -149,24 +152,35 @@ public class JavaTaskCompiler extends ClassLoader {
         out.append(codes);
         out.append("}");
 
+        @Cleanup
         FileOutputStream output = new FileOutputStream(path + "/Temp.java");
         output.write(out.toString().getBytes(StandardCharsets.UTF_8));
         output.flush();
-        output.close();
+
 
         JavaCompiler c = ToolProvider.getSystemJavaCompiler();
 
-        String depend = String.format("%s;", path);
+        StringBuilder builder = new StringBuilder(path);
+        builder.append(";");
+
         for (File core : Data.bukkit_core) {
-            depend = depend.concat(String.format("%s;", core.getPath()));
+            builder.append(core.getAbsolutePath()).append(";");
         }
-        File dir = new File(path);
+
+        //将配置文件中依赖路径写入编译路径
+        Fwmain.getOptionDepends().forEach(depend -> builder.append(depend).append(";"));
+
         if (c == null) {
             Data.ConsoleInfo("当前环境为jre，无法使用javatask！如果需要使用，请安装jdk。");
             return null;
         }
-        if (c.run(null, null, null, "-encoding", "utf-8", "-classpath",
-                depend,
+        Data.ConsoleInfo("编译时 classpath 参数为 -> " + builder.toString());
+        @Cleanup
+        OutputStream streamOut = new FileOutputStream(path + "/TempOut.log");
+        @Cleanup
+        OutputStream streamError = new FileOutputStream(path + "/TempError.log");
+        if (c.run(null, streamOut, streamError, "-encoding", "utf-8", "-classpath",
+                builder.toString(),
                 String.format("%s/Temp.java", path)
         ) == 0) {
             File temp = null;
@@ -174,23 +188,34 @@ public class JavaTaskCompiler extends ClassLoader {
                 if (f.getName().endsWith(".class")) {
                     if (f.getName().contains("$")) {
                         String classname = f.getName().substring(0, f.getName().length() - 6);
+                        var byteArray = new ByteArrayOutputStream();
+                        @Cleanup
                         FileInputStream input = new FileInputStream(f.getPath());
-                        int length = input.read(bt);
-                        input.close();
-                        defineClass(classname, bt, 0, length);
+                        int streamInt;
+                        while((streamInt = input.read()) != -1) {
+                            byteArray.write(streamInt);
+                        }
+                        int length = byteArray.size();
+                        defineClass(classname, byteArray.toByteArray(), 0, length);
                     } else if (f.getName().equals("Temp.class")) {
                         temp = f;
                     }
                 }
             }
             if (temp != null) {
+                var byteArray = new ByteArrayOutputStream();
+                @Cleanup
                 FileInputStream input = new FileInputStream(temp.getPath());
-                int length = input.read(bt);
+                int streamInt;
+                while((streamInt = input.read()) != -1) {
+                    byteArray.write(streamInt);
+                }
+                int length = byteArray.size();
                 //FileMng.deleteDir(dir);
-                input.close();
-                return this.defineClass("Temp", bt, 0, length);
+                return this.defineClass("Temp", byteArray.toByteArray(), 0, length);
             }
         }
+
         Data.Debug("加载javatask脚本出现了错误。");
 
         //FileMng.deleteDir(dir);

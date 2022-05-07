@@ -6,6 +6,10 @@ HighMCVersion: true
 IsPaperSpigot: false
 # 如果您的核心端是PaperSpigot，请将该项设为true。
 
+Depends:
+  - "/home/sycs/LosServer/BCtest/废土主城服-测试版/Gun/spigot-1.12.2[fixed].jar"
+#用户自定义的依赖
+
 DefaultLoc:
   ==: org.bukkit.Location
   world: world
