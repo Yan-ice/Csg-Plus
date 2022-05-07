@@ -2,6 +2,7 @@ package org.csg;
 
 import java.io.File;
 
+import java.io.IOException;
 import java.util.*;
 
 //import org.black_ixx.playerpoints.PlayerPoints;
@@ -38,7 +39,6 @@ import org.csg.sproom.Reflect;
 import org.csg.sproom.Room;
 
 public class Fwmain extends JavaPlugin implements Listener {
-
 
 	public FileConfiguration load(File file) {
 		if (!file.exists()) {
@@ -101,13 +101,11 @@ public class Fwmain extends JavaPlugin implements Listener {
 						return;
 					}
 					for(Entity e : ((Player)sender).getNearbyEntities(300, 150, 300)){
-						Data.ConsoleInfo("Find : "+e.getName()+" in "+ Teleporter.locToString(e.getLocation()));
 						if(!(e instanceof LivingEntity)){
 							continue;
 						}
 						LivingEntity en = (LivingEntity) e;
 						if(!en.isDead()){
-							Data.ConsoleInfo("kill");
 							en.remove();
 						}
 
@@ -174,7 +172,14 @@ public class Fwmain extends JavaPlugin implements Listener {
 					break;
 				case "teach":
 					sender.sendMessage("§d正在进行教程模板加载/更新！请耐心等待...");
-					this.LoadTec();
+					try{
+						this.LoadTec();
+					}catch(Exception e){
+						sender.sendMessage("§c更新教程失败！可以在控制台获取错误信息喔...");
+						e.printStackTrace();
+						return;
+					}
+
 					this.Reload(sender);
 					sender.sendMessage("§d更新完成！你可以选择以下一个队列进行游戏：");
 					sender.sendMessage("§e/csg CustomGoTec join §d[推荐！]");
@@ -223,141 +228,137 @@ public class Fwmain extends JavaPlugin implements Listener {
 
 			String Name = args[0];
 			Lobby lobby = Lobby.getLobby(Name);
-			if (args.length < 2) {
-				Help.LobbyHelp(sender);
-			} else {
-				if (lobby != null) {
-					switch (args[1]) {
-						case "load":
-							if (CheckPerm(sender, "csg.load")) {
-								sender.sendMessage("重载游戏 "+args[0]+" ！");
-								lobby.load();
-							}
-							break;
-						case "unload":
-							if (CheckPerm(sender, "csg.unload")) {
-								sender.sendMessage("卸载游戏 "+args[0]+" ！");
-								lobby.unLoad();
-							}
-							break;
-						case "join":
-							if(args.length<3){
-								if(sender instanceof Player){
-									if (sender.hasPermission("csg.join." + args[0]) || CheckPerm(sender, "csg.join")) {
-										if(Room.searchRoom(args[0])!=null){
-											Room.searchRoom(args[0]).JoinRoom((Player)sender);
-										}else{
-											lobby.Join((Player)sender);
-										}
-
+			if (lobby != null) {
+				switch (args[1]) {
+					case "load":
+						if (CheckPerm(sender, "csg.load")) {
+							sender.sendMessage("重载游戏 "+args[0]+" ！");
+							lobby.load();
+						}
+						break;
+					case "unload":
+						if (CheckPerm(sender, "csg.unload")) {
+							sender.sendMessage("卸载游戏 "+args[0]+" ！");
+							lobby.unLoad();
+						}
+						break;
+					case "join":
+						if(args.length<3){
+							if(sender instanceof Player){
+								if (sender.hasPermission("csg.join." + args[0]) || CheckPerm(sender, "csg.join")) {
+									if(Room.searchRoom(args[0])!=null){
+										Room.searchRoom(args[0]).JoinRoom((Player)sender);
+									}else{
+										lobby.Join((Player)sender);
 									}
-								}else{
-									sender.sendMessage("控制台不能这么做！");
+
 								}
 							}else{
-								if(sender.isOp()){
-									for(Player p : Bukkit.getOnlinePlayers()){
-										if(p.getName().equals(args[2])){
-											if(Room.searchRoom(args[0])!=null){
-												Room.searchRoom(args[0]).JoinRoom(p);
-											}else{
-												lobby.Join(p);
-											}
-											return;
+								sender.sendMessage("控制台不能这么做！");
+							}
+						}else{
+							if(sender.isOp()){
+								for(Player p : Bukkit.getOnlinePlayers()){
+									if(p.getName().equals(args[2])){
+										if(Room.searchRoom(args[0])!=null){
+											Room.searchRoom(args[0]).JoinRoom(p);
+										}else{
+											lobby.Join(p);
 										}
-									}
-									sender.sendMessage("无效的玩家名！");
-								}
-
-							}
-
-							break;
-						case "statu":
-							if (CheckPerm(sender, "csg.statu")) {
-								if(Room.searchRoom(args[0])!=null){
-									Room r = Room.searchRoom(args[0]);
-									sender.sendMessage(ChatColor.YELLOW+"房间名： "+ChatColor.AQUA+r.getName()+ChatColor.YELLOW+"  游戏进行个数： "+r.allreflects.size()+"/"+r.getMaxReflect());
-									for(Reflect rf : r.allreflects){
-										if(rf!=null){
-											sender.sendMessage(ChatColor.YELLOW+"  副本镜像"+rf.getId()+"： ");
-											String pli = "";
-											switch(rf.getStatu()){
-												case WAITING:
-													sender.sendMessage("    游戏状态： "+ChatColor.GREEN+"等待中！");
-													for(UUID p : rf.getLobby().getPlayerList()){
-														pli = pli+Bukkit.getPlayer(p).getName()+" ";
-													}
-													sender.sendMessage("    游玩玩家："+pli);
-													break;
-												case STARTED:
-													sender.sendMessage("    游戏状态： "+ChatColor.RED+"游戏中");
-													for(UUID p : rf.getLobby().getPlayerList()){
-														pli = pli+Bukkit.getPlayer(p).getName()+" ";
-													}
-													sender.sendMessage("    游玩玩家："+pli);
-													break;
-												case PREPARING:
-													sender.sendMessage("    游戏状态： "+ChatColor.RED+"正在加载");
-													break;
-												case ENDED:
-													sender.sendMessage("    处于已卸载状态，随时等待重新启用。");
-													break;
-												case UNLOADING:
-													sender.sendMessage("    游戏已结束，等待所有人离开世界将卸载。");
-													break;
-											}
-										}
-
-									}
-								}else{
-									sender.sendMessage(ChatColor.BLUE+lobby.getName()+" :");
-									sender.sendMessage(ChatColor.GREEN+"默认队列："+lobby.getDefaultGroup().GetDisplay());
-									for(Group gro : lobby.getGroupList()){
-										gro.state(sender);
+										return;
 									}
 								}
-
+								sender.sendMessage("无效的玩家名！");
 							}
 
-							break;
-						case "trigger":
-							if(args.length>2) {
-								Player striker = null;
-								if(args.length>3){
-									striker = Bukkit.getPlayer(args[3]);
-								}
-								if(striker==null && sender instanceof Player){
-									striker = (Player)sender;
-								}
-								if(striker!=null){
-									lobby.callListener(args[2],striker,new Object[0]);
-								}else{
-									lobby.callListener(args[2],lobby.getDefaultGroup(),null,new Object[0]);
-								}
-
-							}else {
-								sender.sendMessage("/csg <房间名> trigger <函数名> [触发者]");
-							}
-							break;
-						default:
-							Help.LobbyHelp(sender);
-					}
-
-				} else {
-					if (args[1].equals("load") && CheckPerm(sender, "csg.load")) {
-
-						for(File f : Data.lobbyDir.listFiles()){
-							if(f.getName().equals(args[0])){
-								Lobby l = new Lobby(f);
-								l.addToList();
-								sender.sendMessage("已加载游戏 "+args[0]+" !");
-								return;
-							}
 						}
-						sender.sendMessage("未找到可加载的文件夹 "+args[0]+" !");
-					}
-					sender.sendMessage("队列不存在！");
+
+						break;
+					case "statu":
+						if (CheckPerm(sender, "csg.statu")) {
+							if(Room.searchRoom(args[0])!=null){
+								Room r = Room.searchRoom(args[0]);
+								sender.sendMessage(ChatColor.YELLOW+"房间名： "+ChatColor.AQUA+r.getName()+ChatColor.YELLOW+"  游戏进行个数： "+r.allreflects.size()+"/"+r.getMaxReflect());
+								for(Reflect rf : r.allreflects){
+									if(rf!=null){
+										sender.sendMessage(ChatColor.YELLOW+"  副本镜像"+rf.getId()+"： ");
+										String pli = "";
+										switch(rf.getStatu()){
+											case WAITING:
+												sender.sendMessage("    游戏状态： "+ChatColor.GREEN+"等待中！");
+												for(UUID p : rf.getLobby().getPlayerList()){
+													pli = pli+Bukkit.getPlayer(p).getName()+" ";
+												}
+												sender.sendMessage("    游玩玩家："+pli);
+												break;
+											case STARTED:
+												sender.sendMessage("    游戏状态： "+ChatColor.RED+"游戏中");
+												for(UUID p : rf.getLobby().getPlayerList()){
+													pli = pli+Bukkit.getPlayer(p).getName()+" ";
+												}
+												sender.sendMessage("    游玩玩家："+pli);
+												break;
+											case PREPARING:
+												sender.sendMessage("    游戏状态： "+ChatColor.RED+"正在加载");
+												break;
+											case ENDED:
+												sender.sendMessage("    处于已卸载状态，随时等待重新启用。");
+												break;
+											case UNLOADING:
+												sender.sendMessage("    游戏已结束，等待所有人离开世界将卸载。");
+												break;
+										}
+									}
+
+								}
+							}else{
+								sender.sendMessage(ChatColor.BLUE+lobby.getName()+" :");
+								sender.sendMessage(ChatColor.GREEN+"默认队列："+lobby.getDefaultGroup().GetDisplay());
+								for(Group gro : lobby.getGroupList()){
+									gro.state(sender);
+								}
+							}
+
+						}
+
+						break;
+					case "trigger":
+						if(args.length>2) {
+							Player striker = null;
+							if(args.length>3){
+								striker = Bukkit.getPlayer(args[3]);
+							}
+							if(striker==null && sender instanceof Player){
+								striker = (Player)sender;
+							}
+							if(striker!=null){
+								lobby.callListener(args[2],striker,new Object[0]);
+							}else{
+								lobby.callListener(args[2],lobby.getDefaultGroup(),null,new Object[0]);
+							}
+
+						}else {
+							sender.sendMessage("/csg <房间名> trigger <函数名> [触发者]");
+						}
+						break;
+					default:
+						Help.LobbyHelp(sender);
 				}
+
+			} else {
+				if (args[1].equals("load") && CheckPerm(sender, "csg.load")) {
+
+					for(File f : Data.lobbyDir.listFiles()){
+						if(f.getName().equals(args[0])){
+							Lobby l = new Lobby(f);
+							l.addToList();
+							sender.sendMessage("已加载游戏 "+args[0]+" !");
+							return;
+						}
+					}
+					sender.sendMessage("未找到可加载的文件夹 "+args[0]+" !");
+				}
+				sender.sendMessage("队列不存在！");
 			}
 		}
 	}
@@ -513,7 +514,7 @@ public class Fwmain extends JavaPlugin implements Listener {
 			}
 		}else{
 			switch(label){
-				case "org/csg":
+				case "csg":
 					Fwcommands(sender, args);
 					break;
 				case "seril":
@@ -572,19 +573,18 @@ public class Fwmain extends JavaPlugin implements Listener {
 			Data.worldpath = ("./");
 		}
 	}
-	private void LoadTec(){
+	private void LoadTec() throws IOException {
 
 		this.saveResource("Csg-Plus.zip", true);
 		File zip = new File(getDataFolder(), "Csg-Plus.zip");
-		FileMng.unZip(zip,"plugins");
+		ZipUtils.decompress("./plugins",zip.getAbsolutePath());
 		zip.delete();
 
 		this.saveResource("CustomGoTec.zip", true);
 		zip = new File(getDataFolder(), "CustomGoTec.zip");
 
 		File csgt = new File(Data.worldpath);
-		FileMng.unZip(zip,csgt.getAbsolutePath());
-
+		ZipUtils.decompress(csgt.getAbsolutePath(),zip.getAbsolutePath());
 		zip.delete();
 
 		getServer().createWorld(WorldCreator.name("CustomGoTec"));

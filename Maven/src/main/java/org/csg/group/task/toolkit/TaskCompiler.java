@@ -156,6 +156,8 @@ public class TaskCompiler {
                 parts[index] = bu.trim();
                 analysisCommand(parts,tab_counter+1);
 
+                analysisCommand(new String[]{"end","","",""},2);
+
                 r.close();
                 input.close();
 

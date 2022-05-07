@@ -1,11 +1,13 @@
 package org.csg;
 
+import org.apache.tools.zip.ZipEntry;
+import org.apache.tools.zip.ZipFile;
+
 import java.io.*;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Enumeration;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
+
 
 public class FileMng {
 	  public static void copyDir(File source, File target)
@@ -62,67 +64,6 @@ public class FileMng {
 	    return dir.delete();
 	  }
 	  
-	  static String basePath;
-	  public static void unZip(File srcFile, String destDirPath){
-		  if (!srcFile.exists()) {
-			  throw new RuntimeException(srcFile.getPath() + "");
-		  }
-		  if(!tryUnZip(srcFile,destDirPath,StandardCharsets.UTF_8)){
-			  tryUnZip(srcFile,destDirPath,StandardCharsets.ISO_8859_1);
-		  }
-
-	  }
-
-	  private static boolean tryUnZip(File srcFile,String destDirPath,Charset code){
-		  ZipFile zipFile = null;
-		  boolean success = true;
-		  try {
-			  zipFile = new ZipFile(srcFile, code);
-			  Enumeration<?> entries = zipFile.entries();
-			  while (entries.hasMoreElements()) {
-				  ZipEntry entry = (ZipEntry) entries.nextElement();
-				  if (entry.isDirectory()) {
-					  String dirPath = destDirPath + "/" + entry.getName();
-					  File dir = new File(dirPath);
-					  dir.mkdirs();
-				  } else {
-					  File targetFile = new File(destDirPath + "/" + entry.getName());
-
-					  if(!targetFile.getParentFile().exists()){
-						  targetFile.getParentFile().mkdirs();
-					  }
-					  targetFile.createNewFile();
-
-					  InputStream is = zipFile.getInputStream(entry);
-					  FileOutputStream fos = new FileOutputStream(targetFile);
-					  int len;
-					  byte[] buf = new byte[1024];
-					  while ((len = is.read(buf)) != -1) {
-						  fos.write(buf, 0, len);
-					  }
-
-					  fos.close();
-					  is.close();
-				  }
-			  }
-		  } catch (Exception e) {
-			  e.printStackTrace();
-			  success = false;
-		  }
-		  if(zipFile != null){
-			  try {
-				  zipFile.close();
-			  } catch (IOException e) {
-				  e.printStackTrace();
-			  }
-		  }
-		  if(success){
-			  Data.ConsoleInfo("获取资源"+srcFile.getName()+"成功！");
-		  }
-		  return success;
-
-	  }
-
 
 	/* 替换文件中的字符串，并覆盖原文件
 	 * @param filePath
