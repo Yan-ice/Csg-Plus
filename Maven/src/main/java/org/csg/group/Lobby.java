@@ -74,7 +74,7 @@ public class Lobby implements customgo.Lobby, CycleUpdate {
 					//true不覆盖已有内容
 					fos = new FileOutputStream(default_macro_file.getPath(), true);
 					//写入
-					fos.write(String.format("\n%s: null",s).getBytes(StandardCharsets.UTF_8));
+					fos.write(String.format("\n%s: 'null'",s).getBytes(StandardCharsets.UTF_8));
 					if(annotation!=null){
 						fos.write(String.format("\n%s\n",annotation).getBytes(StandardCharsets.UTF_8));
 					}
@@ -199,6 +199,7 @@ public class Lobby implements customgo.Lobby, CycleUpdate {
 			for(Method meth : javaFunction.getMethods()){
 				if(meth.getName().equals("_setMember")){
 					meth.invoke(instance,this,executer.group,executer.striker!=null ? Bukkit.getPlayer(executer.striker) : null,p);
+					break;
 				}
 			}
 			for(Method meth : javaFunction.getMethods()){

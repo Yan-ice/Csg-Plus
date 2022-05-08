@@ -43,24 +43,18 @@ public class Macro {
             if(config.isList(key)) {
                 List<String> try1 = config.getStringList(key);
                 macros.put(key, try1.toArray(new String[0]));
-                continue;
-            }
-
+            }else
             if(config.isDouble(key)){
                 macros.put(key,config.getDouble(key));
-                continue;
-            }
+            }else
             if(config.isInt(key)){
                 macros.put(key,config.getInt(key));
-                continue;
-            }
+            }else
             if(config.isString(key)){
                 macros.put(key,config.getString(key));
-                continue;
-            }
+            }else
             if(config.isConfigurationSection(key)){
                 LoadMacro(config.getConfigurationSection(key));
-                continue;
             }
         }
     }
