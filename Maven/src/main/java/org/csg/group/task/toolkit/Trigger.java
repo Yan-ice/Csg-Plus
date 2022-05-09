@@ -1,6 +1,7 @@
 package org.csg.group.task.toolkit;
 
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.csg.Data;
 import org.csg.group.Group;
 import org.csg.group.Lobby;
 import org.csg.update.CycleUpdate;
@@ -74,7 +75,7 @@ public class Trigger implements Listener, CycleUpdate {
 	void KillEntityListen(EntityDeathEvent evt) {
 		if (!(evt.getEntity() instanceof ArmorStand)) {
 			Player killer = evt.getEntity().getKiller();
-			if(killer!=null){
+			if(killer!=null && lobby.hasPlayer(killer)){
 				if(!(evt.getEntity() instanceof Player)){
 					lobby.callListener("onKillEntity",killer,new Object[]{evt.getEntity()});
 				}
@@ -95,17 +96,15 @@ public class Trigger implements Listener, CycleUpdate {
 				if(!(e instanceof LivingEntity)){
 					continue;
 				}
-				if(e instanceof Player){
+				if(e instanceof Player && killer==null){
 					if(lobby.hasPlayer((Player)e)){
 						killer = (Player)e;
 					}
 					continue;
 				}
-				LivingEntity en = (LivingEntity) e;
 				if(!e.isDead()){
-					//Data.ConsoleInfo("Find other: "+e.getName()+" in "+ Teleporter.locToString(e.getLocation()));
 					total_clear = false;
-					if(e.getName().equals(en.getName())){
+					if(e.getName().equals(en_name)){
 						clear = false;
 					}
 				}

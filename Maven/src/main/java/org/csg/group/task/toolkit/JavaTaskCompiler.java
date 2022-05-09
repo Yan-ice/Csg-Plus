@@ -174,7 +174,7 @@ public class JavaTaskCompiler extends ClassLoader {
             Data.ConsoleInfo("当前环境为jre，无法使用javatask！如果需要使用，请安装jdk。");
             return null;
         }
-        Data.ConsoleInfo("编译时 classpath 参数为 -> " + builder.toString());
+
         @Cleanup
         OutputStream streamOut = new FileOutputStream(path + "/TempOut.log");
         @Cleanup
