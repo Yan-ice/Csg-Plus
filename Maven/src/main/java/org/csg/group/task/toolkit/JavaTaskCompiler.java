@@ -43,6 +43,8 @@ public class JavaTaskCompiler extends ClassLoader {
     private String codes = "";
 
     public void addDepend(File file) {
+        if(true)
+            return;
         String s = file.getName().substring(0, file.getName().length() - 6);
 
         if (s.contains(".")) {
@@ -166,9 +168,17 @@ public class JavaTaskCompiler extends ClassLoader {
         for (File core : Data.bukkit_core) {
             builder.append(SplitCharUtils.getSplitChar(Fwmain.getOsName())).append(core.getAbsolutePath());
         }
+        File plugins = new File("./plugins");
+        if(plugins.exists()){
+            for(File plug : plugins.listFiles()){
+                if(plug.getName().endsWith(".jar")){
+                    builder.append(SplitCharUtils.getSplitChar(Fwmain.getOsName())).append(plug.getAbsolutePath());
+                }
+            }
+        }
 
-        //将配置文件中依赖路径写入编译路径
-        Fwmain.getOptionDepends().forEach(depend -> builder.append(SplitCharUtils.getSplitChar(Fwmain.getOsName())).append(depend));
+        //将配置文件中依赖路径写入编译路
+        //Fwmain.getOptionDepends().forEach(depend -> builder.append(SplitCharUtils.getSplitChar(Fwmain.getOsName())).append(depend));
 
         if (c == null) {
             Data.ConsoleInfo("当前环境为jre，无法使用javatask！如果需要使用，请安装jdk。");

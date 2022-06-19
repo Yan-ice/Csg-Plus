@@ -1,8 +1,10 @@
 package customgo;
 
+import customgo.event.PlayerJoinLobbyEvent;
+import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.FileConfiguration;
-import org.csg.group.Group;
 import org.bukkit.entity.Player;
+import org.csg.Data;
 
 import java.util.List;
 import java.util.Set;
@@ -122,4 +124,16 @@ public interface Lobby {
      * @param name 文件名
      */
     public void deleteWorkFile(String name);
+
+    /**
+     * 令一名玩家加入该副本
+     * @param player
+     */
+    public void Join(Player player);
+
+    /**
+     * 令一名玩家离开该副本
+     * @param player
+     */
+    public void Leave(Player player);
 }

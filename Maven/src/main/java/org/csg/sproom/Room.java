@@ -1,5 +1,11 @@
 package org.csg.sproom;
 
+import com.grinderwolf.swm.api.SlimePlugin;
+import com.grinderwolf.swm.api.exceptions.*;
+import com.grinderwolf.swm.api.world.SlimeWorld;
+import com.grinderwolf.swm.api.world.properties.SlimeProperties;
+import com.grinderwolf.swm.api.world.properties.SlimeProperty;
+import com.grinderwolf.swm.api.world.properties.SlimePropertyMap;
 import org.bukkit.*;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -14,36 +20,13 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class Room {
+
+	public static SlimePlugin plugin = (SlimePlugin) Bukkit.getPluginManager().getPlugin("SlimeWorldManager");
+
 	public static Set<Room> rooms = new HashSet<Room>();
 
-	public void delete(){
-		config.set("RoomList."+name,null);
-	}
+	public Settings roomSetting;
 
-	public void loadConfig(){
-		if(config.contains("maxReflect")){
-			maxreflect = config.getInt("maxReflect");
-		}
-
-		if(config.contains("allowBuilding")){
-			allowBuilding = config.getBoolean("allowBuilding");
-		}
-		if(config.contains("leaveLoc")){
-			leaveLoc = (Location)config.get("leaveLoc");
-		}
-	}
-
-	public void saveConfig(){
-		config.set("maxReflect",maxreflect);
-		config.set("allowBuilding",allowBuilding);
-		config.set("leaveLoc",leaveLoc);
-
-		try {
-			config.save(config_file);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
 	
 	public static Room searchRoom(String Name){
 		for(Room r : rooms){
@@ -55,17 +38,42 @@ public class Room {
 	}
 
 	//状态码： 0成功 1找不到队列 2找不到世界
-	public static int serilizeLobby(CommandSender sender, String lobbyname, World world){
-		if(world==null){
-			sender.sendMessage(ChatColor.RED+"错误：无法找到您指定的世界。请确认其是否被加载。");
+	public static int serilizeLobby(CommandSender sender, String lobbyname, String worldName){
+		if(plugin==null){
+			sender.sendMessage("未找到前置插件SlimeWorldManager，无法使用独立副本功能！");
 			return 2;
 		}
-		sender.sendMessage(ChatColor.YELLOW+"正在尝试生成游戏 "+lobbyname+" 的独立副本...");
-
+		sender.sendMessage("正在获取指定游戏房间...");
 		Lobby lobby = Lobby.getLobby(lobbyname);
 		if(lobby==null){
 			sender.sendMessage(ChatColor.RED+"错误: 未找到指定游戏。");
 			return 1;
+		}
+
+		sender.sendMessage("正在获取指定游戏世界...");
+		File sourceWorld = new File(Data.worldpath+worldName);
+		if(!sourceWorld.exists()){
+			sender.sendMessage(ChatColor.RED+"错误：无法找到您指定的世界"+Data.worldpath+"("+sourceWorld.getAbsolutePath()+"。");
+			if(Bukkit.getWorld(worldName)!=null){
+				sender.sendMessage(ChatColor.YELLOW+"插件检测到您似乎在尝试指定一个SlimeWorldManager加载的世界。");
+				sender.sendMessage(ChatColor.YELLOW+"由于特殊格式要求，您必须指定非SlimeWorldManager格式的世界，但你可以用特殊方式实现它");
+			}
+			return 2;
+
+		}
+		World world = Bukkit.getWorld(worldName);
+
+		if(Data.defaultLocation.getWorld()==world){
+			sender.sendMessage(ChatColor.RED+"错误：无法使用默认世界作为独立副本世界！");
+			return 2;
+		}
+		sender.sendMessage("正在尝试保存游戏世界...");
+		if(world!=null){
+			for(Player p : world.getPlayers()){
+				p.sendMessage("由于该世界正在被服务器导入，您被移出了该世界。");
+				p.teleport(Data.defaultLocation);
+			}
+			Bukkit.unloadWorld(world,true);
 		}
 
 		for(Room r : rooms){
@@ -75,33 +83,24 @@ public class Room {
 				break;
 			}
 		}
-
-		sender.sendMessage("已读取到游戏世界 "+ChatColor.YELLOW+world.getName()+ChatColor.WHITE+" 。");
-		world.save();
-		File targetWorld = new File(lobby.getTempFolder(), "sproom_world");
-		if(targetWorld.exists()){
-			FileMng.deleteDir(targetWorld);
-		}
-		targetWorld.mkdir();
-		sender.sendMessage("正在拷贝游戏 "+lobbyname+" 的世界存档...");
-		File sourceWorld = new File(Data.worldpath+world.getName());
-
-		FileMng.copyDir(sourceWorld,targetWorld);
-		//以上在复制世界文件
-		sender.sendMessage("正在将配置中的 "+world.getName()+" 替换为 $world$ 占位符...");
-
+		sender.sendMessage("正在将配置中的 "+worldName+" 替换为 $world$ 占位符...");
 		try{
-			replaceWorldStr(lobby.getFolder(),world.getName(),"$world$");
+			replaceWorldStr(lobby.getFolder(),worldName,"$world$");
 
 		}catch(IOException e){
-
+			e.printStackTrace();
 		}
-		//以上在替换世界名字
-		new Room(lobby,5);
-		sender.sendMessage(ChatColor.AQUA+"生成独立副本"+lobbyname+"成功!");
-		sender.sendMessage(ChatColor.AQUA+"输入 "+ChatColor.YELLOW+ "/org/csg " +lobbyname+" join "+ChatColor.AQUA+"即可开始体验游戏了！");
-		sender.sendMessage(ChatColor.AQUA+"啊对了，你可以随时继续使用 /seril "+lobbyname+" 更新这个独立副本噢~");
 
+		sender.sendMessage(ChatColor.YELLOW+"正在尝试生成游戏 "+lobbyname+" 的独立副本...");
+
+		new Room(lobby,5, sourceWorld);
+		if(sourceWorld.exists() && world!=null){
+			Bukkit.createWorld(WorldCreator.name(worldName));
+		}
+
+		sender.sendMessage(ChatColor.AQUA+"生成独立副本"+lobbyname+"成功!");
+		sender.sendMessage(ChatColor.AQUA+"输入 "+ChatColor.YELLOW+ "/csg " +lobbyname+" join "+ChatColor.AQUA+"即可开始体验游戏了！");
+		sender.sendMessage(ChatColor.AQUA+"啊对了，你可以随时继续使用 /seril "+lobbyname+" 更新这个独立副本噢~");
 		return 0;
 	}
 
@@ -116,43 +115,81 @@ public class Room {
 			}
 		}
 	}
-//	public World loadWorld(){
-//		File wo =  new File(lobby_model.getTempFolder(), name);
-//
-//		File dir = new File(Data.worldpath+"FW_"+name);
-//
-//		if(dir.exists()){
-//			dir.delete();
-//		}
-//		dir.mkdir();
-//		FileMng.copyDir(wo,dir);
-//		WorldCreator w = WorldCreator.name("FW_" +name);
-//		w.type(WorldType.FLAT);
-//		return FwSpMain.main.getServer().createWorld(w);
-//	}
 
-	public Room(Lobby model, int max){
+	private CsgSlimeLoader loader = null;
+	public CsgSlimeLoader getLoader(){
+		if(loader==null){
+			File f = new File(lobby_model.getTempFolder(),"world.slime");
+			loader = new CsgSlimeLoader(f);
+
+		}
+		return loader;
+	}
+	private SlimePropertyMap getProperty(){
+
+		SlimePropertyMap properties = new SlimePropertyMap();
+		properties.setString(SlimeProperties.DIFFICULTY, roomSetting.difficulty);
+		properties.setBoolean(SlimeProperties.PVP,roomSetting.PvP);
+		return properties;
+	}
+	private SlimeWorld world_model;
+	public SlimeWorld loadWorld(){
+		if(world_model==null){
+			try {
+				world_model = plugin.loadWorld(getLoader(),lobby_model.getName(),true,getProperty());
+			} catch (UnknownWorldException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			} catch (CorruptedWorldException e) {
+				e.printStackTrace();
+			} catch (NewerFormatException e) {
+				e.printStackTrace();
+			} catch (WorldInUseException e) {
+				e.printStackTrace();
+			}
+		}
+		return world_model;
+	}
+	public Room(Lobby model, int max, File targetWorld){
+
 		lobby_model = model;
 		this.name = model.getName();
+		try {
+			plugin.importWorld(targetWorld,name,getLoader());
+		} catch (WorldAlreadyExistsException e) {
+			e.printStackTrace();
+		} catch (InvalidWorldException e) {
+			e.printStackTrace();
+		} catch (WorldLoadedException e) {
+			e.printStackTrace();
+		} catch (WorldTooBigException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
 		rooms.add(this);
-		maxreflect = max;
 		joining = createReflect();
 		config_file = new File(lobby_model.getTempFolder(),"sproom_config.yml");
 		try {
 			if(!config_file.exists()){
 				config_file.createNewFile();
+				roomSetting = new Settings();
+				roomSetting.saveConfig(config_file);
+			}else{
+				roomSetting = new Settings(config_file);
 			}
-			config = Data.fmain.load(config_file);
-			loadConfig();
 
-			this.maxreflect = max;
-			saveConfig();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-
 	}
 	public Room(Lobby model, File config_f){
+		if(plugin==null){
+			Data.ConsoleInfo("未找到前置插件SlimeWorldManager，无法使用独立副本功能！");
+			return;
+		}
 		lobby_model = model;
 		this.name = model.getName();
 		rooms.add(this);
@@ -161,32 +198,24 @@ public class Room {
 			if(!config_file.exists()){
 				config_file.createNewFile();
 			}
-			config = Data.fmain.load(config_file);
-
-			loadConfig();
+			roomSetting = new Settings(config_file);
 
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-
-
 		joining = createReflect();
-
 	}
 
 	Lobby lobby_model;
 	String name;
 	public Set<Reflect> allreflects = new HashSet<Reflect>();
 	int id = 0;
-	int maxreflect = 5;
-	Location leaveLoc = null;
-	boolean allowBuilding = false;
+
 	Reflect joining = null;
 	Reflect waiting = null;
 
 	File config_file;
-	FileConfiguration config;
-	
+
 	public void JoinRoom(Player p){
 		if(joining==null){
 			joining = createReflect();
@@ -251,7 +280,7 @@ public class Room {
 				return rf;
 			}
 		}
-		if(allreflects.size()<maxreflect){
+		if(allreflects.size()<roomSetting.maxReflect){
 			id++;
 			Reflect r = new Reflect(this,id);
 			allreflects.add(r);
@@ -271,16 +300,14 @@ public class Room {
 		for(Reflect r : allrc){
 			r.emergencyUnload();
 		}
+		allreflects.clear();
 		rooms.remove(this);
 	}
 	public int getMaxReflect(){
-		return maxreflect;
-	}
-	public void setMaxReflect(int m){
-		maxreflect = m;
+		return roomSetting.maxReflect;
 	}
 	public void setAllowBuilding(boolean allow){
-		allowBuilding = allow;
+		roomSetting.allowBuilding = allow;
 	}
 	
 	public static void autoLeave(Player p){

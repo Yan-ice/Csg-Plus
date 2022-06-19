@@ -274,7 +274,7 @@ public class CommandTask extends Task {
                 break;
 
             case "notice":
-                for(Group g : group.getLobby().getGroupList()){
+                for(Group g : group.getLobby().getGroupListI()){
                     g.sendNotice(args[0]);
                 }
                 break;

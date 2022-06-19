@@ -138,7 +138,7 @@ public class Lobby implements customgo.Lobby, CycleUpdate {
 
 	public List<UUID> getPlayerList(){
 		List<UUID> pl = new ArrayList<>();
-		for(Group g : getGroupList()){
+		for(Group g : getGroupListI()){
 			for(UUID p : g.getPlayerList()){
 				pl.add(p);
 			}
@@ -148,7 +148,7 @@ public class Lobby implements customgo.Lobby, CycleUpdate {
 	}
 
 	public boolean hasPlayer(Player p){
-		for(Group g : getGroupList()){
+		for(Group g : getGroupListI()){
 			if(g.hasPlayer(p)){
 				return true;
 			}
@@ -214,7 +214,7 @@ public class Lobby implements customgo.Lobby, CycleUpdate {
 
 		return null;
 	}
-	public void callListener(String name, Group g, Player p, Object[] para){
+	public void callListener(String name, customgo.Group g, Player p, Object[] para){
 		for(Group gro : grouplist){
 			if(gro==g){
 				for(ListenerTask task : listener){
@@ -526,10 +526,13 @@ public class Lobby implements customgo.Lobby, CycleUpdate {
 		return Default;
 	}
 
-	public Set<Group> getGroupList(){
+	public Set<Group> getGroupListI(){
 		return grouplist;
 	}
-	
+	public Set<customgo.Group> getGroupList(){
+		Set<customgo.Group> g = new HashSet<>(grouplist);
+		return g;
+	}
 
 	public int getPlayerAmount(){
 		int a = 0;

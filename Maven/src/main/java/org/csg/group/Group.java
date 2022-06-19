@@ -36,7 +36,7 @@ public class Group implements customgo.Group{
 
 	public static Group SearchPlayerInGroup(Player pl){
 		for(Lobby l : Lobby.getLobbyList()){
-			for(Group g : l.getGroupList()){
+			for(Group g : l.getGroupListI()){
 				if(g.hasPlayer(pl)){
 					return g;
 				}
@@ -518,7 +518,7 @@ class GListener implements Listener {
 			if(evt.getMessage().startsWith("!")){
 				message = message.replace("%type%", "[所有人]");
 				message = message.replace("%message%", evt.getMessage().substring(1));
-				for(Group g : g.byLobby.getGroupList()){
+				for(Group g : g.byLobby.getGroupListI()){
 					g.sendNotice(message);
 				}
 			}else{

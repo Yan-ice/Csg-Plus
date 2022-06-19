@@ -92,11 +92,11 @@ public class Trigger implements Listener, CycleUpdate {
 			Player killer = evt.getEntity().getKiller();
 			boolean clear = true;
 			boolean total_clear = true;
-			for(Entity e : evt.getEntity().getNearbyEntities(150, 150, 150)){
+			for(Entity e : evt.getEntity().getNearbyEntities(160, 160, 160)){
 				if(!(e instanceof LivingEntity)){
 					continue;
 				}
-				if(e instanceof Player && killer==null){
+				if(e instanceof Player){
 					if(lobby.hasPlayer((Player)e)){
 						killer = (Player)e;
 					}

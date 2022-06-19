@@ -34,7 +34,6 @@ import org.csg.group.Group;
 import org.csg.group.Lobby;
 
 import org.csg.group.task.ValueData;
-import org.csg.location.Teleporter;
 import org.csg.sproom.Reflect;
 import org.csg.sproom.Room;
 
@@ -314,7 +313,7 @@ public class Fwmain extends JavaPlugin implements Listener {
 							}else{
 								sender.sendMessage(ChatColor.BLUE+lobby.getName()+" :");
 								sender.sendMessage(ChatColor.GREEN+"默认队列："+lobby.getDefaultGroup().GetDisplay());
-								for(Group gro : lobby.getGroupList()){
+								for(Group gro : lobby.getGroupListI()){
 									gro.state(sender);
 								}
 							}
@@ -499,12 +498,15 @@ public class Fwmain extends JavaPlugin implements Listener {
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
 		if(args.length==0) {
 			Help.MainHelp(sender);
+			if(sender instanceof Player){
+				sender.sendMessage("您所处的位置是"+((Player)sender).getWorld().getName());
+			}
 			return false;
 		}
 		if(Data.debug){
 			if(CheckPerm(sender,"csg.debug")){
 				switch(label){
-					case "org/csg":
+					case "csg":
 						Fwcommands(sender, args);
 						break;
 				}
@@ -522,7 +524,7 @@ public class Fwmain extends JavaPlugin implements Listener {
 						sender.sendMessage("参数不足！使用方式：/seril <游戏名> <世界名>");
 						break;
 					}
-					Room.serilizeLobby(sender,args[0],Bukkit.getWorld(args[1]));
+					Room.serilizeLobby(sender,args[0],args[1]);
 					break;
 			}
 		}
@@ -546,22 +548,21 @@ public class Fwmain extends JavaPlugin implements Listener {
 	private static List<String> optionDepends;
 
 	private void loadWorldPath(){
-		boolean in_world = false;
+		boolean in_world = true;
 		String default_worldname = "world";
 		File csgt = new File("./");
 
 		for(World w : getServer().getWorlds()){
 			boolean pass = false;
-			for(File f : csgt.listFiles()){
-				if(f.getName().equals(w.getName())){
-					pass = true;
-				}
-			}
+
 			if(w.getName().contains("_nether")){
 				default_worldname = w.getName().split("_nether")[0];
-			}
-			if(!pass){
-				in_world = true;
+
+				for(File f : csgt.listFiles()){
+					if(f.getName().equals(w.getName())){
+						in_world = false;
+					}
+				}
 			}
 		}
 

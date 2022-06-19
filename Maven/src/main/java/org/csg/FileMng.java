@@ -19,11 +19,11 @@ public class FileMng {
 	      if(!source.getName().equals("playerdata") && !source.getName().equals("stats")){
 	    	  for (String el : source.list()){
 	  	        if (!el.equals("uid.dat") && !el.equals("session.lock")) {
-	  	          copyDir(new File(source, el), new File(target, el));
+	  	          	copyDir(new File(source, el), new File(target, el));
 	  	        }
 	  	      }
 	      }
-	      
+
 	    }else{
 	      try{
 	        if (!target.getParentFile().exists())

@@ -1,40 +1,73 @@
 package org.csg.sproom;
 
+import com.grinderwolf.swm.api.SlimePlugin;
+import com.grinderwolf.swm.api.exceptions.UnknownWorldException;
+import com.grinderwolf.swm.api.exceptions.WorldInUseException;
+import com.grinderwolf.swm.api.loaders.SlimeLoader;
+import com.grinderwolf.swm.api.world.SlimeWorld;
+import com.grinderwolf.swm.api.world.properties.SlimeProperties;
+import com.grinderwolf.swm.api.world.properties.SlimePropertyMap;
 import customgo.event.PlayerLeaveLobbyEvent;
+import net.minecraft.server.v1_12_R1.GameRules;
 import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.event.world.ChunkUnloadEvent;
+import org.bukkit.event.world.WorldSaveEvent;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.csg.Data;
 import org.csg.FileMng;
 import org.csg.group.Lobby;
 
-import java.io.File;
+import java.io.*;
+import java.util.List;
+import java.util.Map;
 
 public class Reflect implements Listener {
 
 	protected ReflectStatu statu = ReflectStatu.PREPARING;
-	protected World model;
+	//protected World model;
+
+	protected SlimeWorld world_template;
+
 	protected String worldName;
 	protected int id = 0;
 	protected Lobby lobby;
 	protected Room byRoom;
 
+
 	public Reflect(Room room, final int id) {
 		this.byRoom = room;
 		worldName = "FW_" + byRoom.name + "_" + id;
+		world_template = room.loadWorld().clone(worldName);
+		//
 		this.id = id;
-		loadFile();
+
+		Data.fmain.getServer().getPluginManager().registerEvents(Reflect.this, Data.fmain);
+
+		lobby = byRoom.lobby_model.clone();
+		lobby.macros.AddMacro("world",worldName);
+		lobby.rename(lobby.getName()+"_"+id);
+		lobby.addToList();
+		if(lobby.isComplete()){
+			statu = ReflectStatu.WAITING;
+		}else{
+			statu = ReflectStatu.WRONG;
+		}
 		loadWorld();
 	}
 
 	public ReflectStatu getStatu(){
+		if(lobby==null){
+			return ReflectStatu.WRONG;
+		}
 		if(statu==ReflectStatu.WAITING){
 			if("true".equals(lobby.macros.macros.get("isGaming"))){
 				statu = ReflectStatu.STARTED;
@@ -52,47 +85,30 @@ public class Reflect implements Listener {
 
 	public void renew() {
 		if(statu==ReflectStatu.ENDED) {
+
+			statu = ReflectStatu.PREPARING;
+			loadWorld();
 			statu = ReflectStatu.WAITING;
 		}
 	}
-	
-	protected void loadWorld() {
-		new BukkitRunnable() {
-
-			@Override
-			public void run() {
-				World w = Bukkit.getWorld(worldName);
-				if(w!=null) {
-					w.setKeepSpawnInMemory(false);
-					w.setAutoSave(false);
-					Data.fmain.getServer().unloadWorld(w, false);
-					Data.fmain.getLogger().info("在尝试加载世界"+worldName+"时出现异常：该世界未被卸载？");
-					Data.fmain.getLogger().info("已自动卸载原世界！");
-				}
-				
-				model = Data.fmain.getServer().createWorld(WorldCreator.name(worldName));
-				
-				model.setAutoSave(false);
-				model.setKeepSpawnInMemory(false);
-				Data.fmain.getServer().getPluginManager().registerEvents(Reflect.this, Data.fmain);
-
-				lobby = byRoom.lobby_model.clone();
-				lobby.macros.AddMacro("world",worldName);
-				lobby.rename(lobby.getName()+"_"+id);
-				lobby.addToList();
-				if(lobby.isComplete()){
-					statu = ReflectStatu.WAITING;
-				}else{
-					statu = ReflectStatu.WRONG;
-				}
-
-
+	private void loadWorld(){
+		World model = Bukkit.getWorld(worldName);
+		if(model!=null){
+			for(Player p : model.getPlayers()){
+				p.teleport(Data.defaultLocation);
 			}
-			
-		}.runTask(Data.fmain);
-		
-	}
+			Bukkit.unloadWorld(model, false);
+		}
 
+		world_template = byRoom.loadWorld().clone(worldName);
+		Room.plugin.generateWorld(world_template);
+
+		model = Bukkit.getWorld(worldName);
+		for(Map.Entry<String,String> kv: byRoom.roomSetting.gamerule.entrySet()){
+			model.setGameRuleValue(kv.getKey(),kv.getValue());
+		}
+
+	}
 	public boolean Join(Player p){
 		if(statu!=ReflectStatu.WAITING){
 			p.sendMessage(ChatColor.RED+"房间正在准备中！请您稍等片刻...");
@@ -115,15 +131,13 @@ public class Reflect implements Listener {
 			lobby.unLoad();
 		}
 		lobby=null;
-
+		World model = Bukkit.getWorld(worldName);
 		if(model!=null){
 			for(Player p :model.getPlayers()){
 				p.teleport(Data.defaultLocation);
 			}
 			Data.fmain.getServer().unloadWorld(model, false);
-			model = null;
 		}
-		unloadFile();
 		HandlerList.unregisterAll(this);
 	}
 	
@@ -131,15 +145,25 @@ public class Reflect implements Listener {
 	public void st(PlayerRespawnEvent evt){
 		if(lobby!=null && lobby.hasPlayer(evt.getPlayer())){
 			Location loc = evt.getRespawnLocation();
-			loc.setWorld(model);
+			loc.setWorld(Bukkit.getWorld(worldName));
 			evt.setRespawnLocation(loc);
 		}
 	}
 
-	@EventHandler(priority=EventPriority.MONITOR)
-	public void st(ChunkUnloadEvent evt){
-		if(evt.getWorld()==model){
-			evt.setSaveChunk(false);
+	@EventHandler
+	public void bd(BlockBreakEvent evt){
+		if(!byRoom.roomSetting.allowBuilding && lobby.hasPlayer(evt.getPlayer())){
+			if(evt.getBlock().getWorld().getName().equals(worldName)){
+				evt.setCancelled(true);
+			}
+		}
+	}
+	@EventHandler
+	public void bd(BlockPlaceEvent evt){
+		if(!byRoom.roomSetting.allowBuilding && lobby.hasPlayer(evt.getPlayer())){
+			if(evt.getBlock().getWorld().getName().equals(worldName)){
+				evt.setCancelled(true);
+			}
 		}
 	}
 
@@ -148,55 +172,30 @@ public class Reflect implements Listener {
 		if(evt.getLobby()!=this.lobby){
 			return;
 		}
-		if(evt.getLobby().getPlayerAmount()<=1){
-
+		if(evt.getLobby().getPlayerAmount()<=1 && statu!=ReflectStatu.UNLOADING){
 			statu = ReflectStatu.UNLOADING;
 			new BukkitRunnable() {
+				int wait = 10;
 				@Override
 				public void run() {
+					World model = Bukkit.getWorld(worldName);
 					if(model!=null) {
+						if(model.getPlayers().size()>0 && wait>0){
+							wait--;
+							return;
+						}
 						for(Player p : model.getPlayers()){
 							p.teleport(Data.defaultLocation);
 						}
-						if(model.getPlayers().size()>0){
-							return;
-						}
-						for(Chunk chu : model.getLoadedChunks()){
-							chu.unload(false);
-						}
-						statu = ReflectStatu.ENDED;
-						cancel();
-						byRoom.autoCreateReflect();
+						Bukkit.unloadWorld(model,false);
 
-					}else {
-						statu = ReflectStatu.ENDED;
-						cancel();
-						byRoom.autoCreateReflect();
 					}
+					statu = ReflectStatu.ENDED;
+					cancel();
+					byRoom.autoCreateReflect();
 				}
 			}.runTaskTimer(Data.fmain, 60,60);
 		}
-	}
-
-	boolean fileProcessing = false;
-
-	void loadFile() {
-		fileProcessing = true;
-		File file = new File(byRoom.lobby_model.getTempFolder(), "sproom_world");
-		File target = new File(Data.worldpath+worldName);
-
-		if(target.exists()){
-			FileMng.deleteDir(target);
-		}
-		FileMng.copyDir(file,target);
-		fileProcessing = false;
-	}
-
-	void unloadFile() {
-		fileProcessing = true;
-		FileMng.deleteDir(new File(Data.worldpath + worldName));
-		model = null;
-		fileProcessing = false;
 	}
 
 }

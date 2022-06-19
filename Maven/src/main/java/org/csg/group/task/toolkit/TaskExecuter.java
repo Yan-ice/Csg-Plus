@@ -116,8 +116,7 @@ public class TaskExecuter implements CycleUpdate {
                     String k = String.format("$%s$.random", s.getKey());
                     if(origin.contains(k)){
                         String rd = acc[Data.Random(0,acc.length)];
-                        to.put(rd,rd);
-                        origin = origin.replace(k,String.format("$%s$",rd));
+                        origin = origin.replace(k,rd);
                     }
                     origin = origin.replace(String.format("$%s$", s.getKey()),Arrays.toString(acc));
                     continue;
@@ -181,31 +180,36 @@ public class TaskExecuter implements CycleUpdate {
             return (If(target,If.split("OR")[0].trim()) | If(target,If.split("OR")[1].trim()));
         }
         if(If.contains(">=")){
-            if(Double.parseDouble(If.split(">=")[0].trim())>=Double.parseDouble(If.split(">=")[1].trim())){
-                return true;
-            }else{
-                return false;
+            String[] s = If.split(">=");
+            try{
+                return Double.parseDouble(s[0].trim()) >= Double.parseDouble(s[1].trim());
+            }catch(NumberFormatException e){
+                return s[0].contains(s[1].trim());
             }
+
         }else
         if(If.contains(">")){
-            if(Double.parseDouble(If.split(">")[0].trim())>Double.parseDouble(If.split(">")[1].trim())){
-                return true;
-            }else{
-                return false;
+            String[] s = If.split(">");
+            try{
+                return Double.parseDouble(s[0].trim()) > Double.parseDouble(s[1].trim());
+            }catch(NumberFormatException e){
+                return s[0].contains(s[1].trim()) && !s[0].equals(s[1]);
             }
         }
 
         if(If.contains("<=")){
-            if(Double.parseDouble(If.split("<=")[0].trim())<=Double.parseDouble(If.split("<=")[1].trim())){
-                return true;
-            }else{
-                return false;
+            String[] s = If.split("<=");
+            try{
+                return Double.parseDouble(s[0].trim()) <= Double.parseDouble(s[1].trim());
+            }catch(NumberFormatException e){
+                return s[1].contains(s[0].trim());
             }
         }else if(If.contains("<")){
-            if(Double.parseDouble(If.split("<")[0].trim())<Double.parseDouble(If.split("<")[1].trim())){
-                return true;
-            }else{
-                return false;
+            String[] s = If.split("<");
+            try{
+                return Double.parseDouble(s[0].trim()) < Double.parseDouble(s[1].trim());
+            }catch(NumberFormatException e){
+                return s[1].contains(s[0].trim()) && !s[0].equals(s[1]);
             }
         }
         if(If.contains("!=")){
