@@ -22,10 +22,10 @@ import javax.tools.ToolProvider;
 public class JavaTaskCompiler extends ClassLoader {
     private final Lobby lobby;
     private boolean hasContent = false;
-
     private final String path;
-
     private byte[] bt = new byte[1000000];
+    private Set<String> imports = new HashSet<String>();
+    private String codes = "";
 
     public JavaTaskCompiler(Lobby lobby) {
         super(Group.class.getClassLoader());
@@ -38,9 +38,6 @@ public class JavaTaskCompiler extends ClassLoader {
 
     }
 
-    private Set<String> imports = new HashSet<String>();
-
-    private String codes = "";
 
     public void addDepend(File file) {
         if(true)

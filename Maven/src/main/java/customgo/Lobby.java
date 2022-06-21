@@ -28,7 +28,7 @@ public interface Lobby {
      * @param p 触发者（可为null）
      * @param para 参数，如果参数列表不对应会报错。
      */
-    public Object callFunction(String name, Player p, Object[] para);
+    public Object callFunction(String name, Player p, Object... para);
 
     /**
      * 触发脚本中的指定名字的listener，触发的队列与玩家均自己指定。
@@ -37,7 +37,7 @@ public interface Lobby {
      * @param p 触发者（可为null）
      * @param para 参数，如果参数列表不对应会报错。
      */
-    public void callListener(String name, Group g, Player p, Object[] para);
+    public void callListener(String name, Group g, Player p, Object... para);
 
     /**
      * 触发脚本中的指定名字的listener。由玩家所在队列触发。
@@ -45,13 +45,13 @@ public interface Lobby {
      * @param p 触发者，不可为null且必须在lobby中。
      * @param para 参数，如果参数列表不对应会报错。
      */
-    public void callListener(String name, Player p, Object[] para);
+    public void callListener(String name, Player p, Object... para);
 
     /**
      * 触发脚本中的指定名字的listener。由默认队列触发，且无触发玩家。
      * @param para 参数，如果参数列表不对应会报错。
      */
-    public void callListener(String name, Object[] para);
+    public void callListener(String name, Object... para);
 
 
     /**

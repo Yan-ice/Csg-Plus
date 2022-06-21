@@ -3,6 +3,8 @@ author: 千千
 usuage: /csg
 version: 1
 name: Csg-Plus
+softdepend:
+  - SlimeWorldManager
 commands:
   csg:
     description: main command

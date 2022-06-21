@@ -4,6 +4,7 @@ import java.io.File;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.jar.JarFile;
 
 //import org.black_ixx.playerpoints.PlayerPoints;
 import lombok.Getter;
@@ -30,25 +31,68 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
+import org.csg.cmd.CsgCmd;
 import org.csg.group.Group;
 import org.csg.group.Lobby;
 
 import org.csg.group.task.ValueData;
+import org.csg.group.task.toolkit.ListenerFactory;
 import org.csg.sproom.Reflect;
 import org.csg.sproom.Room;
 
 public class Fwmain extends JavaPlugin implements Listener {
+
+	static CsgCmd csgCmd;
+
 
 	public FileConfiguration load(File file) {
 		if (!file.exists()) {
 			saveResource(file.getName(), true);
 		}
 		return YamlConfiguration.loadConfiguration(file);
-
 	}
+
+	@Getter
 	Set<Player> plist = new HashSet<>();
 	Set<Player> vexlist = new HashSet<>();
 
+	@Deprecated
+	public boolean DonCommand(CommandSender sender, Command command, String label, String[] args) {
+		if(args.length==0) {
+			Help.MainHelp(sender);
+			if(sender instanceof Player){
+				sender.sendMessage("您所处的位置是"+((Player)sender).getWorld().getName());
+			}
+			return false;
+		}
+		if(Data.debug){
+			if(CheckPerm(sender,"csg.debug")){
+				switch(label){
+					case "csg":
+						Fwcommands(sender, args);
+						break;
+				}
+
+			}else{
+				sender.sendMessage("管理员开启了测试模式！暂时无法使用指令...");
+			}
+		}else{
+			switch(label){
+				case "csg":
+					Fwcommands(sender, args);
+					break;
+				case "seril":
+					if(args.length<2){
+						sender.sendMessage("参数不足！使用方式：/seril <游戏名> <世界名>");
+						break;
+					}
+					Room.serilizeLobby(sender,args[0],args[1]);
+					break;
+			}
+		}
+		return false;
+	}
+	@Deprecated
 	private void Fwcommands(CommandSender sender, String args[]) {
 		if(args[0].equals("skip")){
 			if(args.length<2){
@@ -403,8 +447,8 @@ public class Fwmain extends JavaPlugin implements Listener {
 
 	public void onEnable() {
 		Data.fmain = this;
+		ListenerFactory.enable();
 		getServer().getPluginManager().registerEvents(this, this);
-
 		//分析操作系统
 		analyseOs();
 
@@ -420,8 +464,6 @@ public class Fwmain extends JavaPlugin implements Listener {
 				LoadBukkitCore(root,false);
 			}
 
-
-
 			getLogger().info("插件启动成功！ [Csg-Plus " + Data.Version + " ]");
 
 			new BukkitRunnable(){
@@ -430,7 +472,7 @@ public class Fwmain extends JavaPlugin implements Listener {
 				public void run() {
 					getLogger().info("正在准备读取队列...");
 					Lobby.LoadAll(lobby);
-
+					csgCmd = new CsgCmd(Bukkit.getPluginCommand("csg"));
 				}
 
 
@@ -447,7 +489,7 @@ public class Fwmain extends JavaPlugin implements Listener {
 
 	public void onDisable() {
 		Data.onDisable=true;
-
+		ListenerFactory.disable();
 		getLogger().info("正在无触发器退出所有玩家...");
 		Lobby.UnLoadAll();
 
@@ -495,41 +537,6 @@ public class Fwmain extends JavaPlugin implements Listener {
 
 	}
 
-	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-		if(args.length==0) {
-			Help.MainHelp(sender);
-			if(sender instanceof Player){
-				sender.sendMessage("您所处的位置是"+((Player)sender).getWorld().getName());
-			}
-			return false;
-		}
-		if(Data.debug){
-			if(CheckPerm(sender,"csg.debug")){
-				switch(label){
-					case "csg":
-						Fwcommands(sender, args);
-						break;
-				}
-
-			}else{
-				sender.sendMessage("管理员开启了测试模式！暂时无法使用指令...");
-			}
-		}else{
-			switch(label){
-				case "csg":
-					Fwcommands(sender, args);
-					break;
-				case "seril":
-					if(args.length<2){
-						sender.sendMessage("参数不足！使用方式：/seril <游戏名> <世界名>");
-						break;
-					}
-					Room.serilizeLobby(sender,args[0],args[1]);
-					break;
-			}
-		}
-		return false;
-	}
 
 	protected File lobby = new File(getDataFolder(), "lobby");
 	protected File itemd = new File(getDataFolder(), "itemtask");
@@ -574,7 +581,7 @@ public class Fwmain extends JavaPlugin implements Listener {
 			Data.worldpath = ("./");
 		}
 	}
-	private void LoadTec() throws IOException {
+	public void LoadTec() throws IOException {
 
 		this.saveResource("Csg-Plus.zip", true);
 		File zip = new File(getDataFolder(), "Csg-Plus.zip");
@@ -592,13 +599,16 @@ public class Fwmain extends JavaPlugin implements Listener {
 	}
 	private void LoadBukkitCore(File root, boolean isPaper) {
 		if(!isPaper){
-			for(File f : root.listFiles()){
-				if(f.getName().endsWith(".jar") && f.getTotalSpace()>4*1024*1024){
-					Data.ConsoleInfo("识别到核心端 "+f.getName());
-					Data.bukkit_core.add(f);
-					System.out.print(f.getAbsolutePath());
-					break;
+			String[] cores = System.getProperty("java.class.path").split(";");
+			File parent = null;
+			for (String core : cores) {
+				File f = new File(core);
+				if (f.getParentFile() != null) {
+					parent = f.getParentFile();
 				}
+				f = new File(parent,f.getName());
+				Data.ConsoleInfo("识别到核心端 " + f.getAbsolutePath());
+				Data.bukkit_core.add(new File("./" + f));
 			}
 		}else{
 			for(File f : root.listFiles()){
@@ -686,8 +696,8 @@ public class Fwmain extends JavaPlugin implements Listener {
 		}
 	}
 
-	@Override
-	public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+	@Deprecated
+	public List<String> DonTabComplete(CommandSender sender, Command command, String alias, String[] args) {
 		List<String> ls = new ArrayList<>();
 		if(args.length==1){
 			for(Lobby l : Lobby.getLobbyList()){

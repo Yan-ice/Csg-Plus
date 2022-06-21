@@ -21,10 +21,7 @@ import org.bukkit.*;
 import org.csg.Data;
 import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.csg.group.task.toolkit.JavaTaskCompiler;
-import org.csg.group.task.toolkit.TaskCompiler;
-import org.csg.group.task.toolkit.TaskExecuter;
-import org.csg.group.task.toolkit.Trigger;
+import org.csg.group.task.toolkit.*;
 import org.csg.group.task.value.PlayerValueBoard;
 import org.csg.group.task.value.ValueBoard;
 import org.csg.sproom.Room;
@@ -91,7 +88,7 @@ public class Lobby implements customgo.Lobby, CycleUpdate {
 						}
 					}
 				}
-			}catch(Exception e){
+			}catch(Exception ignored){
 
 			}
 		}
@@ -102,8 +99,9 @@ public class Lobby implements customgo.Lobby, CycleUpdate {
 
 	private Set<FunctionTask> functions = new HashSet<>();
 	private Set<ListenerTask> listener = new HashSet<>();
-	private Class<?> javaFunction;
-	private Object instance;
+	private Class<?> javaFunctionClass;
+	private Object javaTaskInstance;
+	private JsTaskCompiler jsTaskCompiler;
 
 	private Set<Group> grouplist = new HashSet<>();
 	private Trigger trigger = new Trigger(this);
@@ -155,7 +153,7 @@ public class Lobby implements customgo.Lobby, CycleUpdate {
 		}
 		return false;
 	}
-	public Object callFunction(String name, Player p, Object[] para){
+	public Object callFunction(String name, Player p, Object... para){
 		for(Group gro : grouplist){
 			if(gro.hasPlayer(p)){
 				for(FunctionTask task : functions){
@@ -163,58 +161,66 @@ public class Lobby implements customgo.Lobby, CycleUpdate {
 						gro.runTask(task,p.getUniqueId(),para);
 					}
 				}
-				if(javaFunction==null){
-					return null;
+				if (jsTaskCompiler != null) {
+					jsTaskCompiler._setMember(this,gro,p,p);
+					if (name.startsWith("js"))
+						return jsTaskCompiler.callFunction(name.substring(2),para);
 				}
-				try{
-					for(Method meth : javaFunction.getMethods()){
-						if(meth.getName().equals("_setMember")){
-							meth.invoke(instance,this,gro,p,p);
+				if(javaFunctionClass !=null){
+					try{
+						for(Method meth : javaFunctionClass.getMethods()){
+							if(meth.getName().equals("_setMember")){
+								meth.invoke(javaTaskInstance,this,gro,p,p);
+							}
 						}
-					}
-					for(Method meth : javaFunction.getMethods()){
-						if(meth.getName().equals(name)){
-							return meth.invoke(instance,para);
+						for(Method meth : javaFunctionClass.getMethods()){
+							if(meth.getName().equals(name)){
+								return meth.invoke(javaTaskInstance,para);
+							}
 						}
+					}catch(IllegalAccessException | InvocationTargetException e){
+						e.printStackTrace();
+						Data.ConsoleInfo("尝试调取java函数"+name+"失败！");
 					}
-				}catch(IllegalAccessException | InvocationTargetException e){
-					e.printStackTrace();
-					Data.ConsoleInfo("尝试调取java函数"+name+"失败！");
 				}
 			}
 		}
 		return null;
 	}
 
-	public Object callFunction(String name, TaskExecuter executer, Player p, Object[] para){
+	public Object callFunction(String name, TaskExecuter executer, Player p, Object... para){
 		for(FunctionTask task : functions){
 			if(task.getName().equals(name)){
 				executer.group.runTask(task,p!=null ? p.getUniqueId() : null,para);
 			}
 		}
-		if(javaFunction==null){
-			return null;
+		if(jsTaskCompiler != null && name.toLowerCase().startsWith("js")) {
+			jsTaskCompiler._setMember(this,executer.group,executer.striker!=null ? Bukkit.getPlayer(executer.striker) : null,p);
+			return jsTaskCompiler.callFunction(name.substring(2),para);
 		}
-		try{
-			for(Method meth : javaFunction.getMethods()){
-				if(meth.getName().equals("_setMember")){
-					meth.invoke(instance,this,executer.group,executer.striker!=null ? Bukkit.getPlayer(executer.striker) : null,p);
-					break;
+		if(javaFunctionClass !=null){
+			try{
+				for(Method meth : javaFunctionClass.getMethods()){
+					if(meth.getName().equals("_setMember")){
+						meth.invoke(javaTaskInstance,this,executer.group,executer.striker!=null ? Bukkit.getPlayer(executer.striker) : null,p);
+						break;
+					}
 				}
-			}
-			for(Method meth : javaFunction.getMethods()){
-				if(meth.getName().equals(name)){
-					return meth.invoke(instance,para);
+				for(Method meth : javaFunctionClass.getMethods()){
+					if(meth.getName().equals(name)){
+						return meth.invoke(javaTaskInstance,para);
+					}
 				}
+			}catch(IllegalAccessException | InvocationTargetException e){
+				e.printStackTrace();
+				Data.ConsoleInfo("尝试调取java函数"+name+"失败！");
 			}
-		}catch(IllegalAccessException | InvocationTargetException e){
-			e.printStackTrace();
-			Data.ConsoleInfo("尝试调取java函数"+name+"失败！");
 		}
+
 
 		return null;
 	}
-	public void callListener(String name, customgo.Group g, Player p, Object[] para){
+	public void callListener(String name, customgo.Group g, Player p, Object... para){
 		for(Group gro : grouplist){
 			if(gro==g){
 				for(ListenerTask task : listener){
@@ -235,7 +241,7 @@ public class Lobby implements customgo.Lobby, CycleUpdate {
 			}
 		}
 	}
-	public void callListener(String name, Player p, Object[] para){
+	public void callListener(String name, Player p, Object... para){
 		for(Group gro : grouplist){
 			if(gro.hasPlayer(p)){
 				for(ListenerTask task : listener){
@@ -253,7 +259,7 @@ public class Lobby implements customgo.Lobby, CycleUpdate {
 			}
 		}
 	}
-	public void callListener(String name, Object[] para){
+	public void callListener(String name, Object... para){
 		Group gro = getDefaultGroup();
 		for(ListenerTask task : listener){
 			if(task.getName().equals(name)){
@@ -274,20 +280,18 @@ public class Lobby implements customgo.Lobby, CycleUpdate {
 	Map<String,FileConfiguration> fc = new HashMap<>();
 
 	public FileConfiguration loadWorkFile(String name){
-		if(fc.containsKey(name)){
-			return (FileConfiguration)fc.get(name);
-		}else{
-			File f = new File(tempFolder,name+".yml");
-			if(!f.exists()){
+		if (!fc.containsKey(name)) {
+			File f = new File(tempFolder, name + ".yml");
+			if (!f.exists()) {
 				try {
 					f.createNewFile();
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
 			}
-			fc.put(name,Data.fmain.load(f));
-			return fc.get(name);
+			fc.put(name, Data.fmain.load(f));
 		}
+		return fc.get(name);
 	}
 	public void saveWorkFile(String name){
 		if(fc.containsKey(name)){
@@ -340,13 +344,13 @@ public class Lobby implements customgo.Lobby, CycleUpdate {
 		LobbyList.add(this);
 	}
 
-	private void loadFileRecurse(File folder, JavaTaskCompiler jcompiler) throws IOException {
+	private void loadFileRecurse(File folder, JavaTaskCompiler jcompiler, JsTaskCompiler jsTaskCompiler) throws IOException {
 		for(File f : folder.listFiles()){
 			if(f.isDirectory()){
 				if(f.getName().equals("temp")){
 					continue;
 				}
-				loadFileRecurse(f,jcompiler);
+				loadFileRecurse(f,jcompiler,jsTaskCompiler);
 				continue;
 			}
 
@@ -380,6 +384,9 @@ public class Lobby implements customgo.Lobby, CycleUpdate {
 			if(f.getName().endsWith("class")){
 				jcompiler.addDepend(f);
 			}
+			if(f.getName().endsWith("js")){
+				jsTaskCompiler.read(f);
+			}
 		}
 	}
 	private void loadMacro(File folder,boolean direct){
@@ -400,6 +407,7 @@ public class Lobby implements customgo.Lobby, CycleUpdate {
 	}
 	private void loadFile(File folder) throws IOException {
 		JavaTaskCompiler jcompiler = new JavaTaskCompiler(this);
+		jsTaskCompiler = new JsTaskCompiler(this);
 
 		loadMacro(folder,true);
 
@@ -411,17 +419,19 @@ public class Lobby implements customgo.Lobby, CycleUpdate {
 			default_macro_file.createNewFile();
 		}
 
-		loadFileRecurse(folder,jcompiler);
+		loadFileRecurse(folder,jcompiler,jsTaskCompiler);
 
-		javaFunction = jcompiler.compile();
-		if(javaFunction==null){
-			return;
+		javaFunctionClass = jcompiler.compile();
+		if(javaFunctionClass !=null){
+			try {
+				javaTaskInstance = javaFunctionClass.getConstructor().newInstance();
+				javaFunctionClass.getMethod("_setPlugin",JavaPlugin.class).invoke(javaTaskInstance,Data.fmain);
+			} catch (InstantiationException | InvocationTargetException | IllegalAccessException | NoSuchMethodException e) {
+				e.printStackTrace();
+			}
 		}
-		try {
-			instance = javaFunction.getConstructor().newInstance();
-			javaFunction.getMethod("_setPlugin",JavaPlugin.class).invoke(instance,Data.fmain);
-		} catch (InstantiationException | InvocationTargetException | IllegalAccessException | NoSuchMethodException e) {
-			e.printStackTrace();
+		if (jsTaskCompiler.isHasContent()) {
+			jsTaskCompiler._setPlugin(Data.fmain);
 		}
 	}
 	/**
@@ -640,6 +650,7 @@ public class Lobby implements customgo.Lobby, CycleUpdate {
 	
 	public static void UnLoadAll() {
 		for(Lobby l : LobbyList){
+			l.jsTaskCompiler.getTasks().values().forEach(e -> e.getListeners().values().forEach(HandlerList::unregisterAll));
 			for(Group g : l.grouplist){
 				g.UnLoad();
 			}

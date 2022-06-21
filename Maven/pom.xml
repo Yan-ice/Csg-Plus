@@ -6,7 +6,7 @@
 
     <groupId>csg</groupId>
     <artifactId>Csg-Plus</artifactId>
-    <version>1.6-SNAPSHOT</version>
+    <version>1.7.1</version>
 
     <properties>
         <maven.compiler.source>8</maven.compiler.source>
@@ -56,6 +56,11 @@
             <artifactId>lombok</artifactId>
             <version>1.18.24</version>
             <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.javassist</groupId>
+            <artifactId>javassist</artifactId>
+            <version>3.28.0-GA</version>
         </dependency>
     </dependencies>
     <build>

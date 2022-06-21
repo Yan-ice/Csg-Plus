@@ -441,7 +441,11 @@ public class CommandTask extends Task {
                 if(label.startsWith("on")){
                     group.getLobby().callListener(label,group,Target,args);
                 }
-                return_obj = group.getLobby().callFunction(label,executer,Target,args);
+                String[] replaced = new String[args.length];
+                for(int a=0; a<args.length; a++) {
+                    replaced[a] = executer.variableReplace(args[a],Target);
+                }
+                return_obj = group.getLobby().callFunction(label,executer,Target,replaced);
         }
         if(cloned_return!=null){
             if(return_obj!=null){

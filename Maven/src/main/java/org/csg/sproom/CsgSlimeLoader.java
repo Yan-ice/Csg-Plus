@@ -22,7 +22,8 @@ public class CsgSlimeLoader implements SlimeLoader {
     public byte[] loadWorld(String s, boolean readOnly) throws UnknownWorldException, WorldInUseException, IOException {
         if(dataSource==null && source.exists()){
             FileInputStream os = new FileInputStream(source);
-            dataSource = os.readAllBytes();
+            dataSource = new byte[os.available()];
+            os.read(dataSource);
             os.close();
         }
         Data.ConsoleInfo(ChatColor.BLUE+"Csg-Plus SpRoom world loaded.");
