@@ -47,45 +47,44 @@ public class ListenerFactory {
             CtClass listener;
             try {
                 listener = pool.getCtClass(ListenerFactory.class.getName()+".dynamic_listener." + eventClass.getSimpleName());
+
             } catch (NotFoundException err){
                 listener = pool.makeClass(ListenerFactory.class.getName()+".dynamic_listener." + eventClass.getSimpleName());
+                //实现bukkit的Listener接口
+                CtClass listenerI = pool.getCtClass("org.bukkit.event.Listener");
+                listener.addInterface(listenerI);
+                //泛型Consumer<event>
+                SignatureAttribute.ClassSignature cs = new SignatureAttribute.ClassSignature(
+                        new SignatureAttribute.TypeParameter[] {
+                                new SignatureAttribute.TypeParameter(eventClass.getName())
+                        }
+                );
+                CtClass eventFunction = pool.getCtClass("java.util.function.Consumer");
+                eventFunction.setGenericSignature(cs.encode());
+                //添加Consumer<event> method字段
+                CtField methodF = new CtField(eventFunction, "method", listener);
+                listener.addField(methodF);
+                //添加构造函数
+                CtConstructor constructor = new CtConstructor(new CtClass[]{eventFunction}, listener);
+                constructor.setBody("{\n"
+                        +"$0.method = $1;\n"
+                        +"}");
+                listener.addConstructor(constructor);
+                //添加@EventHandler注解
+                ConstPool constpool = listener.getClassFile().getConstPool();
+                AnnotationsAttribute methodAttr = new AnnotationsAttribute(constpool, AnnotationsAttribute.visibleTag);
+                Annotation eventHandlerA = new Annotation("org.bukkit.event.EventHandler",constpool);
+                methodAttr.addAnnotation(eventHandlerA);
+                //添加方法体
+                CtMethod onEventM = new CtMethod(CtClass.voidType, "on"+eventClass.getSimpleName(), new CtClass[]{pool.getCtClass(eventClass.getName())}, listener);
+                onEventM.setBody("{$0.method.accept($1);}");
+                onEventM.getMethodInfo().addAttribute(methodAttr);
+                listener.addMethod(onEventM);
             }
-            //实现bukkit的Listener接口
-            CtClass listenerI = pool.getCtClass("org.bukkit.event.Listener");
-            listener.defrost();
-            listener.addInterface(listenerI);
-            //泛型Consumer<event>
-            SignatureAttribute.ClassSignature cs = new SignatureAttribute.ClassSignature(
-                    new SignatureAttribute.TypeParameter[] {
-                            new SignatureAttribute.TypeParameter(eventClass.getName())
-                    }
-            );
-            CtClass eventFunction = pool.getCtClass("java.util.function.Consumer");
-            eventFunction.setGenericSignature(cs.encode());
-            //添加Consumer<event> method字段
-            CtField methodF = new CtField(eventFunction, "method", listener);
-            listener.addField(methodF,methodF.getName());
-            //添加构造函数
-            CtConstructor constructor = new CtConstructor(new CtClass[]{eventFunction}, listener);
-            constructor.setBody("{\n"
-                    +"$0.method = $1;\n"
-                    +"}");
-            listener.addConstructor(constructor);
-            //添加@EventHandler注解
-            ConstPool constpool = listener.getClassFile().getConstPool();
-            AnnotationsAttribute methodAttr = new AnnotationsAttribute(constpool, AnnotationsAttribute.visibleTag);
-            Annotation eventHandlerA = new Annotation("org.bukkit.event.EventHandler",constpool);
-            methodAttr.addAnnotation(eventHandlerA);
-            //添加方法体
-            CtMethod onEventM = new CtMethod(CtClass.voidType, "on"+eventClass.getSimpleName(), new CtClass[]{pool.getCtClass(eventClass.getName())}, listener);
-            onEventM.setBody("{$0.method.accept($1);}");
-            onEventM.getMethodInfo().addAttribute(methodAttr);
-            listener.addMethod(onEventM);
+            listener.detach();
             try{
                 listener.toClass();
-            }catch (CannotCompileException err){
-                err.printStackTrace();
-            }
+            }catch (CannotCompileException ignored){}
             listenerClasses.put(eventClass.getSimpleName(),listener);
         } catch (NotFoundException | CannotCompileException e) {
             e.printStackTrace();
@@ -99,7 +98,7 @@ public class ListenerFactory {
      */
     public static Class getListenerClass(Class<? extends Event> eventClass){
         if(eventClass.isInterface()){
-            Data.Debug(String.format("事件%s为接口，不能注册监听器!", eventClass.getName()));
+            Data.Debug(String.format("事件%s为接口，不能注册监听器!",eventClass.getName()));
             return null;
         }
         if (!listenerClasses.containsKey(eventClass.getSimpleName())){

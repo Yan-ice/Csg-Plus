@@ -2,10 +2,9 @@ package org.csg;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
+import org.csg.Fwmain;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -22,9 +21,9 @@ public class Data {
 	public static Random random = new Random();
 	public static boolean onDisable = false;
 	public static boolean HighMCVersion = true;
-	
 
-	
+
+
 	public static boolean debug = false;
 	public static boolean isPaper = false;
 
@@ -38,17 +37,36 @@ public class Data {
 	public static FileConfiguration LanguageFileConf;
 
 	public static boolean LoadWhenJoin = false;
-	
+
 	public static ValueData data;
 
+	private static Map<String ,List<String>> loadErrors = new HashMap<>();
+
+	public static void LoadError(String lobby, String info) {
+		loadErrors.computeIfAbsent(lobby, k -> new ArrayList<>());
+		loadErrors.get(lobby).add(info);
+	}
+	public static void PrintLoadError(String lobby) {
+		List<String> errors = loadErrors.get(lobby);
+		if (errors != null && !errors.isEmpty()) {
+			ConsoleInfo("=====[大厅"+lobby+"提示信息]=====");
+			errors.forEach(Data::ConsoleError);
+			errors.clear();
+		}
+	}
 	public static void ConsoleInfo(String info) {
 		fmain.getLogger().info(info);
 	}
 	public static void ConsoleError(String info) {
 		fmain.getLogger().info(ChatColor.RED+"ERROR: "+info);
 	}
+	public static void Debug(String str){
+		if(debug){
+			ConsoleInfo("[Debug] "+str);
+		}
+	}
 
-	
+
 	public static void LoadOption() {
 		try {
 			debug = optionFileConf.getBoolean("Debug");
@@ -62,8 +80,8 @@ public class Data {
 			}
 
 			if(optionFileConf.contains("HighMCVersion")){
-     	    	Data.HighMCVersion = optionFileConf.getBoolean("HighMCVersion");
-     	    }
+				Data.HighMCVersion = optionFileConf.getBoolean("HighMCVersion");
+			}
 			LoadWhenJoin = false;
 			//LoadWhenJoin = optionFileConf.getBoolean("LoadWhenJoin");
 
@@ -111,12 +129,6 @@ public class Data {
 
 	public static void ConsoleCommand(String command) {
 		Bukkit.dispatchCommand(Data.fmain.getServer().getConsoleSender(), command);
-	}
-
-	public static void Debug(String str){
-		if(debug){
-			ConsoleInfo("[Debug] "+str);
-		}
 	}
 
 }

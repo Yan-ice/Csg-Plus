@@ -1,5 +1,6 @@
 package org.csg.group.task.toolkit;
 
+import org.bukkit.Bukkit;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.csg.Data;
 import org.csg.group.Group;
@@ -18,7 +19,9 @@ import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.player.*;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 public class Trigger implements Listener, CycleUpdate {
 	Lobby lobby;
@@ -127,13 +130,13 @@ public class Trigger implements Listener, CycleUpdate {
 
 	@EventHandler
 	void InteractListen(PlayerInteractEntityEvent evt) {
-		if(evt.getRightClicked() instanceof HumanEntity){
+		if(evt.getRightClicked() instanceof LivingEntity){
 			Player striker = evt.getPlayer();
 			if(cooldown.contains(striker.getName())){
 				return;
 			}
 			cooldown.add(striker.getName());
-			HumanEntity striked = (HumanEntity) evt.getRightClicked();
+			LivingEntity striked = (LivingEntity) evt.getRightClicked();
 			lobby.callListener("onInteract",striker,new Object[]{striked});
 		}
 	}
@@ -175,22 +178,6 @@ public class Trigger implements Listener, CycleUpdate {
 		}
 	}
 
-	@EventHandler
-	void Listen(PlayerMoveEvent evt2) {
-		Player pl = evt2.getPlayer();
-
-		if(cooldown.contains(pl.getName())){
-			return;
-		}
-		cooldown.add(pl.getName());
-		Location BlockWalk = new Location(pl.getLocation().getWorld(), pl.getLocation().getBlockX(),
-				(pl.getLocation().getBlockY() - 1), pl.getLocation().getBlockZ());
-		Block Blo = BlockWalk.getBlock();
-		cooldown.add(pl.getName());
-		lobby.callListener("onPlayerWalk",evt2.getPlayer(),new Object[]{Blo.getType().name()});
-
-	}
-
 	private Player getDamager(Entity e){
 
 		Player damager = null;
@@ -208,7 +195,18 @@ public class Trigger implements Listener, CycleUpdate {
 	@Override
 	public void onUpdate() {
 		count++;
-		if(count>=4){
+		if(count>4){
+			List<UUID> ud = lobby.getPlayerList();
+			for(Player pl : Bukkit.getOnlinePlayers()){
+				if(ud.contains(pl.getUniqueId())){
+					Location BlockWalk = new Location(pl.getLocation().getWorld(), pl.getLocation().getBlockX(),
+							(pl.getLocation().getBlockY() - 1), pl.getLocation().getBlockZ());
+					Block Blo = BlockWalk.getBlock();
+					lobby.callListener("onPlayerWalk",pl,new Object[]{Blo.getType().name()});
+				}
+
+			}
+
 			count = 0;
 			cooldown.clear();
 		}

@@ -5,10 +5,10 @@ package org.csg.group.task.toolkit;
  *
  * @author 独孤猿1998
  */
-public class Calculater {
+public class Calculator {
 
     public static double Calculate(String args) {
-        args = nifixTransformPostfix(args);
+        args = nifixTransformPostfix("0"+args);
         return calculatePostfixExpression(args);
     }
 

@@ -110,11 +110,15 @@ public class Lobby implements customgo.Lobby, CycleUpdate {
 	File Folder;
 	File tempFolder;
 	String Name;
-	
+
+	private boolean isSproom_control = false;
 	private ValueBoard Board = new ValueBoard();
 	private ValueBoard dataBoard = new ValueBoard();
 	private PlayerValueBoard PlayerBoard = new PlayerValueBoard();
 
+	public boolean isSpRoom(){
+		return isSproom_control;
+	}
 	public File getTempFolder(){
 		return tempFolder;
 	}
@@ -468,6 +472,7 @@ public class Lobby implements customgo.Lobby, CycleUpdate {
 			for(File f : tempFolder.listFiles()){
 				if(!sproom_control && f.getName().equals("sproom_config.yml")){
 					Data.ConsoleInfo("检测到大厅"+Name+"具有独立副本配置，已生成独立副本！");
+					isSproom_control = true;
 					new Room(this,f);
 					break;
 				}

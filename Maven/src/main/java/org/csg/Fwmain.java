@@ -1,14 +1,6 @@
 package org.csg;
 
-import java.io.File;
-
-import java.io.IOException;
-import java.util.*;
-import java.util.jar.JarFile;
-
-//import org.black_ixx.playerpoints.PlayerPoints;
-import lombok.Getter;
-import lombok.Setter;
+import com.google.gson.Gson;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.World;
@@ -21,28 +13,47 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
-
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
-
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
-
 import org.csg.cmd.CsgCmd;
 import org.csg.group.Group;
 import org.csg.group.Lobby;
-
 import org.csg.group.task.ValueData;
 import org.csg.group.task.toolkit.ListenerFactory;
 import org.csg.sproom.Reflect;
 import org.csg.sproom.Room;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.*;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
+
 public class Fwmain extends JavaPlugin implements Listener {
 
 	static CsgCmd csgCmd;
+
+	public static String getOsName() {
+		return Fwmain.osName;
+	}
+
+	public static List<String> getOptionDepends() {
+		return Fwmain.optionDepends;
+	}
+
+	public static void setOsName(String osName) {
+		Fwmain.osName = osName;
+	}
+
+	public static void setOptionDepends(List<String> optionDepends) {
+		Fwmain.optionDepends = optionDepends;
+	}
 
 
 	public FileConfiguration load(File file) {
@@ -52,359 +63,8 @@ public class Fwmain extends JavaPlugin implements Listener {
 		return YamlConfiguration.loadConfiguration(file);
 	}
 
-	@Getter
 	Set<Player> plist = new HashSet<>();
 	Set<Player> vexlist = new HashSet<>();
-
-	@Deprecated
-	public boolean DonCommand(CommandSender sender, Command command, String label, String[] args) {
-		if(args.length==0) {
-			Help.MainHelp(sender);
-			if(sender instanceof Player){
-				sender.sendMessage("您所处的位置是"+((Player)sender).getWorld().getName());
-			}
-			return false;
-		}
-		if(Data.debug){
-			if(CheckPerm(sender,"csg.debug")){
-				switch(label){
-					case "csg":
-						Fwcommands(sender, args);
-						break;
-				}
-
-			}else{
-				sender.sendMessage("管理员开启了测试模式！暂时无法使用指令...");
-			}
-		}else{
-			switch(label){
-				case "csg":
-					Fwcommands(sender, args);
-					break;
-				case "seril":
-					if(args.length<2){
-						sender.sendMessage("参数不足！使用方式：/seril <游戏名> <世界名>");
-						break;
-					}
-					Room.serilizeLobby(sender,args[0],args[1]);
-					break;
-			}
-		}
-		return false;
-	}
-	@Deprecated
-	private void Fwcommands(CommandSender sender, String args[]) {
-		if(args[0].equals("skip")){
-			if(args.length<2){
-				return;
-			}
-			if(args.length<3){
-				if(sender instanceof Player){
-					Group g = Group.SearchPlayerInGroup((Player)sender);
-					if(g!=null){
-						Lobby l = g.getLobby();
-						if (sender.hasPermission("csg.skip." + args[1]) || CheckPerm(sender, "csg.skip")) {
-							l.ChangeGroup((Player)sender, args[1]);
-						}
-					}
-
-				}else{
-					sender.sendMessage("控制台不能这么做！");
-				}
-			}else{
-				if(sender.isOp()){
-					for(Player p : Bukkit.getOnlinePlayers()){
-						if(p.getName().equals(args[2])){
-							Group g = Group.SearchPlayerInGroup(p);
-							if(g!=null){
-								Lobby l = g.getLobby();
-								l.ChangeGroup(p, args[1]);
-							}
-							return;
-						}
-					}
-					sender.sendMessage("无效的玩家名！");
-				}
-			}
-		}else if(args[0].equals("item")){
-			if(args.length<2){
-				return;
-			}
-
-			return;
-		}
-		if(args.length < 2){
-			switch(args[0]){
-				case "unloadtec":
-					Data.ConsoleInfo("已卸载CustomGoTec");
-					Bukkit.unloadWorld("CustomGoTec",false);
-					return;
-				case "killall":
-					if(!(sender instanceof Player)){
-						return;
-					}
-					for(Entity e : ((Player)sender).getNearbyEntities(300, 150, 300)){
-						if(!(e instanceof LivingEntity)){
-							continue;
-						}
-						LivingEntity en = (LivingEntity) e;
-						if(!en.isDead()){
-							en.remove();
-						}
-
-					}
-					break;
-				case "list":
-					if (CheckPerm(sender, "csg.list")) {
-						showList(sender);
-					}
-					break;
-				case "uuid":
-					if (CheckPerm(sender, "csg.uuid")) {
-						if(plist.contains((Player)sender)) {
-							plist.remove((Player)sender);
-							sender.sendMessage("您退出了UUID查看模式。");
-						}else {
-							sender.sendMessage("您正在UUID查看模式：攻击一个生物来查看它的UUID。");
-
-							plist.add((Player)sender);
-						}
-					}
-					break;
-				case "debug":
-					if (CheckPerm(sender, "csg.admin")) {
-						if(Data.debug){
-							Data.debug = false;
-							sender.sendMessage("测试模式已关闭。");
-						}else{
-							Data.debug = true;
-							sender.sendMessage("测试模式已开启。");
-						}
-
-					}
-					break;
-				case "reload":
-					if (CheckPerm(sender, "csg.reload")) {
-						Reload(sender);
-					}
-					break;
-
-				case "leave":
-					if(sender instanceof Player){
-						if (CheckPerm(sender, "csg.leave")) {
-							Lobby.AutoLeave((Player)sender,false);
-						}
-					}
-					break;
-				case "help":
-					if (CheckPerm(sender, "csg.help")) {
-						Help.MainHelp(sender);
-						Help.LobbyHelp(sender);
-						if(Bukkit.getWorld("CustomGoTec")==null){
-							sender.sendMessage("§a*************************************");
-							sender.sendMessage("§a检测到可以进行教程模板加载/更新！");
-							sender.sendMessage("§a如果你是第一次使用插件，教程会对你有很大帮助哦~！");
-							sender.sendMessage("§a");
-							sender.sendMessage("想要加载/更新教程，请输入 §e/csg teach");
-							sender.sendMessage("§a");
-							sender.sendMessage("§7(附加提示：更新教程会重载插件~)");
-							sender.sendMessage("§a*************************************");
-						}
-
-					}
-					break;
-				case "teach":
-					sender.sendMessage("§d正在进行教程模板加载/更新！请耐心等待...");
-					try{
-						this.LoadTec();
-					}catch(Exception e){
-						sender.sendMessage("§c更新教程失败！可以在控制台获取错误信息喔...");
-						e.printStackTrace();
-						return;
-					}
-
-					this.Reload(sender);
-					sender.sendMessage("§d更新完成！你可以选择以下一个队列进行游戏：");
-					sender.sendMessage("§e/csg CustomGoTec join §d[推荐！]");
-					sender.sendMessage("§e/csg Dungeon join");
-					sender.sendMessage("§e/csg 7sec_run join");
-					sender.sendMessage("§e/csg Battle join §d[需要多个玩家]");
-					sender.sendMessage("§e/csg MoneyGame join §d[需要前置Vault，PlaceHolderAPI]");
-					sender.sendMessage("§d一边游戏的同时，可以一边看看它们的配置文件噢！");
-
-					break;
-				case "stop":
-					if (CheckPerm(sender, "csg.stop")) {
-						sender.sendMessage(ChatColor.BLUE+"安全关闭所有游戏！");
-						for(Lobby l : Lobby.getLobbyList()){
-							l.Clear();
-						}
-						Lobby.getLobbyList().clear();
-					}
-
-					break;
-				default:
-					String Name = args[0];
-					if(Lobby.getLobby(Name)!=null){
-						Help.LobbyHelp(sender);
-					}else{
-						Help.MainHelp(sender);
-					}
-
-
-			}
-		}else{
-			if(args[0].equals("leave")){
-				if(sender.isOp()){
-					for(Player p : Bukkit.getOnlinePlayers()){
-						if(p.getName().equals(args[1])){
-							Lobby.AutoLeave(p,false);
-							return;
-						}
-					}
-					sender.sendMessage("无效的玩家名！");
-					return;
-				}else{
-					return;
-				}
-			}
-
-			String Name = args[0];
-			Lobby lobby = Lobby.getLobby(Name);
-			if (lobby != null) {
-				switch (args[1]) {
-					case "load":
-						if (CheckPerm(sender, "csg.load")) {
-							sender.sendMessage("重载游戏 "+args[0]+" ！");
-							lobby.load();
-						}
-						break;
-					case "unload":
-						if (CheckPerm(sender, "csg.unload")) {
-							sender.sendMessage("卸载游戏 "+args[0]+" ！");
-							lobby.unLoad();
-						}
-						break;
-					case "join":
-						if(args.length<3){
-							if(sender instanceof Player){
-								if (sender.hasPermission("csg.join." + args[0]) || CheckPerm(sender, "csg.join")) {
-									if(Room.searchRoom(args[0])!=null){
-										Room.searchRoom(args[0]).JoinRoom((Player)sender);
-									}else{
-										lobby.Join((Player)sender);
-									}
-
-								}
-							}else{
-								sender.sendMessage("控制台不能这么做！");
-							}
-						}else{
-							if(sender.isOp()){
-								for(Player p : Bukkit.getOnlinePlayers()){
-									if(p.getName().equals(args[2])){
-										if(Room.searchRoom(args[0])!=null){
-											Room.searchRoom(args[0]).JoinRoom(p);
-										}else{
-											lobby.Join(p);
-										}
-										return;
-									}
-								}
-								sender.sendMessage("无效的玩家名！");
-							}
-
-						}
-
-						break;
-					case "statu":
-						if (CheckPerm(sender, "csg.statu")) {
-							if(Room.searchRoom(args[0])!=null){
-								Room r = Room.searchRoom(args[0]);
-								sender.sendMessage(ChatColor.YELLOW+"房间名： "+ChatColor.AQUA+r.getName()+ChatColor.YELLOW+"  游戏进行个数： "+r.allreflects.size()+"/"+r.getMaxReflect());
-								for(Reflect rf : r.allreflects){
-									if(rf!=null){
-										sender.sendMessage(ChatColor.YELLOW+"  副本镜像"+rf.getId()+"： ");
-										String pli = "";
-										switch(rf.getStatu()){
-											case WAITING:
-												sender.sendMessage("    游戏状态： "+ChatColor.GREEN+"等待中！");
-												for(UUID p : rf.getLobby().getPlayerList()){
-													pli = pli+Bukkit.getPlayer(p).getName()+" ";
-												}
-												sender.sendMessage("    游玩玩家："+pli);
-												break;
-											case STARTED:
-												sender.sendMessage("    游戏状态： "+ChatColor.RED+"游戏中");
-												for(UUID p : rf.getLobby().getPlayerList()){
-													pli = pli+Bukkit.getPlayer(p).getName()+" ";
-												}
-												sender.sendMessage("    游玩玩家："+pli);
-												break;
-											case PREPARING:
-												sender.sendMessage("    游戏状态： "+ChatColor.RED+"正在加载");
-												break;
-											case ENDED:
-												sender.sendMessage("    处于已卸载状态，随时等待重新启用。");
-												break;
-											case UNLOADING:
-												sender.sendMessage("    游戏已结束，等待所有人离开世界将卸载。");
-												break;
-										}
-									}
-
-								}
-							}else{
-								sender.sendMessage(ChatColor.BLUE+lobby.getName()+" :");
-								sender.sendMessage(ChatColor.GREEN+"默认队列："+lobby.getDefaultGroup().GetDisplay());
-								for(Group gro : lobby.getGroupListI()){
-									gro.state(sender);
-								}
-							}
-
-						}
-
-						break;
-					case "trigger":
-						if(args.length>2) {
-							Player striker = null;
-							if(args.length>3){
-								striker = Bukkit.getPlayer(args[3]);
-							}
-							if(striker==null && sender instanceof Player){
-								striker = (Player)sender;
-							}
-							if(striker!=null){
-								lobby.callListener(args[2],striker,new Object[0]);
-							}else{
-								lobby.callListener(args[2],lobby.getDefaultGroup(),null,new Object[0]);
-							}
-
-						}else {
-							sender.sendMessage("/csg <房间名> trigger <函数名> [触发者]");
-						}
-						break;
-					default:
-						Help.LobbyHelp(sender);
-				}
-
-			} else {
-				if (args[1].equals("load") && CheckPerm(sender, "csg.load")) {
-
-					for(File f : Data.lobbyDir.listFiles()){
-						if(f.getName().equals(args[0])){
-							Lobby l = new Lobby(f);
-							l.addToList();
-							sender.sendMessage("已加载游戏 "+args[0]+" !");
-							return;
-						}
-					}
-					sender.sendMessage("未找到可加载的文件夹 "+args[0]+" !");
-				}
-				sender.sendMessage("队列不存在！");
-			}
-		}
-	}
 
 	/**
 	 * 发送大厅列表。
@@ -451,7 +111,9 @@ public class Fwmain extends JavaPlugin implements Listener {
 		getServer().getPluginManager().registerEvents(this, this);
 		//分析操作系统
 		analyseOs();
-
+		System.out.println("-------------Properties------------");
+		System.getProperties().forEach((k,v)->System.out.printf("%s: %s%n",k,v));
+		System.out.println("-----------------------------------");
 		try{
 
 			SendToData();
@@ -464,6 +126,8 @@ public class Fwmain extends JavaPlugin implements Listener {
 				LoadBukkitCore(root,false);
 			}
 
+			csgCmd = new CsgCmd(Bukkit.getPluginCommand("csg"));
+
 			getLogger().info("插件启动成功！ [Csg-Plus " + Data.Version + " ]");
 
 			new BukkitRunnable(){
@@ -472,7 +136,6 @@ public class Fwmain extends JavaPlugin implements Listener {
 				public void run() {
 					getLogger().info("正在准备读取队列...");
 					Lobby.LoadAll(lobby);
-					csgCmd = new CsgCmd(Bukkit.getPluginCommand("csg"));
 				}
 
 
@@ -546,12 +209,8 @@ public class Fwmain extends JavaPlugin implements Listener {
 	protected static FileConfiguration optionfile;
 	protected static ValueData d;
 
-	@Getter
-	@Setter
 	private static String osName;
 
-	@Getter
-	@Setter
 	private static List<String> optionDepends;
 
 	private void loadWorldPath(){
@@ -599,7 +258,20 @@ public class Fwmain extends JavaPlugin implements Listener {
 	}
 	private void LoadBukkitCore(File root, boolean isPaper) {
 		if(!isPaper){
-			String[] cores = System.getProperty("java.class.path").split(";");
+			Arrays.stream(System.getProperty("java.class.path").split(";")).filter(e -> e.endsWith(".jar")).forEach(e -> {
+				File file = new File(e);
+				try {
+					JarFile jar = new JarFile(file);
+					JarEntry entry = jar.getJarEntry("version.json");
+					if(entry != null){
+						Data.ConsoleInfo("识别到核心端 " + file.getAbsolutePath());
+						Data.bukkit_core.add(file);
+					}
+				}catch (Exception err){
+					err.printStackTrace();
+				}
+			});
+			/*String[] cores = System.getProperty("java.class.path").split(";");
 			File parent = null;
 			for (String core : cores) {
 				File f = new File(core);
@@ -607,9 +279,8 @@ public class Fwmain extends JavaPlugin implements Listener {
 					parent = f.getParentFile();
 				}
 				f = new File(parent,f.getName());
-				Data.ConsoleInfo("识别到核心端 " + f.getAbsolutePath());
-				Data.bukkit_core.add(new File("./" + f));
-			}
+
+			}*/
 		}else{
 			for(File f : root.listFiles()){
 				if(f.isDirectory()){
@@ -707,5 +378,33 @@ public class Fwmain extends JavaPlugin implements Listener {
 			}
 		}
 		return ls;
+	}
+
+	public Set<Player> getVexlist() {
+		return this.vexlist;
+	}
+
+	public File getLobby() {
+		return this.lobby;
+	}
+
+	public File getItemd() {
+		return this.itemd;
+	}
+
+	public File getFunc() {
+		return this.func;
+	}
+
+	public File getData() {
+		return this.data;
+	}
+
+	public File getOption() {
+		return this.option;
+	}
+
+	public Set<Player> getPlist() {
+		return this.plist;
 	}
 }

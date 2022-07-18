@@ -795,16 +795,18 @@ public class CsgCmd extends RootCmd{
                 player.sendMessage(playerParas());
                 return;
             }
-            if(Room.searchRoom(args[0])!=null){
+
+            Lobby lobby = Lobby.getLobby(args[0]);
+            if (lobby != null) {
+            if(lobby.isSpRoom()){
                 Room.searchRoom(args[0]).JoinRoom(player);
             }else{
-                Lobby lobby = Lobby.getLobby(args[0]);
-                if (lobby != null) {
-                    lobby.Join(player);
-                } else {
-                    player.sendMessage("游戏["+args[0]+"]不存在");
-                }
+                lobby.Join(player);
             }
+            } else {
+                player.sendMessage("游戏["+args[0]+"]不存在");
+            }
+
         }
         @Override
         public void op(Player player, String... args) {
@@ -820,15 +822,15 @@ public class CsgCmd extends RootCmd{
                     player.sendMessage("玩家["+args[1]+"]未在线或不存在");
                 }
             }
-            if(Room.searchRoom(args[0])!=null){
-                Room.searchRoom(args[0]).JoinRoom(player);
-            }else{
-                Lobby lobby = Lobby.getLobby(args[0]);
-                if (lobby != null) {
-                    lobby.Join(player);
-                } else {
-                    player.sendMessage("游戏["+args[0]+"]不存在");
+            Lobby lobby = Lobby.getLobby(args[0]);
+            if(lobby!=null ){
+                if(lobby.isSpRoom()){
+                    Room.searchRoom(args[0]).JoinRoom(target);
+                }else{
+                    lobby.Join(target);
                 }
+            }else{
+                player.sendMessage("游戏["+args[0]+"]不存在");
             }
         }
         @Override
@@ -839,15 +841,17 @@ public class CsgCmd extends RootCmd{
             }
             if (Bukkit.getPlayer(args[1]) != null) {
                 Player target = Bukkit.getPlayer(args[1]);
-                if(Room.searchRoom(args[0])!=null){
-                    Room.searchRoom(args[0]).JoinRoom(target);
-                }else{
-                    Lobby lobby = Lobby.getLobby(args[0]);
-                    if (lobby != null) {
+
+                Lobby lobby = Lobby.getLobby(args[0]);
+                if(lobby!=null){
+                    if(lobby.isSpRoom()){
+                        Room.searchRoom(args[0]).JoinRoom(target);
+                    }else{
                         lobby.Join(target);
-                    } else {
-                        sender.sendMessage("游戏["+args[0]+"]不存在");
                     }
+                }
+                else {
+                    sender.sendMessage("游戏["+args[0]+"]不存在");
                 }
             } else {
                 sender.sendMessage("玩家["+args[1]+"]未在线或不存在");
@@ -920,7 +924,12 @@ public class CsgCmd extends RootCmd{
                 sender.sendMessage(consoleParas());
                 return;
             }
-            if(Room.searchRoom(args[0])!=null){
+            Lobby lobby = Lobby.getLobby(args[0]);
+            if(lobby==null){
+                sender.sendMessage("游戏["+args[0]+"]不存在");
+                return;
+            }
+            if(lobby.isSpRoom()){
                 Room r = Room.searchRoom(args[0]);
                 sender.sendMessage(ChatColor.YELLOW+"房间名： "+ChatColor.AQUA+r.getName()+ChatColor.YELLOW+"  游戏进行个数： "+r.allreflects.size()+"/"+r.getMaxReflect());
                 for(Reflect rf : r.allreflects){
@@ -955,16 +964,11 @@ public class CsgCmd extends RootCmd{
                     }
                 }
             }else{
-                Lobby lobby = Lobby.getLobby(args[0]);
-                if (lobby != null) {
                     sender.sendMessage(ChatColor.BLUE+lobby.getName()+" :");
                     sender.sendMessage(ChatColor.GREEN+"默认队列："+lobby.getDefaultGroup().GetDisplay());
                     for(Group gro : lobby.getGroupListI()){
                         gro.state(sender);
                     }
-                } else {
-                    sender.sendMessage("游戏["+args[0]+"]不存在");
-                }
             }
         }
         @Override

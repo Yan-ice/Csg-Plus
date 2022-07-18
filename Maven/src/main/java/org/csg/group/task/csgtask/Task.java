@@ -5,7 +5,7 @@ import java.util.UUID;
 
 
 enum TargetType{
-    Striker,All,Random,None,Global;
+    Striker, Group,Random,None, Lobby, Server;
 }
 
 public abstract class Task {

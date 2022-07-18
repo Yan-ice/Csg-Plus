@@ -20,7 +20,7 @@ public class TaskExecuter implements CycleUpdate {
 
     public boolean endWhenClear = false;
 
-    public Variable variables = new Variable();
+    public VariableBox variables = new VariableBox();
 
     int cooldown = 0;
     public Task begin;
@@ -240,23 +240,11 @@ public class TaskExecuter implements CycleUpdate {
             String value = If.split("==")[1].trim();
             switch(If.split("==")[0].trim()){
                 case "Permission":
-                    if(target.hasPermission(value)){
-                        return true;
-                    }else{
-                        return false;
-                    }
+                    return target.hasPermission(value);
                 case "InGroup":
-                    if(group.hasPlayer(target)){
-                        return true;
-                    }else{
-                        return false;
-                    }
+                    return group.hasPlayer(target);
                 default:
-                    if(If.split("==")[0].trim().equals(If.split("==")[1].trim())){
-                        return true;
-                    }else{
-                        return false;
-                    }
+                    return If.split("==")[0].trim().equals(If.split("==")[1].trim());
             }
         }
         if(If.equals("true")){

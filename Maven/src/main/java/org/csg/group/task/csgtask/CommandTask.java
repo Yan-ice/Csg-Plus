@@ -11,7 +11,7 @@ import org.csg.Data;
 import org.csg.group.Group;
 import org.csg.group.Lobby;
 import org.csg.group.task.ItemCheck;
-import org.csg.group.task.toolkit.Calculater;
+import org.csg.group.task.toolkit.Calculator;
 import org.csg.group.task.toolkit.TaskExecuter;
 
 import org.csg.location.FArena;
@@ -53,7 +53,7 @@ public class CommandTask extends Task {
             }
             switch (tg) {
                 case "@a":
-                    target_type = TargetType.All;
+                    target_type = TargetType.Group;
                     break;
                 case "@p":
                     target_type = TargetType.Striker;
@@ -62,7 +62,16 @@ public class CommandTask extends Task {
                     target_type = TargetType.Random;
                     break;
                 case "@e":
-                    target_type = TargetType.Global;
+                    target_type = TargetType.Lobby;
+                    break;
+                case "@l":
+                    target_type = TargetType.Lobby;
+                    break;
+                case "@g":
+                    target_type = TargetType.Group;
+                    break;
+                case "@server":
+                    target_type = TargetType.Server;
                     break;
                 default:
                     target_type = TargetType.None;
@@ -79,7 +88,7 @@ public class CommandTask extends Task {
 
         List<UUID> players = new ArrayList<>();
         switch(target_type){
-            case All:
+            case Group:
                 players.addAll(executer.group.getPlayerList());
                 break;
             case Striker:
@@ -98,8 +107,13 @@ public class CommandTask extends Task {
                 }
 
                 break;
-            case Global:
+            case Lobby:
                 players.addAll(executer.group.getLobby().getPlayerList());
+                break;
+            case Server:
+                for(Player p : Bukkit.getOnlinePlayers()){
+                    players.add(p.getUniqueId());
+                }
                 break;
             default:
                 break;
@@ -288,10 +302,10 @@ public class CommandTask extends Task {
                 break;
             case "varnum":
                 if(args.length>1){
-                    return_obj = Calculater.Calculate(args[1]);
+                    return_obj = Calculator.Calculate(args[1]);
                     executer.addVariable(args[0], return_obj);
                 }else{
-                    return_obj = Calculater.Calculate(args[0]);
+                    return_obj = Calculator.Calculate(args[0]);
                 }
 
                 break;
@@ -303,13 +317,13 @@ public class CommandTask extends Task {
                     PlayerValueBoard board = group.getLobby().PlayerValueBoard();
                     double score = board.getValue(args[0],Target);
                     args[1] = args[1].replace("~",String.format("%.1f",score));
-                    score = Calculater.Calculate(args[1]);
+                    score = Calculator.Calculate(args[1]);
                     group.getLobby().PlayerValueBoard().Value(args[0], score,Target);
                 }else{
                     ValueBoard board = group.getLobby().ValueBoard();
                     double score = board.getValue(args[0]);
                     args[1] = args[1].replace("~",String.format("%.1f",score));
-                    score = Calculater.Calculate(args[1]);
+                    score = Calculator.Calculate(args[1]);
                     group.getLobby().ValueBoard().Value(args[0], score);
                 }
 
@@ -483,11 +497,8 @@ public class CommandTask extends Task {
     }
 
     private void Damage(Player player, double d) {
-        if (player.getHealth() > d) {
-            player.setHealth(player.getHealth() - d);
-        } else {
-            player.setHealth(0);
-        }
+        player.setNoDamageTicks(0);
+        player.damage(d,null);
     }
 
     private void Teleport(Player player, String location,World autoworld) {

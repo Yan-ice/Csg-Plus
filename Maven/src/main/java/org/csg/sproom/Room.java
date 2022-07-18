@@ -4,7 +4,6 @@ import com.grinderwolf.swm.api.SlimePlugin;
 import com.grinderwolf.swm.api.exceptions.*;
 import com.grinderwolf.swm.api.world.SlimeWorld;
 import com.grinderwolf.swm.api.world.properties.SlimeProperties;
-import com.grinderwolf.swm.api.world.properties.SlimeProperty;
 import com.grinderwolf.swm.api.world.properties.SlimePropertyMap;
 import org.bukkit.*;
 import org.bukkit.command.CommandSender;

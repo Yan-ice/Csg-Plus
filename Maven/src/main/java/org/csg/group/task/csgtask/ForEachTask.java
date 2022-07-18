@@ -18,7 +18,7 @@ public class ForEachTask extends ChooseTask {
             this.checker = arg;
             switch (rest) {
                 case "@a":
-                    target_type = TargetType.All;
+                    target_type = TargetType.Group;
                     break;
                 case "@p":
                     target_type = TargetType.Striker;
@@ -27,7 +27,7 @@ public class ForEachTask extends ChooseTask {
                     target_type = TargetType.Random;
                     break;
                 case "@e":
-                    target_type = TargetType.Global;
+                    target_type = TargetType.Lobby;
                     break;
                 default:
                     target_type = TargetType.None;
@@ -48,7 +48,7 @@ public class ForEachTask extends ChooseTask {
 
             init = true;
             switch(target_type){
-                case All:
+                case Group:
                     for(UUID u : executer.group.getPlayerList()){
                         if(check(u,executer)){
                             players.add(u);
@@ -74,7 +74,7 @@ public class ForEachTask extends ChooseTask {
                     }
 
                     break;
-                case Global:
+                case Lobby:
                     for(UUID u : executer.group.getLobby().getPlayerList()){
                         if(check(u,executer)){
                             players.add(u);

@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-public class Variable {
+public class VariableBox {
 	Map<String,Object> values = new HashMap<>();
 
 	public void declare(String key,Object value){
@@ -18,7 +18,6 @@ public class Variable {
 		}else{
 			values.put(key, value);
 		}
-
 	}
 
 	public Object read(String key){
