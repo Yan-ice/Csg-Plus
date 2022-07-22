@@ -2,6 +2,7 @@ package org.csg.cmd;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.entity.Entity;
@@ -37,7 +38,8 @@ public class CsgCmd extends RootCmd{
                 new Unload(this),
                 new Join(this),
                 new Status(this),
-                new Trigger(this)
+                new Trigger(this),
+                new Seril(this)
         ));
     }
 
@@ -1072,6 +1074,61 @@ public class CsgCmd extends RootCmd{
             }
             if (para == 2) {
                 Bukkit.getOnlinePlayers().forEach(e -> args.add(e.getName()));
+            }
+            return args;
+        }
+    }
+    static class Seril extends Cmd{
+        Seril(RootCmd rootCmd) {
+            super(rootCmd);
+            branch = "Seril";
+            description = "制作独立副本";
+            playerPermission = "csg.Seril";
+            opPermission = "";
+            canPlayer = true;
+            canOp = true;
+            canConsole = true;
+            playerParas = Arrays.asList("游戏名 世界名");
+            opParas = playerParas;
+            consoleParas = playerParas;
+        }
+        @Override
+        public void player(Player player, String... args) {
+             player.sendMessage("您没有权限！");
+        }
+        @Override
+        public void op(Player player, String... args){
+            console(player,args);
+        }
+        @Override
+        public void console(CommandSender sender, String... args) {
+                if(args.length<2){
+                    sender.sendMessage("参数不足！");
+                    return;
+                }
+                Room.serilizeLobby(sender,args[0],args[1]);
+        }
+        @Override
+        public List<String> playerTab(int para, String[] paras, Player player){
+            List<String> args = new ArrayList<>();
+            if(para == 0) {
+                Lobby.getLobbyList().forEach(e -> args.add(e.getName()));
+            }
+            return args;
+        }
+        @Override
+        public List<String> opTab(int para, String[] paras, Player player){
+            List<String> args = new ArrayList<>();
+            if(para == 0) {
+                Lobby.getLobbyList().forEach(e -> args.add(e.getName()));
+            }
+            return args;
+        }
+        @Override
+        public List<String> consoleTab(int para,String[] paras) {
+            List<String> args = new ArrayList<>();
+            if(para == 0) {
+                Lobby.getLobbyList().forEach(e -> args.add(e.getName()));
             }
             return args;
         }
