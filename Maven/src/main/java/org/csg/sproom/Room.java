@@ -169,7 +169,7 @@ public class Room {
 		}
 
 		rooms.add(this);
-		joining = createReflect();
+
 		config_file = new File(lobby_model.getTempFolder(),"sproom_config.yml");
 		try {
 			if(!config_file.exists()){
@@ -183,6 +183,7 @@ public class Room {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		joining = createReflect();
 	}
 	public Room(Lobby model, File config_f){
 		if(plugin==null){
