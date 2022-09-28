@@ -353,9 +353,13 @@ public class CommandTask extends Task {
                 }
                 executer.endWhenClear=(args[0].equals("true"));
                 break;
-//            case "timer":
-//                group.getTimer().addCustomTimer(args[0].split(",")[0], Integer.parseInt(args[0].split(",")[1]));
-//                break;
+            case "endwhennotarget":
+                if(args.length==0){
+                    executer.endWhenNoTarget = true;
+                }else{
+                    executer.endWhenNoTarget = args[0].equals("true");
+                }
+                break;
             case "addhologram":
                 Location lo = Teleporter.stringToLoc(args[0]);
                 group.hd.AddHologram(lo, args[1], args[2]);

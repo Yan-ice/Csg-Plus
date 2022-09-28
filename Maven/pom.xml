@@ -6,7 +6,7 @@
 
     <groupId>csg</groupId>
     <artifactId>Csg-Plus</artifactId>
-    <version>1.7.3</version>
+    <version>1.7.5</version>
 
     <properties>
         <maven.compiler.source>8</maven.compiler.source>

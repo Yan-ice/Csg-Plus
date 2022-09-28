@@ -19,7 +19,7 @@ public class TaskExecuter implements CycleUpdate {
     public UUID striker;
 
     public boolean endWhenClear = false;
-
+    public boolean endWhenNoTarget = false;
     public VariableBox variables = new VariableBox();
 
     int cooldown = 0;
@@ -101,7 +101,7 @@ public class TaskExecuter implements CycleUpdate {
                     String[] acc = (String[])s.getValue();
                     origin = origin.replace(String.format("$%s$.length", s.getKey()),""+acc.length);
                     try{
-                        for(int a = 0;a<acc.length;a++){
+                        for(int a = acc.length-1;a>=0;a--){
                             String k = String.format("$%s$.%d", s.getKey(),a);
                             if(origin.contains(k)){
                                 String temp = temp_id();
@@ -174,10 +174,10 @@ public class TaskExecuter implements CycleUpdate {
     public boolean If(Player target, String If) throws NullPointerException,NumberFormatException,IndexOutOfBoundsException{
 
         if(If.contains("AND")){
-            return (If(target,If.split("AND")[0].trim()) & If(target,If.split("AND")[1].trim()));
+            return (If(target,If.split("AND",1)[0].trim()) & If(target,If.split("AND",1)[1].trim()));
         }
         if(If.contains("OR")){
-            return (If(target,If.split("OR")[0].trim()) | If(target,If.split("OR")[1].trim()));
+            return (If(target,If.split("OR",1)[0].trim()) | If(target,If.split("OR",1)[1].trim()));
         }
         if(If.contains(">=")){
             String[] s = If.split(">=");
@@ -283,6 +283,9 @@ public class TaskExecuter implements CycleUpdate {
     @Override
     public void onUpdate() {
         if(endWhenClear && group.isClear()){
+            next = null;
+        }
+        if(endWhenNoTarget && (striker==null || !group.hasPlayer(Bukkit.getPlayer(striker)) )){
             next = null;
         }
         if(cooldown>0){

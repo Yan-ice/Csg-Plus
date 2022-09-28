@@ -182,14 +182,6 @@ public class Fwmain extends JavaPlugin implements Listener {
 		root = new File("./");
 		LoadBukkitCore(root,false);
 
-//		if(Data.isPaper){
-//			File root = new File("./libraries");
-//			LoadBukkitCore(root,true);
-//		}else{
-//			File root = new File("./");
-//			LoadBukkitCore(root,false);
-//		}
-
 		Lobby.LoadAll(lobby);
 
 		getServer().getPluginManager().registerEvents(this, this);
@@ -271,16 +263,7 @@ public class Fwmain extends JavaPlugin implements Listener {
 					err.printStackTrace();
 				}
 			});
-			/*String[] cores = System.getProperty("java.class.path").split(";");
-			File parent = null;
-			for (String core : cores) {
-				File f = new File(core);
-				if (f.getParentFile() != null) {
-					parent = f.getParentFile();
-				}
-				f = new File(parent,f.getName());
 
-			}*/
 		}else{
 			for(File f : root.listFiles()){
 				if(f.isDirectory()){
