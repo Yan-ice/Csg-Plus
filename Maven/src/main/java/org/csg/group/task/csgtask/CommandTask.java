@@ -1,7 +1,5 @@
 package org.csg.group.task.csgtask;
 
-import customgo.PlayerValueBoard;
-import customgo.ValueBoard;
 import org.bukkit.Location;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -89,7 +87,7 @@ public class CommandTask extends Task {
         List<UUID> players = new ArrayList<>();
         switch(target_type){
             case Group:
-                players.addAll(executer.group.getPlayerList());
+                players.addAll(executer.getField());
                 break;
             case Striker:
                 if(striker!=null){
@@ -98,7 +96,7 @@ public class CommandTask extends Task {
 
                 break;
             case Random:
-                players.addAll(executer.group.getPlayerList());
+                players.addAll(executer.getField());
                 if(players.size()>0){
                     int size = players.size();
                     UUID p = players.get(Data.Random(0,size));
@@ -108,7 +106,7 @@ public class CommandTask extends Task {
 
                 break;
             case Lobby:
-                players.addAll(executer.group.getLobby().getPlayerList());
+                players.addAll(executer.lobby.getPlayerList());
                 break;
             case Server:
                 for(Player p : Bukkit.getOnlinePlayers()){
@@ -147,11 +145,11 @@ public class CommandTask extends Task {
         Object return_obj = null;
 
         String label = command;
-        Group group = executer.group;
+        List<UUID> playerList = executer.getField();
 
         executer.addVariable("player",Target);
-        String cloned_arg = executer.variableReplace(arg,Target);
-        String cloned_return = return_value!=null ? executer.variableReplace(return_value,Target):null;
+        String cloned_arg = executer.variableReplace(this.variables,arg,Target);
+        String cloned_return = return_value!=null ? executer.variableReplace(this.variables,return_value,Target):null;
 
         String[] args;
         if(cloned_arg.contains(",")){
@@ -166,9 +164,9 @@ public class CommandTask extends Task {
 
         }
         World autoworld = null;
-        if(group.getPlayerList().size()>0){
-            if(Bukkit.getPlayer(group.getPlayerList().get(0))!=null){
-                autoworld = Bukkit.getPlayer(group.getPlayerList().get(0)).getWorld();
+        if(playerList.size()>0){
+            if(Bukkit.getPlayer(playerList.get(0))!=null){
+                autoworld = Bukkit.getPlayer(playerList.get(0)).getWorld();
             }else{
                 Data.ConsoleInfo("游戏内出现了异常的玩家数据！");
             }
@@ -186,7 +184,7 @@ public class CommandTask extends Task {
                 if (args.length==0) {
                     return false;
                 }
-                CommandRunner(group, cloned_arg, Target);
+                CommandRunner(cloned_arg, Target);
                 break;
             case "consolecommand":
                 if (args.length==0) {
@@ -211,7 +209,7 @@ public class CommandTask extends Task {
                 if(l==null){
                     l = Target.getLocation();
                 }
-                group.getLobby().setSpawn(Target,l);
+                executer.lobby.setSpawn(Target,l);
                 break;
             case "say":
                 if (args.length==0 || Target==null) {
@@ -288,7 +286,7 @@ public class CommandTask extends Task {
                 break;
 
             case "notice":
-                for(Group g : group.getLobby().getGroupListI()){
+                for(Group g : executer.lobby.getGroupListI()){
                     g.sendNotice(args[0]);
                 }
                 break;
@@ -310,41 +308,41 @@ public class CommandTask extends Task {
 
                 break;
             case "macro":
-                group.getLobby().macros.AddMacro(args[0], args[1]);
+                executer.lobby.macros.AddMacro(args[0], args[1]);
                 break;
             case "setscore":
                 if(Target!=null){
-                    PlayerValueBoard board = group.getLobby().PlayerValueBoard();
-                    double score = board.getValue(args[0],Target);
-                    args[1] = args[1].replace("~",String.format("%.1f",score));
+                    Object score_obj = executer.lobby.macros.getValue(Target,args[0]);
+                    double score = 0;
+                    if(score_obj instanceof Double){
+                        score = (Double) score_obj;
+                    }
+                    args[1] = args[1].replace("~",String.format("%.5f",score));
                     score = Calculator.Calculate(args[1]);
-                    group.getLobby().PlayerValueBoard().Value(args[0], score,Target);
+                    executer.lobby.macros.AddScore(Target, args[0], score);
                 }else{
-                    ValueBoard board = group.getLobby().ValueBoard();
-                    double score = board.getValue(args[0]);
-                    args[1] = args[1].replace("~",String.format("%.1f",score));
+                    Object score_obj = executer.lobby.macros.getValue(null,args[0]);
+                    double score = 0;
+                    if(score_obj instanceof Double){
+                        score = (Double) score_obj;
+                    }
+                    args[1] = args[1].replace("~",String.format("%.5f",score));
                     score = Calculator.Calculate(args[1]);
-                    group.getLobby().ValueBoard().Value(args[0], score);
+                    executer.lobby.macros.AddMacro(args[0], score);
                 }
 
                 break;
             case "getscore":
-                if(Target!=null){
-                    PlayerValueBoard board = group.getLobby().PlayerValueBoard();
-                    return_obj = board.getValue(args[0],Target);
-                }else{
-                    ValueBoard board = group.getLobby().ValueBoard();
-                    return_obj = board.getValue(args[0]);
-                }
+                return_obj = executer.lobby.macros.getValue(Target,args[0]);
                 break;
             case "log":
-                Data.ConsoleInfo("[log]"+group.getLobby().getName()+" - "+args[0]);
+                Data.ConsoleInfo("[log "+executer.lobby.getName()+"] "+args[0]);
                 break;
             case "end":
                 next = null;
                 break;
             case "join":
-                group.getLobby().ChangeGroup(Target, args[0]);
+                executer.lobby.ChangeGroup(Target, args[0]);
                 return true;
             case "endwhenclear":
                 if(args.length==0){
@@ -362,16 +360,16 @@ public class CommandTask extends Task {
                 break;
             case "addhologram":
                 Location lo = Teleporter.stringToLoc(args[0]);
-                group.hd.AddHologram(lo, args[1], args[2]);
+                executer.lobby.hd.AddHologram(lo, args[1], args[2]);
                 break;
             case "delhologram":
-                group.hd.DelHologram(args[0]);
+                executer.lobby.hd.DelHologram(args[0]);
                 break;
             case "edithologram":
-                group.hd.EditHologram(args[0], args[1]);
+                executer.lobby.hd.EditHologram(args[0], args[1]);
                 break;
             case "clearhologram":
-                group.hd.ClearHologram();
+                executer.lobby.hd.ClearHologram();
                 break;
             case "spawnmob":
                 String[] v = args[2].split(" ");
@@ -443,7 +441,7 @@ public class CommandTask extends Task {
                     if(arena.getWorld()!=null){
                         e = arena.getWorld().getLivingEntities();
                     }else{
-                        e = Bukkit.getPlayer(group.getPlayerList().get(0)).getWorld().getLivingEntities();
+                        e = Bukkit.getPlayer(playerList.get(0)).getWorld().getLivingEntities();
                     }
                     for(LivingEntity en : e){
                         if(!(en instanceof HumanEntity)
@@ -457,13 +455,13 @@ public class CommandTask extends Task {
                 break;
             default:
                 if(label.startsWith("on")){
-                    group.getLobby().callListener(label,group,Target,args);
+                    executer.lobby.callListener(label,Target,args);
                 }
                 String[] replaced = new String[args.length];
                 for(int a=0; a<args.length; a++) {
-                    replaced[a] = executer.variableReplace(args[a],Target);
+                    replaced[a] = executer.variableReplace(variables,args[a],Target);
                 }
-                return_obj = group.getLobby().callFunction(label,executer,Target,replaced);
+                return_obj = executer.lobby.callFunction(label,executer,Target,replaced);
         }
         if(cloned_return!=null){
             if(return_obj!=null){
@@ -476,7 +474,7 @@ public class CommandTask extends Task {
     }
 
 
-    private void CommandRunner(Group group, String command, Player Target) {
+    private void CommandRunner(String command, Player Target) {
 
         if (Target != null) {
             if (Target.isOp()) {

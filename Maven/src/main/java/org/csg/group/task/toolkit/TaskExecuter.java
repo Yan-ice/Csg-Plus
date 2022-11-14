@@ -2,6 +2,8 @@ package org.csg.group.task.toolkit;
 
 import org.csg.Data;
 import org.csg.group.Group;
+import org.csg.group.Lobby;
+import org.csg.group.task.VarTable;
 import org.csg.group.task.csgtask.Task;
 import org.csg.location.Teleporter;
 import org.csg.update.CycleUpdate;
@@ -12,12 +14,13 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
 public class TaskExecuter implements CycleUpdate {
-    public Group group;
     public UUID striker;
-
+    public Lobby lobby;
     public boolean endWhenClear = false;
     public boolean endWhenNoTarget = false;
     public VariableBox variables = new VariableBox();
@@ -25,84 +28,91 @@ public class TaskExecuter implements CycleUpdate {
     int cooldown = 0;
     public Task begin;
     Task next;
-    public TaskExecuter(Task begin, Group group){
+    public TaskExecuter(Task begin, Lobby lobby){
         this.begin = begin;
-        this.group = group;
+        this.lobby = lobby;
     }
 
+    public List<UUID> getField(){
+        if(!begin.field.contains(",")){
+            return lobby.getPlayerList();
+        }
+        List<UUID> l = new ArrayList<>();
+        for(String s : begin.field.split(",,")){
+            Group g = lobby.getGroup(s);
+            if(g!=null){
+                l.addAll(g.getPlayerList());
+            }
+        }
+        return l;
+    }
     int identity = 0;
     private String temp_id(){
         identity++;
         return "temp_"+identity;
     }
-    public String variableReplace(String origin,Player target){
-        int identity = 0;
-        Map<String,Object> temp_object = new HashMap<String,Object>();
-        try{
-            temp_object.putAll(variables.values);
-            temp_object.putAll(group.getLobby().macros.macros);
-            temp_object.putAll(group.getLobby().ValueBoard().getValueList());
-            if(target!=null){
-                Map<String,Double> p = group.getLobby().PlayerValueBoard().getValueList(target);
-                if(p!=null){
-                    temp_object.putAll(p);
-                }
+    public String variableReplace(List<String> keys, String origin,Player target){
+        List<String> copy = new ArrayList<>(keys);
+        for(int a = 0;a<copy.size();a++){
+            String ori = String.format("{%s}",copy.get(a));
+            String tar = VarTable.objToString(lobby.macros.getValue(target,copy.get(a)));
+            origin = origin.replace(ori,tar);
+            for(int b = 0;b<copy.size();b++){
+                copy.set(b,copy.get(b).replace(ori,tar));
             }
-        }catch(Exception e){
-            Data.ConsoleInfo("变量出现名字冲突！ ");
-            e.printStackTrace();
+
         }
+
         origin = Data.ColorChange(origin);
         String origin_old = "";
         while(!origin.equals(origin_old)){
             origin_old = origin;
+            Pattern pt = Pattern.compile("\\$[A-Za-z0-9]+\\$");
+            Matcher mch = pt.matcher(origin);
+
             Map<String,Object> to = new HashMap<String,Object>();
-            for(Map.Entry<String,Object> s : temp_object.entrySet()){
-                if(!origin.contains(String.format("$%s$", s.getKey()))){
-                    continue;
-                }
-                if(origin.contains(String.format("$%s$.$", s.getKey()))){
-                    to.put(s.getKey(),s.getValue());
-                    continue;
-                }
-                if(s.getValue() instanceof LivingEntity){
-                    LivingEntity en = (LivingEntity)s.getValue();
+            while(mch.find()){
+                String s = mch.group();
+                Object value = lobby.macros.getValue(target,s);
 
-                    origin = origin.replace(String.format("$%s$.health", s.getKey()), "" + en.getHealth());
-                    origin = origin.replace(String.format("$%s$.max_health", s.getKey()), "" + en.getMaxHealth());
-                    origin = origin.replace(String.format("$%s$.name", s.getKey()), en.getName());
+                if(value instanceof LivingEntity){
+                    LivingEntity en = (LivingEntity)value;
 
-                    if(origin.contains(String.format("$%s$.location", s.getKey()))){
+                    origin = origin.replace(String.format("$%s$.health", s), "" + en.getHealth());
+                    origin = origin.replace(String.format("$%s$.max_health", s), "" + en.getMaxHealth());
+                    origin = origin.replace(String.format("$%s$.name", s), en.getName());
+
+                    if(origin.contains(String.format("$%s$.location", s))){
                         String temp = temp_id();
-                        origin = origin.replace(String.format("$%s$.location", s.getKey()),String.format("$%s$",temp));
+                        origin = origin.replace(String.format("$%s$.location", s),String.format("$%s$",temp));
                         to.put(temp,en.getLocation());
                     }
 
-                    if(s.getValue() instanceof Player){
-                        Player pl = (Player)s.getValue();
-                        origin = origin.replace(String.format("$%s$.level", s.getKey()), "" + pl.getLevel());
-                        origin = origin.replace(String.format("$%s$.food", s.getKey()), "" + pl.getFoodLevel());
-                        origin = origin.replace(String.format("$%s$.speed", s.getKey()), "" + pl.getWalkSpeed());
-                        origin = origin.replace(String.format("$%s$.display", s.getKey()), pl.getDisplayName());
+                    if(value instanceof Player){
+                        Player pl = (Player)value;
+                        origin = origin.replace(String.format("$%s$.level", s), "" + pl.getLevel());
+                        origin = origin.replace(String.format("$%s$.food", s), "" + pl.getFoodLevel());
+                        origin = origin.replace(String.format("$%s$.speed", s), "" + pl.getWalkSpeed());
+                        origin = origin.replace(String.format("$%s$.display", s), pl.getDisplayName());
                     }
-                    origin = origin.replace(String.format("$%s$", s.getKey()), en.getName());
+                    origin = origin.replace(String.format("$%s$", s), en.getName());
                     continue;
                 }
-                if(s.getValue() instanceof Location){
-                    Location loc = (Location)s.getValue();
-                    origin = origin.replace(String.format("$%s$.x", s.getKey()), "" + loc.getX());
-                    origin = origin.replace(String.format("$%s$.y", s.getKey()), "" + loc.getY());
-                    origin = origin.replace(String.format("$%s$.z", s.getKey()), "" + loc.getZ());
-                    origin = origin.replace(String.format("$%s$.world", s.getKey()), "" + loc.getWorld().getName());
-                    origin = origin.replace(String.format("$%s$", s.getKey()), Teleporter.locToString(loc));
+                if(value instanceof Location){
+                    Location loc = (Location)value;
+                    origin = origin.replace(String.format("$%s$.x", s), "" + loc.getX());
+                    origin = origin.replace(String.format("$%s$.y", s), "" + loc.getY());
+                    origin = origin.replace(String.format("$%s$.z", s), "" + loc.getZ());
+                    origin = origin.replace(String.format("$%s$.world", s), "" + loc.getWorld().getName());
+                    origin = origin.replace(String.format("$%s$", s), Teleporter.locToString(loc));
                     continue;
                 }
-                if(s.getValue() instanceof String[]){
-                    String[] acc = (String[])s.getValue();
-                    origin = origin.replace(String.format("$%s$.length", s.getKey()),""+acc.length);
+                if(value instanceof String[]){
+                    String[] acc = (String[])value;
+                    origin = origin.replace(String.format("$%s$.length", s),""+acc.length);
                     try{
                         for(int a = acc.length-1;a>=0;a--){
-                            String k = String.format("$%s$.%d", s.getKey(),a);
+                            String k = String.format("$%s$.%d", s,a);
                             if(origin.contains(k)){
                                 String temp = temp_id();
                                 to.put(temp,acc[a]);
@@ -111,60 +121,34 @@ public class TaskExecuter implements CycleUpdate {
 
                         }
                     }catch (ArrayIndexOutOfBoundsException e){
-                        Data.ConsoleInfo(String.format("解析变量 %s 时出现了数组越界！",String.format("$%s$", s.getKey())));
+                        Data.ConsoleInfo(String.format("解析变量 %s 时出现了数组越界！",String.format("$%s$", s)));
                     }
-                    String k = String.format("$%s$.random", s.getKey());
+                    String k = String.format("$%s$.random", s);
                     if(origin.contains(k)){
                         String rd = acc[Data.Random(0,acc.length)];
                         origin = origin.replace(k,rd);
                     }
-                    origin = origin.replace(String.format("$%s$", s.getKey()),Arrays.toString(acc));
+                    origin = origin.replace(String.format("$%s$", s),Arrays.toString(acc));
                     continue;
                 }
-                if(s.getValue() instanceof Double){
-                    double d = (Double)s.getValue();
+                if(value instanceof Double){
+                    double d = (Double)value;
                     String v;
                     if(d % 1 ==0){
                         v = String.valueOf((int)d);
                     }else{
                         v = String.format("%.1f",d);
                     }
-                    origin = origin.replace(String.format("$%s$", s.getKey()),v);
+                    origin = origin.replace(String.format("$%s$", s),v);
                     continue;
                 }
                 if(true){
-                    String str = s.getValue().toString();
-
-                    if(origin.contains(String.format("$%s$.", s.getKey()))){
-                        Player p = Bukkit.getPlayer(str);
-                        if(p!=null){
-                            to.put(s.getKey(),p);
-                            continue;
-                        }
-
-                        Location l = Teleporter.stringToLoc(str);
-                        if(l!=null){
-                            to.put(s.getKey(),l);
-                            continue;
-                        }
-
-                        if(str.startsWith("[") && str.endsWith("]")){
-                            String c = str.substring(1,str.length()-1);
-                            String[] ls;
-                            if(c.contains(",")){
-                                ls = c.split(",");
-                            }else{
-                                ls = new String[]{c};
-                            }
-                            to.put(s.getKey(),ls);
-                            continue;
-                        }
-                    }
-                    origin = origin.replace(String.format("$%s$", s.getKey()),str);
+                    String str = value.toString();
+                    //TODO 字符串自动识别为坐标和数组
+                    origin = origin.replace(String.format("$%s$", s),str);
 
                 }
             }
-            temp_object.putAll(to);
             to.clear();
         }
 
@@ -221,12 +205,6 @@ public class TaskExecuter implements CycleUpdate {
                     }else{
                         return true;
                     }
-                case "InGroup":
-                    if(group.hasPlayer(target)){
-                        return false;
-                    }else{
-                        return true;
-                    }
                 default:
                     if(If.split("!=")[0].trim().equals(If.split("!=")[1].trim())){
                         return false;
@@ -241,8 +219,6 @@ public class TaskExecuter implements CycleUpdate {
             switch(If.split("==")[0].trim()){
                 case "Permission":
                     return target.hasPermission(value);
-                case "InGroup":
-                    return group.hasPlayer(target);
                 default:
                     return If.split("==")[0].trim().equals(If.split("==")[1].trim());
             }
@@ -258,8 +234,6 @@ public class TaskExecuter implements CycleUpdate {
     }
 
     public void execute(UUID striker){
-        variables.declare("group_name",group.getName());
-        variables.declare("group_display",group.GetDisplay());
         if(Bukkit.getPlayer(striker)!=null){
             variables.declare("striker",Bukkit.getPlayer(striker));
         }
@@ -272,8 +246,8 @@ public class TaskExecuter implements CycleUpdate {
     }
 
     private void updateVar(){
-        variables.declare("group_player_amount",group.getPlayerList().size());
-        variables.declare("lobby_player_amount",group.getLobby().getPlayerList().size());
+        //variables.declare("group_player_amount",group.getPlayerList().size());
+        //variables.declare("lobby_player_amount",group.getLobby().getPlayerList().size());
     }
 
     public void setCooldown(int tick){
@@ -282,10 +256,10 @@ public class TaskExecuter implements CycleUpdate {
 
     @Override
     public void onUpdate() {
-        if(endWhenClear && group.isClear()){
+        if(endWhenClear && getField().size()==0){
             next = null;
         }
-        if(endWhenNoTarget && (striker==null || !group.hasPlayer(Bukkit.getPlayer(striker)) )){
+        if(endWhenNoTarget && (striker==null || !lobby.hasPlayer(Bukkit.getPlayer(striker)) )){
             next = null;
         }
         if(cooldown>0){

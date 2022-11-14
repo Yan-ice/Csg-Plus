@@ -1,6 +1,9 @@
 package org.csg.group.task.csgtask;
 
 import org.csg.group.task.toolkit.TaskExecuter;
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 
@@ -10,6 +13,7 @@ enum TargetType{
 
 public abstract class Task {
     public Task next = null;
+    public String field = "";
     /**
      * 执行此命令并返回下一条命令。
      * @return
@@ -18,6 +22,10 @@ public abstract class Task {
 
     public void set_next(Task task){
         next = task;
+        if(next!=null){
+            next.field = field;
+        }
+
     }
 
     public void destroy(){
@@ -25,5 +33,10 @@ public abstract class Task {
             next.destroy();
         }
         next = null;
+    }
+
+    List<String> variables = new ArrayList<>();
+    public void addVarKey(String key){
+        variables.add(key);
     }
 }

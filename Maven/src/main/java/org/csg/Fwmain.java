@@ -9,6 +9,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -16,7 +17,9 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -337,6 +340,25 @@ public class Fwmain extends JavaPlugin implements Listener {
 
 			}
 		}
+	}
+
+	@EventHandler
+	private void LListen(PlayerQuitEvent evt){
+		Lobby.AutoLeave(evt.getPlayer(),false);
+		Data.ConsoleInfo("玩家"+evt.getPlayer()+"因离开游戏而离开队列。");
+	}
+
+	@EventHandler
+	private void LListen(EntityDamageEvent evt){
+		if(evt.getEntity() instanceof ArmorStand){
+			for(Lobby l : Lobby.getLobbyList()){
+				if(l.hd.Holograms().containsValue((ArmorStand) evt.getEntity())){
+					evt.setCancelled(true);
+				}
+			}
+
+		}
+
 	}
 
 	@EventHandler

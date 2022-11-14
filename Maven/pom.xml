@@ -49,8 +49,13 @@
             <version>15.4</version>
             <scope>system</scope>
             <systemPath>${project.basedir}/libs/nashorn.jar</systemPath>
-
         </dependency>
+        <dependency>
+            <groupId>org.javassist</groupId>
+            <artifactId>javassist</artifactId>
+            <version>3.28.0-GA</version>
+        </dependency>
+
         <!-- ant.jar 用于解决文件解压缩乱码问题 -->
         <dependency>
             <groupId>ant</groupId>
@@ -69,11 +74,6 @@
             <artifactId>lombok</artifactId>
             <version>1.18.24</version>
             <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.javassist</groupId>
-            <artifactId>javassist</artifactId>
-            <version>3.28.0-GA</version>
         </dependency>
     </dependencies>
     <build>

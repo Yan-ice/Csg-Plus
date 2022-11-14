@@ -20,7 +20,7 @@ public class IfTask extends ChooseTask {
     public Task execute(TaskExecuter executer, UUID striker) {
 
         //if(If(executer.group, Bukkit.getPlayer(striker), checker, Bukkit.getPlayer(striker))){
-        if(executer.If(Bukkit.getPlayer(striker), executer.variableReplace(checker, Bukkit.getPlayer(striker)))){
+        if(executer.If(Bukkit.getPlayer(striker), executer.variableReplace(variables, checker, Bukkit.getPlayer(striker)))){
             return next_yes;
         }else{
             return next;

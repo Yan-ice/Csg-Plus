@@ -28,15 +28,21 @@ public class TaskCompiler {
         func.addAll(listeners);
         listeners.clear();
     }
-
+        String fileName;
+        int line_counter = 0;
         int tab_counter = 0;
         int space_counter = 0;
         boolean line_begin = true;
         String field = "";
-        Set<String> target = new HashSet<>();
+
         Task begin = new NothingTask();
+
+        //用于编译变量
+        Stack<Integer> v_stack = new Stack<>();
+        Set<String> vkey = new HashSet<>();
+
         public Task compile(Lobby lb, File f) {
-            field = f.getName().split("\\.")[0];
+            fileName = f.getName();
             Data.ConsoleInfo("正在加载CustomGo脚本 "+f.getName());
             String path = f.getPath();
             last_one = begin;
@@ -51,6 +57,7 @@ public class TaskCompiler {
                 boolean pass = true;
                 String s = r.readLine();
                 while(r.ready()){
+                    line_counter++;
                     if(s.contains("###")){
                         break;
                     }
@@ -58,15 +65,15 @@ public class TaskCompiler {
                         s = r.readLine();
                         continue;
                     }
-                    String[] cm = s.split(" ");
+                    String[] cm = s.split(" ",2);
                     switch(cm[0]){
                         case "macro":
-                            if(!lb.requireMacro(cm[1],cm.length>2?cm[2]:null)){
+                            if(!lb.requireMacro(cm[1])){
                                 pass = false;
                             }
                             break;
                         case "restrict":
-                            target.add(cm[1]);
+                            field = field.concat(cm[1]+",,");
                             break;
                         case "depend":
                             if(!Data.fmain.getServer().getPluginManager().isPluginEnabled(cm[1])){
@@ -107,6 +114,10 @@ public class TaskCompiler {
                             fxg = true;
                             break;
                         case '\n':
+                            if(!v_stack.empty()){
+                                Data.ConsoleError("csg脚本"+fileName+" 第"+this.line_counter+"行变量大括号不匹配(缺少})！");
+                                v_stack.clear();
+                            }
                             if(annotation){
                                 annotation = false;
                             }else{
@@ -116,6 +127,7 @@ public class TaskCompiler {
                             parts = new String[]{null,null,null,null};
                             bu = "";
                             index = 0;
+                            line_counter++;
                             tab_counter = 0;
                             line_begin = true;
                             break;
@@ -146,6 +158,28 @@ public class TaskCompiler {
                             bu = "";
                             index++;
                             break;
+
+                        //变量分析
+                        case '{':
+                            bu = bu.concat(String.valueOf(c));
+                            v_stack.push(bu.length());
+                            line_begin = false;
+                            space_counter=0;
+                            break;
+                        case '}':
+                            if(!v_stack.empty()){
+                                int ind = v_stack.pop();
+                                String vkey = bu.substring(ind);
+                                this.vkey.add(vkey);
+                                bu = bu.concat(String.valueOf(c));
+                            }else{
+                                Data.ConsoleError("csg脚本"+fileName+" 第"+this.line_counter+"行变量大括号不匹配(缺少{)！");
+                            }
+
+                            line_begin = false;
+                            space_counter=0;
+                            break;
+
                         default:
                             line_begin = false;
                             space_counter=0;
@@ -191,17 +225,21 @@ public class TaskCompiler {
                 }else if(label.startsWith("foreach")){
                     task = new ForEachTask(arg,rest);
                 }else if(label.startsWith("function")){
-                    task = new FunctionTask(label,arg);
+                    task = new FunctionTask(label,arg,field);
                     functions.add((FunctionTask)task);
                 }else if(label.startsWith("listener")){
-                    task = new ListenerTask(label,arg,field,target);
+                    task = new ListenerTask(label,arg,field);
                     listeners.add((ListenerTask)task);
                 }else{
                     task = new CommandTask(label,arg,rest);
                     //task = new TestTask(label+" "+arg);
                 }
+                for(String s : vkey){
+                    task.addVarKey(s);
+                }
+
             }catch(TaskSyntaxError e){
-                Data.ConsoleInfo("无法解析任务 "+label+" ：出现语法错误！");
+                Data.ConsoleInfo("csg脚本"+fileName+" 第"+this.line_counter+"行 出现语法错误！");
                 return;
             }
 

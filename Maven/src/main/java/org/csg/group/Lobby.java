@@ -12,7 +12,9 @@ import customgo.event.ListenerCalledEvent;
 import customgo.event.PlayerJoinLobbyEvent;
 import customgo.event.PlayerLeaveLobbyEvent;
 import org.bukkit.configuration.file.FileConfiguration;
-import org.csg.group.task.Macro;
+import org.csg.group.hologram.FwHologram;
+import org.csg.group.task.VarTable;
+import customgo.CsgTaskListener;
 import org.csg.group.task.csgtask.FunctionTask;
 import org.csg.group.task.csgtask.ListenerTask;
 import org.bukkit.entity.*;
@@ -22,8 +24,6 @@ import org.csg.Data;
 import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.csg.group.task.toolkit.*;
-import org.csg.group.task.value.PlayerValueBoard;
-import org.csg.group.task.value.ValueBoard;
 import org.csg.sproom.Room;
 import org.csg.update.CycleUpdate;
 import org.csg.update.MainCycle;
@@ -36,6 +36,7 @@ public class Lobby implements customgo.Lobby, CycleUpdate {
 		return LobbyList;
 	}
 
+	public FwHologram hd = new FwHologram();
 	Map<UUID,Location> spawnpoint = new HashMap<>();
 	public void setSpawn(Player p,Location loc){
 		if(loc==null||p==null){
@@ -50,6 +51,7 @@ public class Lobby implements customgo.Lobby, CycleUpdate {
 			spawnpoint.put(p.getUniqueId(),loc);
 		}
 	}
+	public boolean open = true;
 
 	public Location getSpawn(Player p){
 		if(p==null || !hasPlayer(p)){
@@ -58,7 +60,23 @@ public class Lobby implements customgo.Lobby, CycleUpdate {
 		return spawnpoint.get(p.getUniqueId());
 	}
 
-	public boolean requireMacro(String s,String annotation){
+	public void setCanJoin(boolean open){
+		this.open = open;
+	}
+
+	public boolean requireMacro(String line){
+		String[] ano = line.split("#");
+		String annotation = ano[1];
+		String s;
+		String default_value;
+		if(ano[0].contains(" ")){
+			s = ano[0].split(" ",2)[0];
+			default_value = ano[0].split(" ",2)[1];
+		}else{
+			s = ano[0];
+			default_value = "'null'";
+		}
+
 		int state = macros.HasMacro(s);
 		if(state!=2){
 			Data.ConsoleError("该大厅并未满足脚本需求的宏"+s+"！");
@@ -71,7 +89,7 @@ public class Lobby implements customgo.Lobby, CycleUpdate {
 					//true不覆盖已有内容
 					fos = new FileOutputStream(default_macro_file.getPath(), true);
 					//写入
-					fos.write(String.format("\n%s: 'null'",s).getBytes(StandardCharsets.UTF_8));
+					fos.write(String.format("\n%s: %s",s,default_value).getBytes(StandardCharsets.UTF_8));
 					if(annotation!=null){
 						fos.write(String.format("\n%s\n",annotation).getBytes(StandardCharsets.UTF_8));
 					}
@@ -94,7 +112,7 @@ public class Lobby implements customgo.Lobby, CycleUpdate {
 		}
 		return state==2;
 	}
-	public Macro macros = new Macro();
+	public VarTable macros = new VarTable();
 	File default_macro_file;
 
 	private Set<FunctionTask> functions = new HashSet<>();
@@ -112,9 +130,6 @@ public class Lobby implements customgo.Lobby, CycleUpdate {
 	String Name;
 
 	private boolean isSproom_control = false;
-	private ValueBoard Board = new ValueBoard();
-	private ValueBoard dataBoard = new ValueBoard();
-	private PlayerValueBoard PlayerBoard = new PlayerValueBoard();
 
 	public boolean isSpRoom(){
 		return isSproom_control;
@@ -124,18 +139,6 @@ public class Lobby implements customgo.Lobby, CycleUpdate {
 	}
 	public File getFolder(){
 		return Folder;
-	}
-
-	public ValueBoard DataBoard(){
-		return dataBoard;
-	}
-
-	public customgo.ValueBoard ValueBoard(){
-		return Board;
-	}
-
-	public customgo.PlayerValueBoard PlayerValueBoard(){
-		return PlayerBoard;
 	}
 
 	public List<UUID> getPlayerList(){
@@ -158,35 +161,31 @@ public class Lobby implements customgo.Lobby, CycleUpdate {
 		return false;
 	}
 	public Object callFunction(String name, Player p, Object... para){
-		for(Group gro : grouplist){
-			if(gro.hasPlayer(p)){
-				for(FunctionTask task : functions){
-					if(task.getName().equals(name)){
-						gro.runTask(task,p.getUniqueId(),para);
+		for(FunctionTask task : functions){
+			if(task.getName().equals(name)){
+				runTask(task,p,para);
+			}
+		}
+		if (jsTaskCompiler != null) {
+			jsTaskCompiler._setMember(this,null,p,p);
+			if (name.startsWith("js"))
+				return jsTaskCompiler.callFunction(name.substring(2),para);
+		}
+		if(javaFunctionClass !=null){
+			try{
+				for(Method meth : javaFunctionClass.getMethods()) {
+					if (meth.getName().equals("_setMember")) {
+						meth.invoke(javaTaskInstance, p, p);
 					}
 				}
-				if (jsTaskCompiler != null) {
-					jsTaskCompiler._setMember(this,gro,p,p);
-					if (name.startsWith("js"))
-						return jsTaskCompiler.callFunction(name.substring(2),para);
-				}
-				if(javaFunctionClass !=null){
-					try{
-						for(Method meth : javaFunctionClass.getMethods()){
-							if(meth.getName().equals("_setMember")){
-								meth.invoke(javaTaskInstance,this,gro,p,p);
-							}
-						}
-						for(Method meth : javaFunctionClass.getMethods()){
-							if(meth.getName().equals(name)){
-								return meth.invoke(javaTaskInstance,para);
-							}
-						}
-					}catch(IllegalAccessException | InvocationTargetException e){
-						e.printStackTrace();
-						Data.ConsoleInfo("尝试调取java函数"+name+"失败！");
+				for(Method meth : javaFunctionClass.getMethods()){
+					if(meth.getName().equals(name)){
+						return meth.invoke(javaTaskInstance,para);
 					}
 				}
+			}catch(IllegalAccessException | InvocationTargetException e){
+				e.printStackTrace();
+				Data.ConsoleInfo("尝试调取java函数"+name+"失败！");
 			}
 		}
 		return null;
@@ -195,18 +194,18 @@ public class Lobby implements customgo.Lobby, CycleUpdate {
 	public Object callFunction(String name, TaskExecuter executer, Player p, Object... para){
 		for(FunctionTask task : functions){
 			if(task.getName().equals(name)){
-				executer.group.runTask(task,p!=null ? p.getUniqueId() : null,para);
+				executer.lobby.runTask(task,p, para);
 			}
 		}
 		if(jsTaskCompiler != null && name.toLowerCase().startsWith("js")) {
-			jsTaskCompiler._setMember(this,executer.group,executer.striker!=null ? Bukkit.getPlayer(executer.striker) : null,p);
+			jsTaskCompiler._setMember(this,null,executer.striker!=null ? Bukkit.getPlayer(executer.striker) : null,p);
 			return jsTaskCompiler.callFunction(name.substring(2),para);
 		}
 		if(javaFunctionClass !=null){
 			try{
 				for(Method meth : javaFunctionClass.getMethods()){
 					if(meth.getName().equals("_setMember")){
-						meth.invoke(javaTaskInstance,this,executer.group,executer.striker!=null ? Bukkit.getPlayer(executer.striker) : null,p);
+						meth.invoke(javaTaskInstance,this, executer.striker!=null ? Bukkit.getPlayer(executer.striker) : null,p);
 						break;
 					}
 				}
@@ -224,55 +223,43 @@ public class Lobby implements customgo.Lobby, CycleUpdate {
 
 		return null;
 	}
-	public void callListener(String name, customgo.Group g, Player p, Object... para){
-		for(Group gro : grouplist){
-			if(gro==g){
-				for(ListenerTask task : listener){
-					if(task.getName().equals(name)){
-						if(!task.checkTarget(gro) || !gro.hasScriptField(task.getField())){
-							continue;
-						}
-						ListenerCalledEvent call = new ListenerCalledEvent(name,this,p,para);
-						Data.fmain.getServer().getPluginManager().callEvent(call);
-						if(p!=null){
-							gro.runTask(task,p.getUniqueId(),para);
-						}else{
-							gro.runTask(task,null,para);
-						}
 
-					}
-				}
-			}
-		}
+	public void runTask(FunctionTask task, Player p, Object... para){
+		TaskExecuter executer = new TaskExecuter(task,this);
+		task.loadArgs(executer,para);
+
+		executer.execute(p!=null ? p.getUniqueId() : null);
 	}
 	public void callListener(String name, Player p, Object... para){
-		for(Group gro : grouplist){
-			if(gro.hasPlayer(p)){
-				for(ListenerTask task : listener){
-					if(task.getName().equals(name)){
-						if(!task.checkTarget(gro) || !gro.hasScriptField(task.getField())){
-							continue;
-						}
-						ListenerCalledEvent call = new ListenerCalledEvent(name,this,p,para);
-						Data.fmain.getServer().getPluginManager().callEvent(call);
-
-						gro.runTask(task,p.getUniqueId(),para);
-					}
-				}
-
-			}
-		}
-	}
-	public void callListener(String name, Object... para){
-		Group gro = getDefaultGroup();
 		for(ListenerTask task : listener){
 			if(task.getName().equals(name)){
-				if(!task.checkTarget(gro) || !gro.hasScriptField(task.getField())){
-					continue;
-				}
-				ListenerCalledEvent call = new ListenerCalledEvent(name,this,null,para);
+				ListenerCalledEvent call = new ListenerCalledEvent(name,this,p,para);
 				Data.fmain.getServer().getPluginManager().callEvent(call);
-				gro.runTask(task,null,para);
+
+				TaskExecuter executer = new TaskExecuter(task,this);
+				task.loadArgs(executer,para);
+				executer.execute(p!=null ? p.getUniqueId() : null);
+			}
+		}
+		if(javaFunctionClass !=null){
+			try{
+				for(Method meth : javaFunctionClass.getMethods()){
+					if(meth.getName().equals("_setMember")){
+						meth.invoke(javaTaskInstance,this, p, p);
+						break;
+					}
+				}
+				for(Method meth : javaFunctionClass.getMethods()){
+					if(meth.isAnnotationPresent(CsgTaskListener.class)){
+						CsgTaskListener ls = meth.getAnnotation(CsgTaskListener.class);
+						if(ls.name().equals(name)){
+							meth.invoke(javaTaskInstance,para);
+						}
+					}
+				}
+			}catch(IllegalAccessException | InvocationTargetException e){
+				e.printStackTrace();
+				Data.ConsoleInfo("尝试调取java监听器"+name+"失败！");
 			}
 		}
 	}
@@ -467,7 +454,7 @@ public class Lobby implements customgo.Lobby, CycleUpdate {
 		Data.fmain.getServer().getPluginManager().registerEvents(trigger,Data.fmain);
 		MainCycle.registerCall(trigger);
 		if(isComplete()){
-			callListener("onLobbyLoaded",getDefaultGroup(),null,new Object[0]);
+			callListener("onLobbyLoaded",null);
 
 			for(File f : tempFolder.listFiles()){
 				if(!sproom_control && f.getName().equals("sproom_config.yml")){
@@ -502,7 +489,7 @@ public class Lobby implements customgo.Lobby, CycleUpdate {
 			LobbyList.remove(this);
 		}
 
-		callListener("onLobbyUnloaded",null,null,new Object[0]);
+		callListener("onLobbyUnloaded",null);
 		HandlerList.unregisterAll(trigger);
 		MainCycle.unRegisterCall(trigger);
 		SecondCycle.unRegisterCall(this);
@@ -556,7 +543,9 @@ public class Lobby implements customgo.Lobby, CycleUpdate {
 		}
 		return a;
 	}
-
+	public String getVariable(Player p, String key){
+		return VarTable.objToString(macros.getValue(p,key));
+	}
 	public Group getGroup(String Name){
 		for(Group l : grouplist){
 			if(l.getName().equals(Name)){
@@ -571,9 +560,7 @@ public class Lobby implements customgo.Lobby, CycleUpdate {
 		for(UUID p : this.getPlayerList()){
 			this.Leave(Bukkit.getPlayer(p));
 		}
-		for(Group l : grouplist){
-			l.hd.ClearHologram();
-		}
+		hd.ClearHologram();
 	}
 
 	public static Lobby getLobby(String Name){
@@ -589,6 +576,13 @@ public class Lobby implements customgo.Lobby, CycleUpdate {
 	public void Join(Player player){
 		if(Default==null){
 			player.sendMessage(ChatColor.RED+"该游戏缺少主队列！");
+			return;
+		}
+		if(getPlayerAmount()==0){
+			open = true;
+		}
+		if(!open){
+			player.sendMessage(ChatColor.RED+"该游戏正在进行中，无法加入！");
 			return;
 		}
 		PlayerJoinLobbyEvent e = new PlayerJoinLobbyEvent(player,this);
@@ -666,7 +660,7 @@ public class Lobby implements customgo.Lobby, CycleUpdate {
 
 	@Override
 	public void onUpdate() {
-		callListener("onEverySecond",getDefaultGroup(),null,new Object[0]);
+		callListener("onEverySecond",null);
 	}
 //
 //	static List<LobbyListener> llist = new ArrayList<>();

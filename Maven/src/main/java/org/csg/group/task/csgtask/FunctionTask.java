@@ -8,8 +8,8 @@ import java.util.UUID;
 public class FunctionTask extends Task {
     String name;
     String[] args;
-    String field;
-    public FunctionTask(String lb,String arg) throws TaskSyntaxError {
+    public FunctionTask(String lb, String arg, String field) throws TaskSyntaxError {
+        this.field = field;
         try{
             name = lb.split(" ")[1].trim();
             //读取参数

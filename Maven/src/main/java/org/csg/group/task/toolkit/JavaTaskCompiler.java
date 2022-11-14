@@ -95,11 +95,11 @@ public class JavaTaskCompiler extends ClassLoader {
                 s = reader.readLine();
                 continue;
             }
-            String[] cm = s.split(" ");
+            String[] cm = s.split(" ",2);
 
             switch (cm[0]) {
                 case "macro":
-                    if (!lobby.requireMacro(cm[1], cm.length > 2 ? cm[2] : null)) {
+                    if (!lobby.requireMacro(cm[1])) {
                         pass = false;
                     }
                     break;
@@ -146,9 +146,9 @@ public class JavaTaskCompiler extends ClassLoader {
         out.append("public class Temp { \n" +
                 "JavaPlugin plugin;\n" +
                 " public void _setPlugin(JavaPlugin p){plugin = p;}\n" +
-                "Lobby lobby = null;Group group = null;Player striker = null;Player player = null;\n" +
-                "public void _setMember(Lobby lobby,Group gro,Player striker,Player player){\n" +
-                "this.group = gro; this.lobby=lobby;this.striker = striker;this.player = player;}\n");
+                "Lobby lobby = null;Player striker = null;Player player = null;\n" +
+                "public void _setMember(Lobby lobby, Player striker, Player player){\n" +
+                "this.lobby=lobby;this.striker = striker;this.player = player;}\n");
         out.append(codes);
         out.append("}");
 
@@ -178,7 +178,11 @@ public class JavaTaskCompiler extends ClassLoader {
         //Fwmain.getOptionDepends().forEach(depend -> builder.append(SplitCharUtils.getSplitChar(Fwmain.getOsName())).append(depend));
 
         if (c == null) {
-            Data.ConsoleInfo("当前环境为jre，无法使用javatask！如果需要使用，请安装jdk。");
+            Data.ConsoleInfo("注意！当前环境为jre，无法使用javatask！请安装jdk。");
+            Data.ConsoleInfo("注意！当前环境为jre，无法使用javatask！请安装jdk。");
+            Data.ConsoleInfo("注意！当前环境为jre，无法使用javatask！请安装jdk。");
+            Data.ConsoleInfo("注意！当前环境为jre，无法使用javatask！请安装jdk。");
+            Data.ConsoleInfo("注意！当前环境为jre，无法使用javatask！请安装jdk。");
             return null;
         }
 
@@ -210,7 +214,7 @@ public class JavaTaskCompiler extends ClassLoader {
                 }
             }
             if (temp != null) {
-                var byteArray = new ByteArrayOutputStream();
+                ByteArrayOutputStream byteArray = new ByteArrayOutputStream();
                 @Cleanup
                 FileInputStream input = new FileInputStream(temp.getPath());
                 int streamInt;

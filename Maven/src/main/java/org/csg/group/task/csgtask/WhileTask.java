@@ -18,7 +18,7 @@ public class WhileTask extends ChooseTask {
 
     @Override
     public Task execute(TaskExecuter executer, UUID striker){
-        if(executer.If(Bukkit.getPlayer(striker), executer.variableReplace(checker,Bukkit.getPlayer(striker)))){
+        if(executer.If(Bukkit.getPlayer(striker), executer.variableReplace(variables, checker,Bukkit.getPlayer(striker)))){
             return next_yes;
         }else{
             return next;

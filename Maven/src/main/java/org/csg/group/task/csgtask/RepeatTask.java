@@ -22,7 +22,7 @@ public class RepeatTask extends ChooseTask {
     @Override
     public Task execute(TaskExecuter executer, UUID striker) {
         if(time==-1){
-            String str = executer.variableReplace(checker, striker!=null? Bukkit.getPlayer(striker):null);
+            String str = executer.variableReplace(variables, checker, striker!=null? Bukkit.getPlayer(striker):null);
             time_set = Integer.parseInt(str);
             time = time_set;
         }

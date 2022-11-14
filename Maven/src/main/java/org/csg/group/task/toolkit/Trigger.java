@@ -34,7 +34,7 @@ public class Trigger implements Listener, CycleUpdate {
 		if(evt2.getMessage().startsWith("/")){
 			return;
 		}
-		lobby.callListener("onPlayerChat",evt2.getPlayer(),new String[]{evt2.getMessage()});
+		lobby.callListener("onPlayerChat",evt2.getPlayer(),evt2.getMessage());
 	}
 	@EventHandler(priority= EventPriority.HIGHEST)
 	protected void Listen(PlayerRespawnEvent evt2) {
@@ -42,7 +42,7 @@ public class Trigger implements Listener, CycleUpdate {
 		if(l!=null){
 			evt2.setRespawnLocation(l);
 		}
-		lobby.callListener("onPlayerRespawn",evt2.getPlayer(),new Object[0]);
+		lobby.callListener("onPlayerRespawn",evt2.getPlayer());
 
 	}
 
@@ -67,7 +67,7 @@ public class Trigger implements Listener, CycleUpdate {
 
 	@EventHandler(priority= EventPriority.HIGHEST)
 	protected void pdeath(PlayerDeathEvent evt){
-		lobby.callListener("onPlayerDeath",evt.getEntity(),new Object[0]);
+		lobby.callListener("onPlayerDeath",evt.getEntity());
 
 		Player killer = evt.getEntity().getKiller();
 		if(killer!=null){
@@ -116,11 +116,11 @@ public class Trigger implements Listener, CycleUpdate {
 			if(!cooldown.contains(en_name)){
 				if(clear){
 					cooldown.add(en_name);
-					lobby.callListener("onKillAllEntity", Group.SearchPlayerInGroup(killer),null,new Object[]{en_name});
+					lobby.callListener("onKillAllEntity", killer,en_name);
 				}
 				if(total_clear){
 					cooldown.add(en_name);
-					lobby.callListener("onKillAllEntity",Group.SearchPlayerInGroup(killer),null,new Object[]{"all"});
+					lobby.callListener("onKillAllEntity",killer,"all");
 				}
 			}
 
@@ -137,7 +137,7 @@ public class Trigger implements Listener, CycleUpdate {
 			}
 			cooldown.add(striker.getName());
 			LivingEntity striked = (LivingEntity) evt.getRightClicked();
-			lobby.callListener("onInteract",striker,new Object[]{striked});
+			lobby.callListener("onInteract",striker,striked);
 		}
 	}
 
@@ -174,7 +174,7 @@ public class Trigger implements Listener, CycleUpdate {
 	@EventHandler
 	void Listen(PlayerToggleSneakEvent evt2) {
 		if(!evt2.getPlayer().isSneaking()){
-			lobby.callListener("onPlayerSneak",evt2.getPlayer(),new Object[0]);
+			lobby.callListener("onPlayerSneak",evt2.getPlayer());
 		}
 	}
 

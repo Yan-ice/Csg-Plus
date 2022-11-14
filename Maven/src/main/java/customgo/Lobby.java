@@ -31,27 +31,19 @@ public interface Lobby {
     public Object callFunction(String name, Player p, Object... para);
 
     /**
-     * 触发脚本中的指定名字的listener，触发的队列与玩家均自己指定。
-     * @param name listener名字
-     * @param g 所在队伍
-     * @param p 触发者（可为null）
-     * @param para 参数，如果参数列表不对应会报错。
+     * 设置大厅是否允许加入。
+     * 在大厅内没人时，自动切换为允许加入。
+     * @param canJoin 是否允许加入
      */
-    public void callListener(String name, Group g, Player p, Object... para);
+    public void setCanJoin(boolean canJoin);
 
     /**
      * 触发脚本中的指定名字的listener。由玩家所在队列触发。
      * @param name listener名字
-     * @param p 触发者，不可为null且必须在lobby中。
+     * @param p 触发者，不为null则必须在lobby中。
      * @param para 参数，如果参数列表不对应会报错。
      */
     public void callListener(String name, Player p, Object... para);
-
-    /**
-     * 触发脚本中的指定名字的listener。由默认队列触发，且无触发玩家。
-     * @param para 参数，如果参数列表不对应会报错。
-     */
-    public void callListener(String name, Object... para);
 
 
     /**
@@ -88,22 +80,19 @@ public interface Lobby {
     public int getPlayerAmount();
 
     /**
+     * 获取大厅内的变量，可以是玩家分数，宏，或局部变量。
+     * @param p 玩家
+     * @param key 变量占位符
+     * @return
+     */
+    public String getVariable(Player p, String key);
+
+    /**
      * 使玩家转移到游戏内的另一队伍。
      * @return
      */
     public void ChangeGroup(Player player,String groupname);
 
-    /**
-     * 获得游戏的全局计分板对象
-     * @return
-     */
-    public ValueBoard ValueBoard();
-
-    /**
-     * 获得游戏的玩家计分板对象
-     * @return
-     */
-    public PlayerValueBoard PlayerValueBoard();
 
     /**
      * 为该游戏大厅创建一个新的工作文件(或读取一个已存在的文件)。

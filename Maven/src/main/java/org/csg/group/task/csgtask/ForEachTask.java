@@ -49,7 +49,7 @@ public class ForEachTask extends ChooseTask {
             init = true;
             switch(target_type){
                 case Group:
-                    for(UUID u : executer.group.getPlayerList()){
+                    for(UUID u : executer.getField()){
                         if(check(u,executer)){
                             players.add(u);
                         }
@@ -61,7 +61,7 @@ public class ForEachTask extends ChooseTask {
                     }
                     break;
                 case Random:
-                    for(UUID u : executer.group.getPlayerList()){
+                    for(UUID u : executer.getField()){
                         if(check(u,executer)){
                             players.add(u);
                         }
@@ -75,7 +75,7 @@ public class ForEachTask extends ChooseTask {
 
                     break;
                 case Lobby:
-                    for(UUID u : executer.group.getLobby().getPlayerList()){
+                    for(UUID u : executer.lobby.getPlayerList()){
                         if(check(u,executer)){
                             players.add(u);
                         }
@@ -104,7 +104,7 @@ public class ForEachTask extends ChooseTask {
             return false;
         }
         e.variables.declare("player",p);
-        String s = e.variableReplace(checker,p);
+        String s = e.variableReplace(this.variables,this.checker,p);
         return e.If(p,s);
     }
 
