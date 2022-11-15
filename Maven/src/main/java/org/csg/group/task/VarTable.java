@@ -104,6 +104,9 @@ public class VarTable {
     }
 
     public static String objToString(Object origin){
+        if(origin==null){
+            return "[null]";
+        }
         if(origin instanceof LivingEntity){
             LivingEntity en = (LivingEntity)origin;
             return en.getName();
@@ -126,6 +129,10 @@ public class VarTable {
                 return String.format("%.2f",d);
             }
         }
+        if(origin instanceof Integer){
+            return ""+origin;
+        }
+
         if(origin instanceof Group){
             return ((Group)origin).getName();
         }

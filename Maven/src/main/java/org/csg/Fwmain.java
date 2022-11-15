@@ -28,8 +28,6 @@ import org.csg.group.Group;
 import org.csg.group.Lobby;
 import org.csg.group.task.ValueData;
 import org.csg.group.task.toolkit.ListenerFactory;
-import org.csg.sproom.Reflect;
-import org.csg.sproom.Room;
 
 import java.io.File;
 import java.io.IOException;
@@ -258,6 +256,11 @@ public class Fwmain extends JavaPlugin implements Listener {
 				try {
 					JarFile jar = new JarFile(file);
 					JarEntry entry = jar.getJarEntry("version.json");
+
+					if(jar.getJarEntry("version.json") != null || jar.getJarEntry("mohist_libraries.txt") != null){
+						Data.ConsoleInfo("识别到核心端 " + file.getAbsolutePath());
+						Data.bukkit_core.add(file);
+					}
 					if(entry != null){
 						Data.ConsoleInfo("识别到核心端 " + file.getAbsolutePath());
 						Data.bukkit_core.add(file);
@@ -272,6 +275,7 @@ public class Fwmain extends JavaPlugin implements Listener {
 				if(f.isDirectory()){
 					LoadBukkitCore(f,isPaper);
 				}else{
+
 					if(f.getName().endsWith(".jar")){
 						Data.ConsoleInfo("识别到API "+f.getName());
 						Data.bukkit_core.add(f);
