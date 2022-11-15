@@ -5,6 +5,8 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.csg.Data;
+import org.csg.group.Group;
+import org.csg.group.task.toolkit.TaskExecuter;
 import org.csg.location.Teleporter;
 
 import java.text.DecimalFormat;
@@ -13,7 +15,7 @@ import java.util.*;
 public class VarTable {
     public Map<String,Object> macros = new HashMap<String,Object>();
     public Map<String,Map<UUID, Double>> scores = new HashMap<>();
-    public Map<String,Object> variables = new HashMap<String,Object>();
+    public Map<TaskExecuter, Map<String,Object>> variables = new HashMap<>();
 
     public void AddMacro(String key,Object obj){
         if(macros.containsKey(key)){
@@ -65,12 +67,26 @@ public class VarTable {
         }
     }
 
-    public void AddVariable(String key,Object obj){
-        if(variables.containsKey(key)){
-            variables.replace(key,obj);
-        }else{
-            variables.put(key,obj);
+    public void AddVariable(TaskExecuter ex, String key, Object obj){
+        if(!variables.containsKey(ex)){
+            variables.put(ex, new HashMap<>());
         }
+        Map<String,Object> vari = variables.get(ex);
+
+        if(vari.containsKey(key)){
+            vari.replace(key,obj);
+        }else{
+            vari.put(key,obj);
+        }
+    }
+
+    public void CleanExecuter(TaskExecuter ex){
+        Map<String,Object> vari = variables.get(ex);
+        if(vari!=null){
+            vari.clear();
+            variables.remove(ex);
+        }
+
     }
 
     public void AddScore(Player p, String key, double score){
@@ -110,22 +126,32 @@ public class VarTable {
                 return String.format("%.2f",d);
             }
         }
+        if(origin instanceof Group){
+            return ((Group)origin).getName();
+        }
         if(origin instanceof String){
             return (String)origin;
         }
         return "[不可序列化]";
     }
-
     public Object getValue(Player p, String key){
+        return getValue(p, key, null);
+    }
+    public Object getValue(Player p, String key, TaskExecuter executer){
         if(key.contains("\\.")){
             String[] pr = key.split("\\.",2);
-            Object o = getValue(p,pr[0]);
+            Object o = getValue(p,pr[0],executer);
             return getMember(o,pr[1]);
         }
 
-        Object value = variables.get(key);
-        if(value!=null) return value;
+        Map<String,Object> vr = variables.get(executer);
+        if(vr!=null) {
+            if(vr.get(key)!=null){
+                return vr.get(key);
+            }
+        }
 
+        Object value = null;
         if(p!=null){
             Map<UUID, Double> m = scores.get(key);
             if(m!=null){

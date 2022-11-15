@@ -64,17 +64,32 @@ public class Lobby implements customgo.Lobby, CycleUpdate {
 		this.open = open;
 	}
 
+	public Object getMacro(String key){
+		return macros.macros.get(key);
+	}
 	public boolean requireMacro(String line){
-		String[] ano = line.split("#");
-		String annotation = ano[1];
+		String annotation;
 		String s;
 		String default_value;
-		if(ano[0].contains(" ")){
-			s = ano[0].split(" ",2)[0];
-			default_value = ano[0].split(" ",2)[1];
+		if(line.contains("#")){
+			String[] ano = line.split("#");
+			annotation = "# "+ano[1];
+			if(ano[0].contains(" ")){
+				s = ano[0].split(" ",2)[0];
+				default_value = ano[0].split(" ",2)[1];
+			}else{
+				s = ano[0];
+				default_value = "'null'";
+			}
 		}else{
-			s = ano[0];
-			default_value = "'null'";
+			annotation = null;
+			if(line.contains(" ")){
+				s = line.split(" ",2)[0];
+				default_value = line.split(" ",2)[1];
+			}else{
+				s = line;
+				default_value = "'null'";
+			}
 		}
 
 		int state = macros.HasMacro(s);
@@ -115,8 +130,8 @@ public class Lobby implements customgo.Lobby, CycleUpdate {
 	public VarTable macros = new VarTable();
 	File default_macro_file;
 
-	private Set<FunctionTask> functions = new HashSet<>();
-	private Set<ListenerTask> listener = new HashSet<>();
+	private final Set<FunctionTask> functions = new HashSet<>();
+	private final Set<ListenerTask> listener = new HashSet<>();
 	private Class<?> javaFunctionClass;
 	private Object javaTaskInstance;
 	private JsTaskCompiler jsTaskCompiler;
@@ -144,9 +159,7 @@ public class Lobby implements customgo.Lobby, CycleUpdate {
 	public List<UUID> getPlayerList(){
 		List<UUID> pl = new ArrayList<>();
 		for(Group g : getGroupListI()){
-			for(UUID p : g.getPlayerList()){
-				pl.add(p);
-			}
+			pl.addAll(g.getPlayerList());
 			
 		}
 		return pl;
@@ -221,6 +234,15 @@ public class Lobby implements customgo.Lobby, CycleUpdate {
 		}
 
 
+		return null;
+	}
+
+	public Group findGroupOfPlayer(Player p){
+		for(Group g : grouplist){
+			if(g.hasPlayer(p)){
+				return g;
+			}
+		}
 		return null;
 	}
 
@@ -346,20 +368,7 @@ public class Lobby implements customgo.Lobby, CycleUpdate {
 			}
 
 			if(f.getName().endsWith("yml")){
-				if(f.getName().equals("macro.yml")){
-					continue;
-				}
-				String groName = f.getName().split("\\.")[0];
-				if(getGroup(groName)==null){
-					Data.ConsoleInfo("正在加载队列 "+groName);
-					Group gro = new Group(this, Data.fmain.load(f),groName);
-					grouplist.add(gro);
-					if(groName.equals("Main")){
-						setDefaultGroup(gro);
-					}
-				}else {
-					Data.ConsoleError(String.format("多个队列出现相同名字%s！", this.Name, groName));
-				}
+				continue;
 			}
 			if(f.getName().endsWith("csgtask")){
 
@@ -390,7 +399,6 @@ public class Lobby implements customgo.Lobby, CycleUpdate {
 				if(direct){
 					default_macro_file = f;
 				}else{
-					Data.ConsoleInfo("正在加载宏列表 "+f.getPath());
 					macros.LoadMacro(Data.fmain.load(f));
 				}
 			}
@@ -444,12 +452,9 @@ public class Lobby implements customgo.Lobby, CycleUpdate {
 			e.printStackTrace();
 			Data.ConsoleInfo("文件读取失败！");
 		}
-		if(this.getDefaultGroup()==null){
-			Data.ConsoleInfo("该游戏缺少初始队列，已自动生成默认初始队列。");
-			Group gro = new Group(this, "Main","主队列");
-			grouplist.add(gro);
-			setDefaultGroup(gro);
-		}
+
+		Default = new Group(this, "Main");
+		grouplist.add(Default);
 
 		Data.fmain.getServer().getPluginManager().registerEvents(trigger,Data.fmain);
 		MainCycle.registerCall(trigger);
@@ -485,6 +490,7 @@ public class Lobby implements customgo.Lobby, CycleUpdate {
 			getDefaultGroup().UnLoad();
 		}
 
+		jsTaskCompiler.getTasks().values().forEach(e -> e.getListeners().values().forEach(HandlerList::unregisterAll));
 		if(LobbyList.contains(this)){
 			LobbyList.remove(this);
 		}
@@ -506,21 +512,6 @@ public class Lobby implements customgo.Lobby, CycleUpdate {
 		return Name;
 	}
 	
-
-	protected void setDefaultGroup(Group gro){
-		if(setted){
-			Data.ConsoleInfo("警告：该游戏存在多个初始队列(Main.yml)！");
-			gro.UnLoad();
-			return;
-		}
-		setted = true;
-		this.Default = gro;
-		if(!grouplist.contains(gro)){
-			grouplist.add(gro);
-		}
-		
-	}
-	
 	private boolean setted = false;
 
 
@@ -531,6 +522,7 @@ public class Lobby implements customgo.Lobby, CycleUpdate {
 	public Set<Group> getGroupListI(){
 		return grouplist;
 	}
+
 	public Set<customgo.Group> getGroupList(){
 		Set<customgo.Group> g = new HashSet<>(grouplist);
 		return g;
@@ -543,6 +535,7 @@ public class Lobby implements customgo.Lobby, CycleUpdate {
 		}
 		return a;
 	}
+
 	public String getVariable(Player p, String key){
 		return VarTable.objToString(macros.getValue(p,key));
 	}
@@ -574,10 +567,6 @@ public class Lobby implements customgo.Lobby, CycleUpdate {
 	
 
 	public void Join(Player player){
-		if(Default==null){
-			player.sendMessage(ChatColor.RED+"该游戏缺少主队列！");
-			return;
-		}
 		if(getPlayerAmount()==0){
 			open = true;
 		}
@@ -588,7 +577,8 @@ public class Lobby implements customgo.Lobby, CycleUpdate {
 		PlayerJoinLobbyEvent e = new PlayerJoinLobbyEvent(player,this);
 		Data.fmain.getServer().getPluginManager().callEvent(e);
 		if(!e.isCancelled()){
-			Default.JoinGroup(player,"_outside_");
+			Default.JoinGroup(player);
+			callListener("onPlayerJoinLobby", player);
 		}
 
 	}
@@ -598,10 +588,15 @@ public class Lobby implements customgo.Lobby, CycleUpdate {
 			return;
 		}
 
-		this.ChangeGroup(player,"Main");
+		callListener("onPlayerLeaveLobby", player);
+
+		Group g = this.findGroupOfPlayer(player);
+		g.LeaveGroup(player);
+
+
 		PlayerLeaveLobbyEvent e = new PlayerLeaveLobbyEvent(player,this);
 		Data.fmain.getServer().getPluginManager().callEvent(e);
-		getDefaultGroup().LeaveGroup(player.getUniqueId(),"_outside_");
+
 	}
 
 	public void ChangeGroup(Player player,String groupname){
@@ -613,16 +608,16 @@ public class Lobby implements customgo.Lobby, CycleUpdate {
 			return;
 		}
 
-		if(this.getGroup(groupname)!=null){
-			Group to = this.getGroup(groupname);
-			if(from==to){
-				return;
-			}
-			from.LeaveGroup(player.getUniqueId(),to.getName());
-			to.JoinGroup(player,from.getName());
-		}else{
-			player.sendMessage(ChatColor.RED+"目标队列不存在！");
+		if(getGroup(groupname)==null){
+			grouplist.add(new Group(this,groupname));
 		}
+
+		Group to = this.getGroup(groupname);
+		if(from==to){
+			return;
+		}
+		from.LeaveGroup(player);
+		to.JoinGroup(player);
 		
 	}
 	
@@ -649,10 +644,7 @@ public class Lobby implements customgo.Lobby, CycleUpdate {
 	
 	public static void UnLoadAll() {
 		for(Lobby l : LobbyList){
-			l.jsTaskCompiler.getTasks().values().forEach(e -> e.getListeners().values().forEach(HandlerList::unregisterAll));
-			for(Group g : l.grouplist){
-				g.UnLoad();
-			}
+			l.unLoad();
 			//l.ListenerRespond(new EventOnLobbyUnloaded(l,false));
 		}
 		LobbyList.clear();

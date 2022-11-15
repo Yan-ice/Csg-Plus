@@ -91,6 +91,16 @@ public class Upgrader {
                 }
             }
 
+            line = line.replace("onPlayerJoin(","onPlayerJoinGroup(");
+            line = line.replace("onPlayerLeave(","onPlayerLeaveGroup(");
+            if(line.contains("_outside_")){
+                sender.sendMessage("=========================" +
+                        "\nCsg文件"+f.getPath()+" "+"第 "+line_counter+" 行的语句: \n"
+                        +line_origin.trim()+" 含有_outside_，该关键词已被移除。" +
+                        "\n猜测替换为Main，如果不符合预期要求，请手动更正！");
+            }
+            line = line.replace("_outside_","Main");
+
             new_l.append(line).append("\n");
 
             if(replace_counter>=3){

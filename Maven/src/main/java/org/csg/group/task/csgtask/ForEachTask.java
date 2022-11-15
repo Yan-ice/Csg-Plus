@@ -41,12 +41,13 @@ public class ForEachTask extends ChooseTask {
     }
     boolean init = false;
 
+    UUID original_striker = null;
     @Override
     public Task execute(TaskExecuter executer, UUID striker) {
 
         if(!init){
-
             init = true;
+            original_striker = executer.striker;
             switch(target_type){
                 case Group:
                     for(UUID u : executer.getField()){
@@ -56,6 +57,11 @@ public class ForEachTask extends ChooseTask {
                     }
                     break;
                 case Striker:
+                    if(executer.getField().contains(striker) && check(striker,executer)){
+                        players.add(striker);
+                    }
+                    break;
+                case Striker_force:
                     if(check(striker,executer)){
                         players.add(striker);
                     }
@@ -86,16 +92,24 @@ public class ForEachTask extends ChooseTask {
             }
         }
 
-        if(players.size()>0){
+        while(players.size()>0){
             UUID u = players.get(0);
             players.remove(0);
+
+            executer.striker = u;
             Player p = Bukkit.getPlayer(u);
-            executer.variables.declare("player",p);
+            executer.addVariable("striker",p);
+
+            executer.addVariable("player",p);
+            String s = executer.variableReplace(this.variables,this.checker,p);
+            if(!executer.If(p,s)) continue;
+
             return next_yes;
-        }else{
+        }
+            executer.striker = original_striker;
+            executer.addVariable("striker",original_striker);
             init = false;
             return next;
-        }
     }
 
     private boolean check(UUID uid,TaskExecuter e){
@@ -103,7 +117,7 @@ public class ForEachTask extends ChooseTask {
         if(p==null){
             return false;
         }
-        e.variables.declare("player",p);
+
         String s = e.variableReplace(this.variables,this.checker,p);
         return e.If(p,s);
     }

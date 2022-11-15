@@ -5,7 +5,7 @@ Csg-Plus是基于CustomGo重制的MineCraft开源副本插件，在CustomGo的�
 @[bilibili](https://www.bilibili.com/video/av90909994)
 
 ## 支持与反馈
-本插件目前处于Beta版，正在努力更新完善中，且作者承诺全部内容免费。欢迎加入我们的QQ交流群：1群645974402  2群1036303267 ，当然也可以在github向我提交issue和pull request~
+本插件目前处于Beta版，正在努力更新完善中，且全部内容免费。欢迎加入我们的QQ交流群：1群645974402  2群1036303267 ，当然也可以在github向我提交issue和pull request~
 
 ## 功能概述
 - 用一系列脚本与队列，DIY属于你自己的副本房间。
@@ -19,12 +19,11 @@ Csg-Plus是基于CustomGo重制的MineCraft开源副本插件，在CustomGo的�
 ## 插件wiki (在线文档)
 如果原帖内容的教学无法满足你的需求，你可以选择阅读wiki教学，来熟悉本插件。wiki开发手册包括理论与实战练习，且内容更加完整（帖子毕竟篇幅有限）！
 
-插件WIKI[*持续更新与完善中*]: [Csg Plus 开发手册(wiki)](https://www.kancloud.cn/yan_ice/csg-plus-doc/2723886)  
-
+插件WIKI[*持续更新与完善中*]: [Csg Plus 开发手册(wiki)](https://www.kancloud.cn/yan_ice/csg-plus-doc/2723886)
 
 ## 阅读该项目代码
 源码分为两个package：其中"customgo"包内包含插件的API，另一个包内为所有实现代码。
 
-## 依赖
-
-你需要安装 Lombok 来使用此源码。
+## 编译与打包
+该项目为maven项目，用IDEA开发。
+因为某些原因，在使用maven打包项目jar后，还需要将lib中的nashorn.jar解压并放入项目jar中。

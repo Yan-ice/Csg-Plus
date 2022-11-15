@@ -82,9 +82,9 @@ public class Room {
 				break;
 			}
 		}
-		sender.sendMessage("正在将配置中的 "+worldName+" 替换为 $world$ 占位符...");
+		sender.sendMessage("正在将配置中的 "+worldName+" 替换为 {world} 占位符...");
 		try{
-			replaceWorldStr(lobby.getFolder(),worldName,"$world$");
+			replaceWorldStr(lobby.getFolder(),worldName,"{world}");
 
 		}catch(IOException e){
 			e.printStackTrace();

@@ -45,7 +45,12 @@ public interface Lobby {
      */
     public void callListener(String name, Player p, Object... para);
 
-
+    /**
+     * 查找一名游戏内玩家所处的队伍。
+     * @param p 游戏内玩家
+     * @return 返回玩家所处的队伍，如果玩家为null或不在游戏中，返回null。
+     */
+    public Group findGroupOfPlayer(Player p);
     /**
      * 重新命名此游戏。
      * @param name
@@ -81,11 +86,20 @@ public interface Lobby {
 
     /**
      * 获取大厅内的变量，可以是玩家分数，宏，或局部变量。
+     * 自动字符串化。
      * @param p 玩家
      * @param key 变量占位符
      * @return
      */
     public String getVariable(Player p, String key);
+
+    /**
+     * 获取大厅内的宏，不会字符串化。
+     * 自动字符串化。
+     * @param key 变量占位符
+     * @return
+     */
+    public Object getMacro(String key);
 
     /**
      * 使玩家转移到游戏内的另一队伍。

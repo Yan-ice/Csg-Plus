@@ -63,7 +63,7 @@ public class Reflect implements Listener {
 			return ReflectStatu.WRONG;
 		}
 		if(statu==ReflectStatu.WAITING){
-			if("true".equals(lobby.macros.macros.get("isGaming"))){
+			if(!lobby.open){
 				statu = ReflectStatu.STARTED;
 			}
 		}

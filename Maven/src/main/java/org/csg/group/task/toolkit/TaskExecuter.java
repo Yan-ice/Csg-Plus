@@ -23,7 +23,6 @@ public class TaskExecuter implements CycleUpdate {
     public Lobby lobby;
     public boolean endWhenClear = false;
     public boolean endWhenNoTarget = false;
-    public VariableBox variables = new VariableBox();
 
     int cooldown = 0;
     public Task begin;
@@ -55,7 +54,7 @@ public class TaskExecuter implements CycleUpdate {
         List<String> copy = new ArrayList<>(keys);
         for(int a = 0;a<copy.size();a++){
             String ori = String.format("{%s}",copy.get(a));
-            String tar = VarTable.objToString(lobby.macros.getValue(target,copy.get(a)));
+            String tar = VarTable.objToString(lobby.macros.getValue(target,copy.get(a),this));
             origin = origin.replace(ori,tar);
             for(int b = 0;b<copy.size();b++){
                 copy.set(b,copy.get(b).replace(ori,tar));
@@ -230,12 +229,12 @@ public class TaskExecuter implements CycleUpdate {
     }
 
     public void addVariable(String var,Object value){
-        variables.declare(var,value);
+        lobby.macros.AddVariable(this,var,value);
     }
 
     public void execute(UUID striker){
         if(Bukkit.getPlayer(striker)!=null){
-            variables.declare("striker",Bukkit.getPlayer(striker));
+            lobby.macros.AddVariable(this,"striker",Bukkit.getPlayer(striker));
         }
 
         this.striker = striker;
@@ -247,7 +246,7 @@ public class TaskExecuter implements CycleUpdate {
 
     private void updateVar(){
         //variables.declare("group_player_amount",group.getPlayerList().size());
-        //variables.declare("lobby_player_amount",group.getLobby().getPlayerList().size());
+        addVariable("lobby_player_amount",lobby.getPlayerAmount());
     }
 
     public void setCooldown(int tick){
@@ -279,6 +278,7 @@ public class TaskExecuter implements CycleUpdate {
                 e.printStackTrace();
             }
         }else{
+            lobby.macros.CleanExecuter(this);
             MainCycle.unRegisterCall(this);
         }
     }

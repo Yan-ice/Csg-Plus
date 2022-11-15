@@ -62,6 +62,9 @@ public class CommandTask extends Task {
                 case "@e":
                     target_type = TargetType.Lobby;
                     break;
+                case "@t":
+                    target_type = TargetType.Striker_force;
+                    break;
                 case "@l":
                     target_type = TargetType.Lobby;
                     break;
@@ -90,7 +93,7 @@ public class CommandTask extends Task {
                 players.addAll(executer.getField());
                 break;
             case Striker:
-                if(striker!=null){
+                if(striker!=null && executer.getField().contains(striker)){
                     players.add(striker);
                 }
 
@@ -245,7 +248,7 @@ public class CommandTask extends Task {
                     return false;
                 }
                 break;
-            case "getplayer":
+            case "divide":
                 if(Target==null){
                     return false;
                 }
@@ -391,6 +394,12 @@ public class CommandTask extends Task {
                         return_obj = ItemCheck.itemConsume(Target,args[1]);
                 }
                 break;
+            case "close":
+                executer.lobby.setCanJoin(false);
+                break;
+            case "open":
+                executer.lobby.setCanJoin(true);
+                break;
             case "give":
                 if(args.length==0 || Target==null){
                     return false;
@@ -465,7 +474,7 @@ public class CommandTask extends Task {
         }
         if(cloned_return!=null){
             if(return_obj!=null){
-                executer.variables.declare(cloned_return,return_obj);
+                executer.addVariable(cloned_return,return_obj);
             }else{
                 Data.ConsoleInfo(String.format("注意：企图将无返回值的指令%s赋值给变量！",command));
             }

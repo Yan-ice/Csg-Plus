@@ -1016,7 +1016,7 @@ public class CsgCmd extends RootCmd{
                 }
             }else{
                     sender.sendMessage(ChatColor.BLUE+lobby.getName()+" :");
-                    sender.sendMessage(ChatColor.GREEN+"默认队列："+lobby.getDefaultGroup().GetDisplay());
+                    sender.sendMessage(ChatColor.GREEN+"默认队列："+lobby.getDefaultGroup().getName());
                     for(Group gro : lobby.getGroupListI()){
                         gro.state(sender);
                     }
