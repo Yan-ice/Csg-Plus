@@ -1,4 +1,4 @@
-package org.csg.group.task.toolkit;
+package org.csg.group;
 
 import org.bukkit.Bukkit;
 import org.bukkit.event.entity.PlayerDeathEvent;
@@ -49,7 +49,7 @@ public class Trigger implements Listener, CycleUpdate {
 	@EventHandler(priority= EventPriority.HIGHEST)
 	protected void Listen(BlockBreakEvent evt2) {
 		if(evt2.getPlayer()!=null){
-			lobby.callListener("onPlayerBreakBlock",evt2.getPlayer(),new Object[]{evt2.getBlock().getType().name(),evt2.getBlock().getLocation()});
+			lobby.callListener("onPlayerBreakBlock",evt2.getPlayer(),evt2.getBlock().getType().name(),evt2.getBlock().getLocation());
 		}
 	}
 
@@ -61,7 +61,7 @@ public class Trigger implements Listener, CycleUpdate {
 			if(evt instanceof EntityDamageByEntityEvent){
 				damager = getDamager(((EntityDamageByEntityEvent)evt).getDamager());
 			}
-			lobby.callListener("onPlayerDamaged",damaged,new Object[]{evt.getDamage(),damager});
+			lobby.callListener("onPlayerDamaged",damaged,evt.getDamage(),damager);
 		}
 	}
 
@@ -71,17 +71,16 @@ public class Trigger implements Listener, CycleUpdate {
 
 		Player killer = evt.getEntity().getKiller();
 		if(killer!=null){
-			lobby.callListener("onKillPlayer",killer,new Object[]{evt.getEntity()});
+			lobby.callListener("onKillPlayer",killer,evt.getEntity());
 		}
 	}
+
 	@EventHandler(priority=EventPriority.HIGHEST)
 	void KillEntityListen(EntityDeathEvent evt) {
 		if (!(evt.getEntity() instanceof ArmorStand)) {
 			Player killer = evt.getEntity().getKiller();
 			if(killer!=null && lobby.hasPlayer(killer)){
-				if(!(evt.getEntity() instanceof Player)){
-					lobby.callListener("onKillEntity",killer,new Object[]{evt.getEntity()});
-				}
+				lobby.callListener("onKillEntity",killer,evt.getEntity());
 			}
 		}
 	}
@@ -130,7 +129,7 @@ public class Trigger implements Listener, CycleUpdate {
 
 	@EventHandler
 	void InteractListen(PlayerInteractEntityEvent evt) {
-		if(evt.getRightClicked() instanceof LivingEntity){
+		if(evt.getRightClicked() instanceof LivingEntity && !(evt.getRightClicked() instanceof ArmorStand)){
 			Player striker = evt.getPlayer();
 			if(cooldown.contains(striker.getName())){
 				return;
@@ -151,7 +150,7 @@ public class Trigger implements Listener, CycleUpdate {
 				return;
 			}
 			cooldown.add(pl.getName());
-			lobby.callListener("onInteractBlock",pl,new Object[]{evt.getClickedBlock().getType().name(),evt.getClickedBlock().getLocation()});
+			lobby.callListener("onInteractBlock",pl,evt.getClickedBlock().getType().name(),evt.getClickedBlock().getLocation());
 		}
 
 	}
@@ -169,7 +168,7 @@ public class Trigger implements Listener, CycleUpdate {
 		}else{
 			args = new String[]{message};
 		}
-		lobby.callListener("onSendCommand",pl,new Object[]{args});
+		lobby.callListener("onSendCommand",pl,args);
 	}
 	@EventHandler
 	void Listen(PlayerToggleSneakEvent evt2) {
@@ -202,7 +201,7 @@ public class Trigger implements Listener, CycleUpdate {
 					Location BlockWalk = new Location(pl.getLocation().getWorld(), pl.getLocation().getBlockX(),
 							(pl.getLocation().getBlockY() - 1), pl.getLocation().getBlockZ());
 					Block Blo = BlockWalk.getBlock();
-					lobby.callListener("onPlayerWalk",pl,new Object[]{Blo.getType().name()});
+					lobby.callListener("onPlayerWalk",pl,Blo.getType().name());
 				}
 
 			}

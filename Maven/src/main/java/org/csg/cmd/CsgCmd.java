@@ -314,7 +314,7 @@ public class CsgCmd extends RootCmd{
         @Override
         public void console(CommandSender sender, String... args) {
             StringBuilder Glist = new StringBuilder();
-            Set<Lobby> Lobbylist = Lobby.getLobbyList();
+            List<Lobby> Lobbylist = Lobby.getLobbyList();
             for (Lobby l : Lobbylist) {
                 String Name;
                 if (l.isComplete()) {
@@ -323,7 +323,7 @@ public class CsgCmd extends RootCmd{
                     Name = ChatColor.RED + l.getName() + ChatColor.AQUA;
                 }
                 if (Glist.length()>0) {
-                    Glist.append("、").append(Name);
+                    Glist.append(", ").append(Name);
                 } else {
                     Glist.append(Name);
                 }

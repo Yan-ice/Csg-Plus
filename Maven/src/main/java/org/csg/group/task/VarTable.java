@@ -63,6 +63,8 @@ public class VarTable {
             }else
             if(config.isConfigurationSection(key)){
                 LoadMacro(config.getConfigurationSection(key));
+            }else{
+                macros.put(key,config.get(key));
             }
         }
     }
@@ -145,7 +147,7 @@ public class VarTable {
         return getValue(p, key, null);
     }
     public Object getValue(Player p, String key, TaskExecuter executer){
-        if(key.contains("\\.")){
+        if(key.contains(".")){
             String[] pr = key.split("\\.",2);
             Object o = getValue(p,pr[0],executer);
             return getMember(o,pr[1]);
@@ -174,7 +176,7 @@ public class VarTable {
     }
 
     private Object getMember(Object origin, String memberKey){
-        if(memberKey.contains("\\.")){
+        if(memberKey.contains(".")){
             String[] pr = memberKey.split("\\.",2);
             Object mb = getMember(origin, pr[0]);
             return getMember(mb,pr[1]);

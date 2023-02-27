@@ -7,6 +7,7 @@ package org.csg.group.task.toolkit;
  */
 public class Calculator {
 
+
     public static double Calculate(String args) {
         args = nifixTransformPostfix("0"+args);
         return calculatePostfixExpression(args);

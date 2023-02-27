@@ -27,6 +27,8 @@ public class Data {
 	public static boolean debug = false;
 	public static boolean isPaper = false;
 
+	public static boolean isBungee = false;
+
 	public static Fwmain fmain = null;
 
 	public static List<File> bukkit_core = new ArrayList<>();
@@ -77,6 +79,9 @@ public class Data {
 
 			if(optionFileConf.contains("IsPaperSpigot")){
 				isPaper = optionFileConf.getBoolean("IsPaperSpigot");
+			}
+			if(optionFileConf.contains("BungeeCordSupport")){
+				isBungee = optionFileConf.getBoolean("BungeeCordSupport");
 			}
 
 			if(optionFileConf.contains("HighMCVersion")){

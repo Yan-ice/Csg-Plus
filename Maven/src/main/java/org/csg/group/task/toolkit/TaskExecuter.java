@@ -50,17 +50,24 @@ public class TaskExecuter implements CycleUpdate {
         identity++;
         return "temp_"+identity;
     }
-    public String variableReplace(List<String> keys, String origin,Player target){
+    public String variableReplace(List<String> keys, String origin, Player target){
         List<String> copy = new ArrayList<>(keys);
-        for(int a = 0;a<copy.size();a++){
-            String ori = String.format("{%s}",copy.get(a));
-            String tar = VarTable.objToString(lobby.macros.getValue(target,copy.get(a),this));
-            origin = origin.replace(ori,tar);
-            for(int b = 0;b<copy.size();b++){
-                copy.set(b,copy.get(b).replace(ori,tar));
+        int stop_cnt = 100;
+        //System.out.println("-- replace begin: "+origin);
+        while(copy.size()>0 && (stop_cnt-->0)){
+            String current = copy.get(0);
+            copy.remove(0);
+            if(current.contains("{")){
+                copy.add(current);
+                continue;
             }
-
+            //System.out.println("replacing: "+current);
+            String ori = String.format("{%s}", current);
+            String tar = VarTable.objToString(lobby.macros.getValue(target,current,this));
+            origin = origin.replace(ori,tar);
+            copy.replaceAll(s -> s.replace(ori, tar));
         }
+        //System.out.println("-- replace end: "+origin);
 
         origin = Data.ColorChange(origin);
         String origin_old = "";
@@ -157,10 +164,12 @@ public class TaskExecuter implements CycleUpdate {
     public boolean If(Player target, String If) throws NullPointerException,NumberFormatException,IndexOutOfBoundsException{
 
         if(If.contains("AND")){
-            return (If(target,If.split("AND",1)[0].trim()) & If(target,If.split("AND",1)[1].trim()));
+            String[] st = If.split("AND",2);
+            return (If(target,st[0].trim()) && If(target,st[1].trim()));
         }
         if(If.contains("OR")){
-            return (If(target,If.split("OR",1)[0].trim()) | If(target,If.split("OR",1)[1].trim()));
+            String[] st = If.split("OR",2);
+            return (If(target,st[0].trim()) || If(target,st[1].trim()));
         }
         if(If.contains(">=")){
             String[] s = If.split(">=");
@@ -199,17 +208,9 @@ public class TaskExecuter implements CycleUpdate {
             String value = If.split("!=")[1].trim();
             switch(If.split("!=")[0].trim()){
                 case "Permission":
-                    if(target.hasPermission(value)){
-                        return false;
-                    }else{
-                        return true;
-                    }
+                    return !target.hasPermission(value);
                 default:
-                    if(If.split("!=")[0].trim().equals(If.split("!=")[1].trim())){
-                        return false;
-                    }else{
-                        return true;
-                    }
+                    return !If.split("!=")[0].trim().equals(If.split("!=")[1].trim());
             }
 
         }else
@@ -222,10 +223,7 @@ public class TaskExecuter implements CycleUpdate {
                     return If.split("==")[0].trim().equals(If.split("==")[1].trim());
             }
         }
-        if(If.equals("true")){
-            return true;
-        }
-        return false;
+        return If.equals("true");
     }
 
     public void addVariable(String var,Object value){

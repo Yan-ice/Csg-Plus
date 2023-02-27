@@ -164,8 +164,13 @@ public class CommandTask extends Task {
                 args = new String[1];
                 args[0] = cloned_arg;
             }
-
         }
+
+        //对参数整理，不让其带空格。
+        for(int a = 0;a<args.length;a++){
+            args[a] = args[a].trim();
+        }
+
         World autoworld = null;
         if(playerList.size()>0){
             if(Bukkit.getPlayer(playerList.get(0))!=null){
@@ -314,12 +319,20 @@ public class CommandTask extends Task {
                 executer.lobby.macros.AddMacro(args[0], args[1]);
                 break;
             case "setscore":
+                //为了兼容性
+                if(args[1].startsWith("+")){
+                    args[1] = "~"+args[1];
+                }
                 if(Target!=null){
                     Object score_obj = executer.lobby.macros.getValue(Target,args[0]);
                     double score = 0;
                     if(score_obj instanceof Double){
                         score = (Double) score_obj;
                     }
+                    if(score_obj instanceof Integer){
+                        score = (int) score_obj;
+                    }
+
                     args[1] = args[1].replace("~",String.format("%.5f",score));
                     score = Calculator.Calculate(args[1]);
                     executer.lobby.macros.AddScore(Target, args[0], score);
@@ -328,6 +341,9 @@ public class CommandTask extends Task {
                     double score = 0;
                     if(score_obj instanceof Double){
                         score = (Double) score_obj;
+                    }
+                    if(score_obj instanceof Integer){
+                        score = (int) score_obj;
                     }
                     args[1] = args[1].replace("~",String.format("%.5f",score));
                     score = Calculator.Calculate(args[1]);

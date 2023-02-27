@@ -6,6 +6,9 @@ HighMCVersion: true
 IsPaperSpigot: false
 # 如果您的核心端是PaperSpigot，请将该项设为true。
 
+BungeeCordSupport: false
+# 如果开启此项，玩家将会在加入服务器时进入第一个游戏，且会在退出游戏时退出服务器。
+
 Depends: []
 #用户自定义的依赖
 

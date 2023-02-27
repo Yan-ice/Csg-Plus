@@ -73,7 +73,7 @@ public class Fwmain extends JavaPlugin implements Listener {
 	 */
 	public void showList(CommandSender player) {
 		String Glist = "";
-		Set<Lobby> Lobbylist = Lobby.getLobbyList();
+		List<Lobby> Lobbylist = Lobby.getLobbyList();
 		for (Lobby l : Lobbylist) {
 			String Name;
 			if (l.isComplete()) {
@@ -129,18 +129,10 @@ public class Fwmain extends JavaPlugin implements Listener {
 
 			csgCmd = new CsgCmd(Bukkit.getPluginCommand("csg"));
 
+			Lobby.LoadAll(lobby);
+
 			getLogger().info("插件启动成功！ [Csg-Plus " + Data.Version + " ]");
 
-			new BukkitRunnable(){
-
-				@Override
-				public void run() {
-					getLogger().info("正在准备读取队列...");
-					Lobby.LoadAll(lobby);
-				}
-
-
-			}.runTaskLater(this, 80);
 		}catch(LinkageError e){
 			getLogger().info("=====[出现链接错误！]=====");
 			getLogger().info("请检查是否有以下任何情况发生：");
@@ -275,7 +267,6 @@ public class Fwmain extends JavaPlugin implements Listener {
 				if(f.isDirectory()){
 					LoadBukkitCore(f,isPaper);
 				}else{
-
 					if(f.getName().endsWith(".jar")){
 						Data.ConsoleInfo("识别到API "+f.getName());
 						Data.bukkit_core.add(f);

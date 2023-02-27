@@ -3,19 +3,11 @@ package org.csg.group;
 import java.util.*;
 
 import org.bukkit.entity.*;
-import org.csg.group.task.csgtask.FunctionTask;
-import org.csg.group.task.toolkit.TaskExecuter;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.command.CommandSender;
-import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.scoreboard.Scoreboard;
-import org.bukkit.scoreboard.Team;
 
-import org.csg.Data;
-import org.csg.group.hologram.FwHologram;
-import org.csg.location.Teleporter;
 
 public class Group implements customgo.Group{
 	public static Group SearchPlayerInGroup(Player pl){
@@ -83,16 +75,15 @@ public class Group implements customgo.Group{
 	public void JoinGroup(Player player) {
 		UUID uid = player.getUniqueId();
 		playerList.add(uid);
-		byLobby.callListener("onPlayerJoin",player, this);
+		byLobby.callListener("onPlayerJoinGroup",player, this);
 	}
 
 	public void LeaveGroup(Player pl) {
 		for (UUID plu : playerList) {
 			if (pl.getUniqueId().equals(plu)) {
-				byLobby.callListener("onPlayerLeave",pl, this);
+				byLobby.callListener("onPlayerLeaveGroup",pl, this);
 				playerList.remove(plu);
 
-				byLobby.callListener("onPlayerRest",null,playerList.size(), this);
 				return;
 			}
 		}

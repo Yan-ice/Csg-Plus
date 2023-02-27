@@ -12,6 +12,7 @@ import customgo.event.ListenerCalledEvent;
 import customgo.event.PlayerJoinLobbyEvent;
 import customgo.event.PlayerLeaveLobbyEvent;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.csg.BungeeSupport;
 import org.csg.group.hologram.FwHologram;
 import org.csg.group.task.VarTable;
 import customgo.CsgTaskListener;
@@ -30,9 +31,9 @@ import org.csg.update.MainCycle;
 import org.csg.update.SecondCycle;
 
 public class Lobby implements customgo.Lobby, CycleUpdate {
-	private static Set<Lobby> LobbyList = new HashSet<>();
+	private static List<Lobby> LobbyList = new ArrayList<>();
 
-	public static Set<Lobby> getLobbyList(){
+	public static List<Lobby> getLobbyList(){
 		return LobbyList;
 	}
 
@@ -91,7 +92,7 @@ public class Lobby implements customgo.Lobby, CycleUpdate {
 				default_value = "'null'";
 			}
 		}
-
+		s = s.trim();
 		int state = macros.HasMacro(s);
 		if(state!=2){
 			Data.ConsoleError("该大厅并未满足脚本需求的宏"+s+"！");
@@ -253,6 +254,9 @@ public class Lobby implements customgo.Lobby, CycleUpdate {
 		executer.execute(p!=null ? p.getUniqueId() : null);
 	}
 	public void callListener(String name, Player p, Object... para){
+		if(p!=null && !hasPlayer(p)){
+			return;
+		}
 		for(ListenerTask task : listener){
 			if(task.getName().equals(name)){
 				ListenerCalledEvent call = new ListenerCalledEvent(name,this,p,para);
@@ -446,6 +450,11 @@ public class Lobby implements customgo.Lobby, CycleUpdate {
 		functions.clear();
 		listener.clear();
 		Data.ConsoleInfo("=====[正在加载大厅"+Name+"]=====");
+
+		if(Data.isBungee){
+			new BungeeSupport((this));
+		}
+
 		try{
 			loadFile(Folder);
 		}catch(IOException e){
@@ -458,6 +467,7 @@ public class Lobby implements customgo.Lobby, CycleUpdate {
 
 		Data.fmain.getServer().getPluginManager().registerEvents(trigger,Data.fmain);
 		MainCycle.registerCall(trigger);
+
 		if(isComplete()){
 			callListener("onLobbyLoaded",null);
 
@@ -511,9 +521,6 @@ public class Lobby implements customgo.Lobby, CycleUpdate {
 	public String getName(){
 		return Name;
 	}
-	
-	private boolean setted = false;
-
 
 	public Group getDefaultGroup(){
 		return Default;
@@ -539,6 +546,7 @@ public class Lobby implements customgo.Lobby, CycleUpdate {
 	public String getVariable(Player p, String key){
 		return VarTable.objToString(macros.getValue(p,key));
 	}
+
 	public Group getGroup(String Name){
 		for(Group l : grouplist){
 			if(l.getName().equals(Name)){
@@ -574,6 +582,10 @@ public class Lobby implements customgo.Lobby, CycleUpdate {
 			player.sendMessage(ChatColor.RED+"该游戏正在进行中，无法加入！");
 			return;
 		}
+		if(Group.SearchPlayerInGroup(player)!=null){
+			player.sendMessage(ChatColor.RED+"你已经在一个游戏中了！");
+			return;
+		}
 		PlayerJoinLobbyEvent e = new PlayerJoinLobbyEvent(player,this);
 		Data.fmain.getServer().getPluginManager().callEvent(e);
 		if(!e.isCancelled()){
@@ -593,9 +605,10 @@ public class Lobby implements customgo.Lobby, CycleUpdate {
 		Group g = this.findGroupOfPlayer(player);
 		g.LeaveGroup(player);
 
-
 		PlayerLeaveLobbyEvent e = new PlayerLeaveLobbyEvent(player,this);
 		Data.fmain.getServer().getPluginManager().callEvent(e);
+
+		callListener("onPlayerRest",null,getPlayerAmount());
 
 	}
 
@@ -643,55 +656,15 @@ public class Lobby implements customgo.Lobby, CycleUpdate {
 	}
 	
 	public static void UnLoadAll() {
-		for(Lobby l : LobbyList){
-			l.unLoad();
+		while(LobbyList.size()>0){
+			LobbyList.get(0).unLoad();
 			//l.ListenerRespond(new EventOnLobbyUnloaded(l,false));
 		}
-		LobbyList.clear();
 	}
 
 	@Override
 	public void onUpdate() {
 		callListener("onEverySecond",null);
 	}
-//
-//	static List<LobbyListener> llist = new ArrayList<>();
-//
-//	public static void RegisterListener(LobbyListener l){
-//		llist.add(l);
-//	}
-//	public static void UnRegisterListener(LobbyListener l){
-//		llist.remove(l);
-//	}
 
-//	protected void ListenerRespond(EventLobby evt){
-//		for(int a = llist.size()-1;a>=0;a--){
-//			LobbyListener listener = llist.get(a);
-//			Method[] mlist = listener.getClass().getMethods();
-//			List<Method> runninglist = new ArrayList<>();
-//			for(Method meth : mlist){
-//				if(meth.isAnnotationPresent(ListenerTag.class)){
-//					runninglist.add(meth);
-//				}
-//			}
-//			for(int dtime = -5;dtime <= 5;dtime++){
-//				for(Method run : runninglist){
-//					if(run.getAnnotation(ListenerTag.class).runDelay() == dtime){
-//						try {
-//							if(run.getParameterTypes().length==1 && run.getParameterTypes()[0].equals(evt.getClass())){
-//								run.invoke(listener,evt);
-//							}
-//						} catch (IllegalAccessException e) {
-//							e.printStackTrace();
-//						} catch (IllegalArgumentException e) {
-//							e.printStackTrace();
-//						} catch (InvocationTargetException e) {
-//							e.printStackTrace();
-//						}
-//					}
-//				}
-//			}
-//
-//		}
-//	}
 }
