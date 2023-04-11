@@ -1,4 +1,4 @@
-# Csg-Plus 可编程副本
+# Csg-Plus Pro 可编程副本
 Csg-Plus是基于CustomGo重制的MineCraft开源副本插件，在CustomGo的基础上大幅重做配置与脚本机制，具有**一套自己的脚本体系、30+种游戏监听器、模块化开发环境、可嵌入java源代码**，真正做到了可编程的副本房间。
 
 论坛帖：[https://www.mcbbs.net/thread-1310318-1-1.html](https://www.mcbbs.net/thread-1310318-1-1.html)
@@ -27,3 +27,7 @@ Csg-Plus是基于CustomGo重制的MineCraft开源副本插件，在CustomGo的�
 ## 编译与打包
 该项目为maven项目，用IDEA开发。
 因为某些原因，在使用maven打包项目jar后，还需要将lib中的nashorn.jar解压并放入项目jar中。
+
+## 更新计划
+- [ ] 基础个人混战游戏模块
+- [ ] 基础团队对抗游戏模块
