@@ -29,14 +29,12 @@ public class CsgCmd extends RootCmd{
         branchs.addAll(Arrays.asList(
                 new Skip(this),
                 new Item(this),
-                new UnloadTec(this),
                 new KillAll(this),
                 new ShowList(this),
                 new UUID(this),
                 new Debug(this),
                 new Reload(this),
                 new Leave(this),
-                new Teach(this),
                 new Stop(this),
                 new Load(this),
                 new Unload(this),
@@ -187,51 +185,7 @@ public class CsgCmd extends RootCmd{
             return args;
         }
     }
-    static class UnloadTec extends Cmd{
-        UnloadTec(RootCmd rootCmd) {
-            super(rootCmd);
-            branch = "UnloadTec";
-            description = "卸载教程";
-            playerPermission = "csg.UnloadTec";
-            opPermission = "";
-            canPlayer = true;
-            canOp = true;
-            canConsole = true;
-            playerParas = new ArrayList<>();
-            opParas = new ArrayList<>();
-            consoleParas = new ArrayList<>();
-        }
-        @Override
-        public void player(Player player, String... args) {
-            Data.ConsoleInfo("已卸载CustomGoTec");
-            Bukkit.unloadWorld("CustomGoTec",false);
-        }
-        @Override
-        public void op(Player player, String... args) {
-            Data.ConsoleInfo("已卸载CustomGoTec");
-            Bukkit.unloadWorld("CustomGoTec",false);
-        }
-        @Override
-        public void console(CommandSender sender, String... args) {
-            Data.ConsoleInfo("已卸载CustomGoTec");
-            Bukkit.unloadWorld("CustomGoTec",false);
-        }
-        @Override
-        public List<String> playerTab(int para, String[] paras, Player player){
-            List<String> args = new ArrayList<>();
-            return args;
-        }
-        @Override
-        public List<String> opTab(int para, String[] paras, Player player){
-            List<String> args = new ArrayList<>();
-            return args;
-        }
-        @Override
-        public List<String> consoleTab(int para,String[] paras) {
-            List<String> args = new ArrayList<>();
-            return args;
-        }
-    }
+
     static class KillAll extends Cmd{
         KillAll(RootCmd rootCmd) {
             super(rootCmd);
@@ -595,63 +549,6 @@ public class CsgCmd extends RootCmd{
             if (para == 0) {
                 Bukkit.getOnlinePlayers().forEach(e -> args.add(e.getName()));
             }
-            return args;
-        }
-    }
-    static class Teach extends Cmd{
-        Teach(RootCmd rootCmd) {
-            super(rootCmd);
-            branch = "Teach";
-            description = "加载教学";
-            playerPermission = "csg.Teach";
-            opPermission = "";
-            canPlayer = true;
-            canOp = true;
-            canConsole = true;
-            playerParas = new ArrayList<>();
-            opParas = new ArrayList<>();
-            consoleParas = new ArrayList<>();
-        }
-        @Override
-        public void player(Player player, String... args) {
-            console(player,args);
-        }
-        @Override
-        public void op(Player player, String... args) {
-            console(player,args);
-        }
-        @Override
-        public void console(CommandSender sender, String... args) {
-            sender.sendMessage("§d正在进行教程模板加载/更新！请耐心等待...");
-            try{
-                Data.fmain.LoadTec();
-            }catch(Exception e){
-                sender.sendMessage("§c更新教程失败！可以在控制台获取错误信息喔...");
-                e.printStackTrace();
-                return;
-            }
-            Data.fmain.Reload(sender);
-            sender.sendMessage("§d更新完成！你可以选择以下一个队列进行游戏：");
-            sender.sendMessage("§e/csg CustomGoTec join §d[推荐！]");
-            sender.sendMessage("§e/csg Dungeon join");
-            sender.sendMessage("§e/csg 7sec_run join");
-            sender.sendMessage("§e/csg Battle join §d[需要多个玩家]");
-            sender.sendMessage("§e/csg MoneyGame join §d[需要前置Vault，PlaceHolderAPI]");
-            sender.sendMessage("§d一边游戏的同时，可以一边看看它们的配置文件噢！");
-        }
-        @Override
-        public List<String> playerTab(int para, String[] paras, Player player){
-            List<String> args = new ArrayList<>();
-            return args;
-        }
-        @Override
-        public List<String> opTab(int para, String[] paras, Player player){
-            List<String> args = new ArrayList<>();
-            return args;
-        }
-        @Override
-        public List<String> consoleTab(int para,String[] paras) {
-            List<String> args = new ArrayList<>();
             return args;
         }
     }

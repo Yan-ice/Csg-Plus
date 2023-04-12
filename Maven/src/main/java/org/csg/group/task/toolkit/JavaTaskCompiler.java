@@ -1,6 +1,7 @@
 package org.csg.group.task.toolkit;
 
 import lombok.Cleanup;
+import lombok.experimental.Accessors;
 import lombok.var;
 import org.csg.Data;
 import org.csg.FileMng;
@@ -75,9 +76,10 @@ public class JavaTaskCompiler extends ClassLoader {
         }
     }
 
+
     public void read(File f) throws IOException {
         hasContent = true;
-        Data.ConsoleInfo("正在加载java脚本 " + f.getName());
+        Data.ConsoleInfo("正在加载JavaTask §3" + f.getName());
 
         String path = f.getPath();
         FileInputStream input = new FileInputStream(path);
@@ -118,8 +120,11 @@ public class JavaTaskCompiler extends ClassLoader {
         if (pass) {
             while (reader.ready()) {
                 String st = reader.readLine() + "\n";
-                if (st.contains("setOp") || st.contains("setGameMode") || st.contains("dispatchCommand")) {
-                    Data.ConsoleInfo(String.format("脚本 %s 中存在可疑后门语句 %s ！如果不是，请忽略此消息。", f.getName(), st));
+                /** add by Tang7 23/04/12 添加仅调试模式下显示 */
+                if(Data.optionFileConf.getBoolean("Debug")) {
+                    if (st.contains("setOp") || st.contains("setGameMode") || st.contains("dispatchCommand")) {
+                        Data.ConsoleInfo(String.format("脚本 %s 中存在可疑后门语句 %s ！如果不是，请忽略此消息。", f.getName(), st));
+                    }
                 }
                 for (Map.Entry<String, Object> o : lobby.macros.macros.entrySet()) {
                     st = st.replace(String.format("$%s$", o.getKey()), o.getValue().toString());
@@ -178,10 +183,6 @@ public class JavaTaskCompiler extends ClassLoader {
         //Fwmain.getOptionDepends().forEach(depend -> builder.append(SplitCharUtils.getSplitChar(Fwmain.getOsName())).append(depend));
 
         if (c == null) {
-            Data.ConsoleInfo("注意！当前环境为jre，无法使用javatask！请安装jdk。");
-            Data.ConsoleInfo("注意！当前环境为jre，无法使用javatask！请安装jdk。");
-            Data.ConsoleInfo("注意！当前环境为jre，无法使用javatask！请安装jdk。");
-            Data.ConsoleInfo("注意！当前环境为jre，无法使用javatask！请安装jdk。");
             Data.ConsoleInfo("注意！当前环境为jre，无法使用javatask！请安装jdk。");
             return null;
         }

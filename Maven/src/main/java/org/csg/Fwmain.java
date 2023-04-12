@@ -112,9 +112,11 @@ public class Fwmain extends JavaPlugin implements Listener {
 		getServer().getPluginManager().registerEvents(this, this);
 		//分析操作系统
 		analyseOs();
-		System.out.println("-------------Properties------------");
-		System.getProperties().forEach((k,v)->System.out.printf("%s: %s%n",k,v));
-		System.out.println("-----------------------------------");
+		if(Data.debug) {
+			System.out.print("-------------Properties------------");
+			System.getProperties().forEach((k,v)->System.out.printf("%s: %s%n",k,v));
+			System.out.print("-----------------------------------");
+		}
 		try{
 
 			SendToData();
@@ -225,22 +227,6 @@ public class Fwmain extends JavaPlugin implements Listener {
 			Data.worldpath = ("./");
 		}
 	}
-	public void LoadTec() throws IOException {
-
-		this.saveResource("Csg-Plus.zip", true);
-		File zip = new File(getDataFolder(), "Csg-Plus.zip");
-		ZipUtils.decompress("./plugins",zip.getAbsolutePath());
-		zip.delete();
-
-		this.saveResource("CustomGoTec.zip", true);
-		zip = new File(getDataFolder(), "CustomGoTec.zip");
-
-		File csgt = new File(Data.worldpath);
-		ZipUtils.decompress(csgt.getAbsolutePath(),zip.getAbsolutePath());
-		zip.delete();
-
-		getServer().createWorld(WorldCreator.name("CustomGoTec"));
-	}
 	private void LoadBukkitCore(File root, boolean isPaper) {
 		if(!isPaper){
 			Arrays.stream(System.getProperty("java.class.path").split(";")).filter(e -> e.endsWith(".jar")).forEach(e -> {
@@ -268,7 +254,9 @@ public class Fwmain extends JavaPlugin implements Listener {
 					LoadBukkitCore(f,isPaper);
 				}else{
 					if(f.getName().endsWith(".jar")){
-						Data.ConsoleInfo("识别到API "+f.getName());
+						if(Data.debug) {
+							Data.ConsoleInfo("识别到API "+f.getName());
+						}
 						Data.bukkit_core.add(f);
 						break;
 					}
@@ -307,35 +295,12 @@ public class Fwmain extends JavaPlugin implements Listener {
 		Data.LoadOption();
 	}
 
+	/** 暂留
 	@EventHandler
 	private void PlayerJoinTip(PlayerJoinEvent evt){
 		final Player sender = evt.getPlayer();
-		if(evt.getPlayer().isOp()) {
-			if(Lobby.getLobby("CustomGoTec")==null){
 
-				new BukkitRunnable() {
-
-					@Override
-					public void run() {
-
-						if(sender.isOp()) {
-							sender.sendMessage("§a*************************************");
-							sender.sendMessage("§a检测到可以进行教程模板加载/更新！");
-							sender.sendMessage("§a如果你是第一次使用插件，教程会对你有很大帮助哦~！");
-							sender.sendMessage("§a");
-							sender.sendMessage("想要加载/更新教程，请输入 §d/csg teach");
-							sender.sendMessage("§a");
-							sender.sendMessage("§7(附加提示：更新教程会重载插件~)");
-							sender.sendMessage("§a*************************************");
-						}
-
-					}
-
-				}.runTaskLater(this, 100);
-
-			}
-		}
-	}
+	}*/
 
 	@EventHandler
 	private void LListen(PlayerQuitEvent evt){

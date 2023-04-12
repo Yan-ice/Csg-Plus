@@ -17,7 +17,6 @@ public class Help {
 	public static void MainHelp(CommandSender sender) {
 		sender.sendMessage(title("Csg-Plus "+Data.Version+" 帮助"));
 		sender.sendMessage("/csg reload              重载插件");
-		sender.sendMessage("/csg teach               加载教程模板");
 		sender.sendMessage("/csg list                查看所有游戏");
 		sender.sendMessage("/csg leave               离开一个大厅");
 		sender.sendMessage("/csg leave <玩家>         令指定玩家离开一个游戏");

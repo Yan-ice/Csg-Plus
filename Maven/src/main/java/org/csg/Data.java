@@ -57,7 +57,7 @@ public class Data {
 		}
 	}
 	public static void ConsoleInfo(String info) {
-		fmain.getLogger().info(info);
+		fmain.getLogger().info("§a[信息]§r " + info);
 	}
 	public static void ConsoleError(String info) {
 		fmain.getLogger().info(ChatColor.RED+"ERROR: "+info);

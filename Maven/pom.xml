@@ -5,8 +5,8 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>csg</groupId>
-    <artifactId>Csg-Plus</artifactId>
-    <version>1.8.4-Beta</version>
+    <artifactId>CsgPlusPro</artifactId>
+    <version>1.9.0-Beta1</version>
 
     <properties>
         <maven.compiler.source>8</maven.compiler.source>
@@ -32,35 +32,14 @@
             <systemPath>${project.basedir}/libs/[修复版]spigot-1.12.2.jar</systemPath>
         </dependency>
         <dependency>
-            <groupId>papi</groupId>
-            <artifactId>papi</artifactId>
-            <version>1.12.2</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/libs/PlaceholderAPI-2.9.2.jar</systemPath>
-        </dependency>
-<!--        <dependency>-->
-<!--            <groupId>org.openjdk.nashorn</groupId>-->
-<!--            <artifactId>nashorn-core</artifactId>-->
-<!--            <version>15.4</version>-->
-<!--        </dependency>-->
-        <dependency>
-            <groupId>nashorn</groupId>
-            <artifactId>nashorn</artifactId>
-            <version>15.4</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/libs/nashorn.jar</systemPath>
+            <groupId>com.alibaba</groupId>
+            <artifactId>druid</artifactId>
+            <version>1.2.16</version>
         </dependency>
         <dependency>
             <groupId>org.javassist</groupId>
             <artifactId>javassist</artifactId>
             <version>3.28.0-GA</version>
-        </dependency>
-
-        <!-- ant.jar 用于解决文件解压缩乱码问题 -->
-        <dependency>
-            <groupId>ant</groupId>
-            <artifactId>ant</artifactId>
-            <version>1.6.5</version>
         </dependency>
 
         <dependency>

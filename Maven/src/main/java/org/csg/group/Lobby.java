@@ -135,7 +135,6 @@ public class Lobby implements customgo.Lobby, CycleUpdate {
 	private final Set<ListenerTask> listener = new HashSet<>();
 	private Class<?> javaFunctionClass;
 	private Object javaTaskInstance;
-	private JsTaskCompiler jsTaskCompiler;
 
 	private Set<Group> grouplist = new HashSet<>();
 	private Trigger trigger = new Trigger(this);
@@ -161,7 +160,7 @@ public class Lobby implements customgo.Lobby, CycleUpdate {
 		List<UUID> pl = new ArrayList<>();
 		for(Group g : getGroupListI()){
 			pl.addAll(g.getPlayerList());
-			
+
 		}
 		return pl;
 	}
@@ -179,11 +178,6 @@ public class Lobby implements customgo.Lobby, CycleUpdate {
 			if(task.getName().equals(name)){
 				runTask(task,p,para);
 			}
-		}
-		if (jsTaskCompiler != null) {
-			jsTaskCompiler._setMember(this,null,p,p);
-			if (name.startsWith("js"))
-				return jsTaskCompiler.callFunction(name.substring(2),para);
 		}
 		if(javaFunctionClass !=null){
 			try{
@@ -210,10 +204,6 @@ public class Lobby implements customgo.Lobby, CycleUpdate {
 			if(task.getName().equals(name)){
 				executer.lobby.runTask(task,p, para);
 			}
-		}
-		if(jsTaskCompiler != null && name.toLowerCase().startsWith("js")) {
-			jsTaskCompiler._setMember(this,null,executer.striker!=null ? Bukkit.getPlayer(executer.striker) : null,p);
-			return jsTaskCompiler.callFunction(name.substring(2),para);
 		}
 		if(javaFunctionClass !=null){
 			try{
@@ -355,19 +345,19 @@ public class Lobby implements customgo.Lobby, CycleUpdate {
 	public Lobby clone(){
 		return new Lobby(Folder,1);
 	}
-	
-	
+
+
 	public void addToList(){
 		LobbyList.add(this);
 	}
 
-	private void loadFileRecurse(File folder, JavaTaskCompiler jcompiler, JsTaskCompiler jsTaskCompiler) throws IOException {
+	private void loadFileRecurse(File folder, JavaTaskCompiler jcompiler) throws IOException {
 		for(File f : folder.listFiles()){
 			if(f.isDirectory()){
 				if(f.getName().equals("temp")){
 					continue;
 				}
-				loadFileRecurse(f,jcompiler,jsTaskCompiler);
+				loadFileRecurse(f,jcompiler);
 				continue;
 			}
 
@@ -388,9 +378,6 @@ public class Lobby implements customgo.Lobby, CycleUpdate {
 			if(f.getName().endsWith("class")){
 				jcompiler.addDepend(f);
 			}
-			if(f.getName().endsWith("js")){
-				jsTaskCompiler.read(f);
-			}
 		}
 	}
 	private void loadMacro(File folder,boolean direct){
@@ -410,19 +397,18 @@ public class Lobby implements customgo.Lobby, CycleUpdate {
 	}
 	private void loadFile(File folder) throws IOException {
 		JavaTaskCompiler jcompiler = new JavaTaskCompiler(this);
-		jsTaskCompiler = new JsTaskCompiler(this);
 
 		loadMacro(folder,true);
 
 		if(default_macro_file!=null){
-			Data.ConsoleInfo("正在加载用户宏列表 macro.yml");
+			//Data.ConsoleInfo("正在加载Macro预设宏");
 			macros.LoadMacro(Data.fmain.load(default_macro_file));
 		}else{
 			default_macro_file = new File(folder.getPath()+"/macro.yml");
 			default_macro_file.createNewFile();
 		}
 
-		loadFileRecurse(folder,jcompiler,jsTaskCompiler);
+		loadFileRecurse(folder,jcompiler);
 
 		javaFunctionClass = jcompiler.compile();
 		if(javaFunctionClass !=null){
@@ -432,9 +418,6 @@ public class Lobby implements customgo.Lobby, CycleUpdate {
 			} catch (InstantiationException | InvocationTargetException | IllegalAccessException | NoSuchMethodException e) {
 				e.printStackTrace();
 			}
-		}
-		if (jsTaskCompiler.isHasContent()) {
-			jsTaskCompiler._setPlugin(Data.fmain);
 		}
 	}
 	/**
@@ -449,7 +432,7 @@ public class Lobby implements customgo.Lobby, CycleUpdate {
 		grouplist.clear();
 		functions.clear();
 		listener.clear();
-		Data.ConsoleInfo("=====[正在加载大厅"+Name+"]=====");
+		Data.ConsoleInfo("===== | §b正在加载大厅 "+Name+" §r| =====");
 
 		if(Data.isBungee){
 			new BungeeSupport((this));
@@ -480,11 +463,11 @@ public class Lobby implements customgo.Lobby, CycleUpdate {
 				}
 			}
 
-			Data.ConsoleInfo("=====[大厅"+Name+"加载成功]=====");
+			Data.ConsoleInfo("===== | §a大厅 "+Name+"加载成功 §r| =====");
 			SecondCycle.registerCall(this);
 
 		}else{
-			Data.ConsoleInfo("=====[大厅"+Name+"加载失败]=====");
+			Data.ConsoleInfo("===== | §c大厅 "+Name+"加载失败 §r| =====");
 		}
 	}
 
@@ -500,7 +483,6 @@ public class Lobby implements customgo.Lobby, CycleUpdate {
 			getDefaultGroup().UnLoad();
 		}
 
-		jsTaskCompiler.getTasks().values().forEach(e -> e.getListeners().values().forEach(HandlerList::unregisterAll));
 		if(LobbyList.contains(this)){
 			LobbyList.remove(this);
 		}
@@ -572,7 +554,7 @@ public class Lobby implements customgo.Lobby, CycleUpdate {
 		}
 		return null;
 	}
-	
+
 
 	public void Join(Player player){
 		if(getPlayerAmount()==0){
@@ -631,9 +613,9 @@ public class Lobby implements customgo.Lobby, CycleUpdate {
 		}
 		from.LeaveGroup(player);
 		to.JoinGroup(player);
-		
+
 	}
-	
+
 
 	public static void AutoLeave(Player player,boolean noTel){
 		for(Lobby l : LobbyList){
@@ -654,7 +636,7 @@ public class Lobby implements customgo.Lobby, CycleUpdate {
 		}
 
 	}
-	
+
 	public static void UnLoadAll() {
 		while(LobbyList.size()>0){
 			LobbyList.get(0).unLoad();

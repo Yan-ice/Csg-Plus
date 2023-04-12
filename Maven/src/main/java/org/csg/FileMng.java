@@ -1,7 +1,5 @@
 package org.csg;
 
-import org.apache.tools.zip.ZipEntry;
-import org.apache.tools.zip.ZipFile;
 
 import java.io.*;
 import java.nio.charset.Charset;
@@ -37,7 +35,7 @@ public class FileMng {
 	        }
 	        InputStream in = new FileInputStream(source);
 	        Object out = new FileOutputStream(target);
-	        
+
 	        byte[] buf = new byte[1024];
 	        int len;
 	        while ((len = in.read(buf)) > 0) {
@@ -51,7 +49,7 @@ public class FileMng {
 	      }
 	    }
 	  }
-	  
+
 	  public static boolean deleteDir(File dir)
 	  {
 	    if (dir.isDirectory()) {
@@ -63,7 +61,7 @@ public class FileMng {
 	    }
 	    return dir.delete();
 	  }
-	  
+
 
 	/* 替换文件中的字符串，并覆盖原文件
 	 * @param filePath
