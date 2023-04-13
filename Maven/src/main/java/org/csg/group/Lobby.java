@@ -5,6 +5,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -250,24 +251,15 @@ public class Lobby implements customgo.Lobby, CycleUpdate {
 	 * @throws IllegalAccessException
 	 */
 	private Object safeCallJavaFunction(Method meth, Object... para) throws InvocationTargetException, IllegalAccessException {
-		Class<?>[] require_list = meth.getParameterTypes();
-
+		Type[] require_list = meth.getGenericParameterTypes();
 		if(require_list.length > para.length){
 			throw new ClassCastException("param not enough");
 		}
-
 		Object[] cast_list = new Object[require_list.length];
 		for(int a = 0;a<require_list.length;a++){
-			if(require_list[a].isAssignableFrom(para[a].getClass())){
-				//如果类型满足，直接提供给函数。
-				cast_list[a] = para[a];
-			}else{
-				//如果类型不满足，尝试进行类型转化再提供给函数。
-				cast_list[a] = TypeCastFactory.castObject(para[a],require_list[a]);
-			}
+			cast_list[a] = TypeCastFactory.castObject(para[a],require_list[a]);
 		}
-
-		return meth.invoke(javaTaskInstance,para);
+		return meth.invoke(javaTaskInstance,cast_list);
 	}
 
 	public Group findGroupOfPlayer(Player p){

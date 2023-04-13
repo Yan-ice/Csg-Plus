@@ -1,10 +1,13 @@
 package org.csg.group.task.cast;
 
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
+
 import java.lang.reflect.Type;
 
-public class StringTypeCaster extends TypeCaster{
+public class PlayerTypeCaster extends TypeCaster{
     public Class<?> targetType(){
-        return String.class;
+        return Player.class;
     }
 
     /**
@@ -13,7 +16,8 @@ public class StringTypeCaster extends TypeCaster{
      * @return
      */
     protected String serializeRule(Object s){
-        return (String)s;
+        Player p = (Player)s;
+        return p.getName();
     }
 
     /**
@@ -21,8 +25,12 @@ public class StringTypeCaster extends TypeCaster{
      * @param s 源字符串。
      * @return 如果反序列化失败，请返回null。
      */
-    protected Object deserializeRule(String s, Type... typeArguments){
-        return s;
+    protected Object deserializeRule(String s,  Type... typeArguments){
+        for(Player p : Bukkit.getOnlinePlayers()){
+            if(p.getName().equals(s))
+                return p;
+        }
+        return null;
     }
 }
 

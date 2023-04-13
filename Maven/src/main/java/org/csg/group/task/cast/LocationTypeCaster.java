@@ -5,6 +5,8 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
 
+import java.lang.reflect.Type;
+
 /**
  * location与字符的转化格式为：
  * x y z world 或 x y z world yaw pitch
@@ -22,7 +24,9 @@ public class LocationTypeCaster extends TypeCaster{
      * @return
      */
     protected String serializeRule(Object s){
-        return (String)s;
+        Location obj = (Location)s;
+        return String.format("%d %d %d %s %d %d",obj.getBlockX(),obj.getBlockY(),obj.getBlockZ(),
+                obj.getWorld().getName(),(int)obj.getYaw(),(int)obj.getPitch());
     }
 
     /**
@@ -30,7 +34,7 @@ public class LocationTypeCaster extends TypeCaster{
      * @param arg 源字符串。
      * @return 如果反序列化失败，请返回null。
      */
-    protected Object deserializeRule(String arg) throws UnknownWorldException {
+    protected Object deserializeRule(String arg, Type... typeArguments) throws UnknownWorldException {
         if (arg.matches("^(-?[0-9]+ ){3}\\S+$")) {
             String[] sl = arg.split(" ");
             World w = Bukkit.getWorld(sl[3]);

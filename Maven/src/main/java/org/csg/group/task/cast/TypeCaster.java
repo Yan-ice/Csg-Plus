@@ -49,11 +49,12 @@ public abstract class TypeCaster {
     /**
      * 将字符串反序列化为targetType类型的object。
      * @param s 源字符串。
-     * @return 如果反序列化失败，请返回null。
+     * @param typeArguments 若targetType存在泛型，请在这里提供泛型类型。
+     * @return 如果反序列化失败，返回null。
      */
-    public Object deserialize(String s){
+    public Object deserialize(String s, Type... typeArguments){
         try{
-            Object dese = deserializeRule(s);
+            Object dese = deserializeRule(s, typeArguments);
             if(targetType().isAssignableFrom(dese.getClass())){
                 return dese;
             }else{
@@ -71,9 +72,10 @@ public abstract class TypeCaster {
     /**
      * 将字符串反序列化为targetType类型的object。
      * @param s 源字符串。
+     * @param typeArguments 若targetType存在泛型，这里会提供泛型类型。
      * @return 如果反序列化失败，请返回null。
      */
-    protected abstract Object deserializeRule(String s) throws Exception;
+    protected abstract Object deserializeRule(String s, Type... typeArguments) throws Exception;
 }
 
 
