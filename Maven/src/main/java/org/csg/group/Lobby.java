@@ -5,6 +5,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
@@ -12,6 +13,7 @@ import customgo.event.ListenerCalledEvent;
 import customgo.event.PlayerJoinLobbyEvent;
 import customgo.event.PlayerLeaveLobbyEvent;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.event.player.PlayerMoveEvent;
 import org.csg.BungeeSupport;
 import org.csg.group.hologram.FwHologram;
 import org.csg.group.task.VarTable;
@@ -194,6 +196,9 @@ public class Lobby implements customgo.Lobby, CycleUpdate {
 				}
 				for(Method meth : javaFunctionClass.getMethods()){
 					if(meth.getName().equals(name)){
+						for(Type t : meth.getGenericParameterTypes()){
+							para[0] = para[0];
+						}
 						return meth.invoke(javaTaskInstance,para);
 					}
 				}
@@ -607,9 +612,7 @@ public class Lobby implements customgo.Lobby, CycleUpdate {
 
 		PlayerLeaveLobbyEvent e = new PlayerLeaveLobbyEvent(player,this);
 		Data.fmain.getServer().getPluginManager().callEvent(e);
-
 		callListener("onPlayerRest",null,getPlayerAmount());
-
 	}
 
 	public void ChangeGroup(Player player,String groupname){

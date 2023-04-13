@@ -119,13 +119,9 @@ public class Fwmain extends JavaPlugin implements Listener {
 
 			SendToData();
 			loadWorldPath();
-			if(Data.isPaper){
-				File root = new File("./libraries");
-				LoadBukkitCore(root,true);
-			}else{
-				File root = new File("./");
-				LoadBukkitCore(root,false);
-			}
+
+			File root = new File("./");
+			LoadBukkitCore(root);
 
 			csgCmd = new CsgCmd(Bukkit.getPluginCommand("csg"));
 
@@ -168,12 +164,9 @@ public class Fwmain extends JavaPlugin implements Listener {
 		SendToData();
 		loadWorldPath();
 
-		File root = new File("./libraries");
-		if(root.exists()){
-			LoadBukkitCore(root,true);
-		}
-		root = new File("./");
-		LoadBukkitCore(root,false);
+
+		File root = new File("./");
+		LoadBukkitCore(root);
 
 		Lobby.LoadAll(lobby);
 
@@ -241,37 +234,35 @@ public class Fwmain extends JavaPlugin implements Listener {
 
 		getServer().createWorld(WorldCreator.name("CustomGoTec"));
 	}
-	private void LoadBukkitCore(File root, boolean isPaper) {
-		if(!isPaper){
-			Arrays.stream(System.getProperty("java.class.path").split(";")).filter(e -> e.endsWith(".jar")).forEach(e -> {
-				File file = new File(e);
-				try {
-					JarFile jar = new JarFile(file);
-					JarEntry entry = jar.getJarEntry("version.json");
+	private void LoadBukkitCore(File root) {
+		//寻找核心端
+//		Arrays.stream(System.getProperty("java.class.path").split(";")).filter(e -> e.endsWith(".jar")).forEach(e -> {
+//			File file = new File(e);
+//			try {
+//				JarFile jar = new JarFile(file);
+//				JarEntry entry = jar.getJarEntry("version.json");
+//
+//				if(jar.getJarEntry("version.json") != null || jar.getJarEntry("mohist_libraries.txt") != null){
+//					Data.ConsoleInfo("识别到核心端 " + file.getAbsolutePath());
+//					Data.bukkit_core.add(file);
+//				}
+//				if(entry != null){
+//					Data.ConsoleInfo("识别到核心端 " + file.getAbsolutePath());
+//					Data.bukkit_core.add(file);
+//				}
+//			}catch (Exception err){
+//				err.printStackTrace();
+//			}
+//		});
 
-					if(jar.getJarEntry("version.json") != null || jar.getJarEntry("mohist_libraries.txt") != null){
-						Data.ConsoleInfo("识别到核心端 " + file.getAbsolutePath());
-						Data.bukkit_core.add(file);
-					}
-					if(entry != null){
-						Data.ConsoleInfo("识别到核心端 " + file.getAbsolutePath());
-						Data.bukkit_core.add(file);
-					}
-				}catch (Exception err){
-					err.printStackTrace();
-				}
-			});
-
-		}else{
-			for(File f : root.listFiles()){
-				if(f.isDirectory()){
-					LoadBukkitCore(f,isPaper);
-				}else{
-					if(f.getName().endsWith(".jar")){
-						Data.ConsoleInfo("识别到API "+f.getName());
-						Data.bukkit_core.add(f);
-						break;
-					}
+		//寻找API
+		for(File f : root.listFiles()){
+			if(f.isDirectory()){
+				LoadBukkitCore(f);
+			}else{
+				if(f.getName().endsWith(".jar")){
+					Data.ConsoleInfo("识别到API "+f.getName());
+					Data.bukkit_core.add(f);
 				}
 			}
 		}

@@ -12,6 +12,7 @@ import org.csg.group.task.ItemCheck;
 import org.csg.group.task.toolkit.Calculator;
 import org.csg.group.task.toolkit.TaskExecuter;
 
+import org.csg.group.task.toolkit.TypeManage;
 import org.csg.location.FArena;
 import org.csg.location.Teleporter;
 import org.bukkit.Bukkit;
@@ -20,6 +21,7 @@ import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.*;
 
+import java.lang.reflect.Type;
 import java.util.*;
 
 public class CommandTask extends Task {
@@ -142,6 +144,7 @@ public class CommandTask extends Task {
 
         return next;
     }
+
 
     private boolean RunTask(TaskExecuter executer, Player Target) throws NullPointerException,NumberFormatException,IndexOutOfBoundsException{
 

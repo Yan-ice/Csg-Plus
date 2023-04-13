@@ -1,5 +1,6 @@
 package org.csg.group.task.toolkit;
 
+import org.bukkit.World;
 import org.csg.Data;
 import org.csg.group.Group;
 import org.csg.group.Lobby;
@@ -53,7 +54,7 @@ public class TaskExecuter implements CycleUpdate {
     public String variableReplace(List<String> keys, String origin, Player target){
         List<String> copy = new ArrayList<>(keys);
         int stop_cnt = 100;
-        //System.out.println("-- replace begin: "+origin);
+
         while(copy.size()>0 && (stop_cnt-->0)){
             String current = copy.get(0);
             copy.remove(0);
@@ -61,13 +62,12 @@ public class TaskExecuter implements CycleUpdate {
                 copy.add(current);
                 continue;
             }
-            //System.out.println("replacing: "+current);
+
             String ori = String.format("{%s}", current);
             String tar = VarTable.objToString(lobby.macros.getValue(target,current,this));
             origin = origin.replace(ori,tar);
             copy.replaceAll(s -> s.replace(ori, tar));
         }
-        //System.out.println("-- replace end: "+origin);
 
         origin = Data.ColorChange(origin);
         String origin_old = "";
@@ -150,8 +150,7 @@ public class TaskExecuter implements CycleUpdate {
                 }
                 if(true){
                     String str = value.toString();
-                    //TODO 字符串自动识别为坐标和数组
-                    origin = origin.replace(String.format("$%s$", s),str);
+
 
                 }
             }
