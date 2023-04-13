@@ -20,6 +20,7 @@ public class ListenerCalledEvent extends Event {
         player = p;
         args = a;
     }
+
     public Lobby getLobby(){
         return lobby;
     }

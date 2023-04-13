@@ -1,6 +1,7 @@
 package org.csg.group.task.cast;
 
 import org.bukkit.Location;
+import org.csg.Data;
 
 import javax.lang.model.type.ArrayType;
 import java.lang.reflect.InvocationTargetException;
@@ -52,10 +53,18 @@ public class TypeCastFactory {
      * @param target
      */
     public static Object castObject(Object object, Type target){
+        if(object==null) return null;
+
         //如果类型已经相同就无需再转化。
         if(target instanceof Class<?>){
+
             if(((Class<?>)target).isAssignableFrom(object.getClass())){
                 return object;
+            }
+
+            if(!castAvailable((Class<?>)target)){
+                Data.ConsoleError("csg暂时不支持"+((Class<?>)target).getName()+"的类型转化！");
+                return null;
             }
         }
         if(target instanceof ParameterizedType){
@@ -63,10 +72,21 @@ public class TypeCastFactory {
             if(((Class<?>)p.getRawType()).isAssignableFrom(object.getClass())){
                 return object;
             }
+
+            if(!castAvailable((Class<?>)p.getRawType())){
+                Data.ConsoleError("csg暂时不支持"+((Class<?>)p.getRawType()).getName()+"的类型转化！");
+                return null;
+            }
+        }
+
+        if(!castAvailable(object.getClass())){
+            Data.ConsoleError("csg暂时不支持"+object.getClass().getName()+"的类型转化！");
+            return null;
         }
 
         //进行转化。
         String seril = serializeObject(object);
+
         return deserializeObject(seril, target);
     }
 

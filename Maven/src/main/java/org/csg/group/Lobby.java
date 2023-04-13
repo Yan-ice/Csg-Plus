@@ -303,7 +303,7 @@ public class Lobby implements customgo.Lobby, CycleUpdate {
 					if(meth.isAnnotationPresent(CsgTaskListener.class)){
 						CsgTaskListener ls = meth.getAnnotation(CsgTaskListener.class);
 						if(ls.name().equals(name)){
-							meth.invoke(javaTaskInstance,para);
+							safeCallJavaFunction(meth, para);
 						}
 					}
 				}
