@@ -18,6 +18,7 @@ import org.csg.BungeeSupport;
 import org.csg.group.hologram.FwHologram;
 import org.csg.group.task.VarTable;
 import customgo.CsgTaskListener;
+import org.csg.group.task.cast.TypeCastFactory;
 import org.csg.group.task.csgtask.FunctionTask;
 import org.csg.group.task.csgtask.ListenerTask;
 import org.bukkit.entity.*;
@@ -196,10 +197,7 @@ public class Lobby implements customgo.Lobby, CycleUpdate {
 				}
 				for(Method meth : javaFunctionClass.getMethods()){
 					if(meth.getName().equals(name)){
-						for(Type t : meth.getGenericParameterTypes()){
-							para[0] = para[0];
-						}
-						return meth.invoke(javaTaskInstance,para);
+						safeCallJavaFunction(meth,para);
 					}
 				}
 			}catch(IllegalAccessException | InvocationTargetException e){
@@ -230,7 +228,7 @@ public class Lobby implements customgo.Lobby, CycleUpdate {
 				}
 				for(Method meth : javaFunctionClass.getMethods()){
 					if(meth.getName().equals(name)){
-						return meth.invoke(javaTaskInstance,para);
+						return safeCallJavaFunction(meth,para);
 					}
 				}
 			}catch(IllegalAccessException | InvocationTargetException e){
@@ -239,8 +237,37 @@ public class Lobby implements customgo.Lobby, CycleUpdate {
 			}
 		}
 
-
 		return null;
+	}
+
+	/**
+	 * "安全地"进行java函数调用。
+	 * 在调用时如果出现类型不匹配，会先尝试用TypeCastFactory进行类型转化。
+	 * @param meth
+	 * @param para
+	 * @return
+	 * @throws InvocationTargetException
+	 * @throws IllegalAccessException
+	 */
+	private Object safeCallJavaFunction(Method meth, Object... para) throws InvocationTargetException, IllegalAccessException {
+		Class<?>[] require_list = meth.getParameterTypes();
+
+		if(require_list.length > para.length){
+			throw new ClassCastException("param not enough");
+		}
+
+		Object[] cast_list = new Object[require_list.length];
+		for(int a = 0;a<require_list.length;a++){
+			if(require_list[a].isAssignableFrom(para[a].getClass())){
+				//如果类型满足，直接提供给函数。
+				cast_list[a] = para[a];
+			}else{
+				//如果类型不满足，尝试进行类型转化再提供给函数。
+				cast_list[a] = TypeCastFactory.castObject(para[a],require_list[a]);
+			}
+		}
+
+		return meth.invoke(javaTaskInstance,para);
 	}
 
 	public Group findGroupOfPlayer(Player p){

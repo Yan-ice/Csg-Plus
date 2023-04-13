@@ -1,6 +1,6 @@
 package org.csg.group.task.cast;
 
-public abstract class StringTypeCaster extends TypeCaster{
+public class StringTypeCaster extends TypeCaster{
     public Class<?> targetType(){
         return String.class;
     }
