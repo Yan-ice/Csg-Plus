@@ -5,6 +5,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
@@ -12,10 +14,12 @@ import customgo.event.ListenerCalledEvent;
 import customgo.event.PlayerJoinLobbyEvent;
 import customgo.event.PlayerLeaveLobbyEvent;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.event.player.PlayerMoveEvent;
 import org.csg.BungeeSupport;
 import org.csg.group.hologram.FwHologram;
 import org.csg.group.task.VarTable;
 import customgo.CsgTaskListener;
+import org.csg.group.task.cast.TypeCastFactory;
 import org.csg.group.task.csgtask.FunctionTask;
 import org.csg.group.task.csgtask.ListenerTask;
 import org.bukkit.entity.*;
@@ -188,7 +192,7 @@ public class Lobby implements customgo.Lobby, CycleUpdate {
 				}
 				for(Method meth : javaFunctionClass.getMethods()){
 					if(meth.getName().equals(name)){
-						return meth.invoke(javaTaskInstance,para);
+						safeCallJavaFunction(meth,para);
 					}
 				}
 			}catch(IllegalAccessException | InvocationTargetException e){
@@ -215,7 +219,7 @@ public class Lobby implements customgo.Lobby, CycleUpdate {
 				}
 				for(Method meth : javaFunctionClass.getMethods()){
 					if(meth.getName().equals(name)){
-						return meth.invoke(javaTaskInstance,para);
+						return safeCallJavaFunction(meth,para);
 					}
 				}
 			}catch(IllegalAccessException | InvocationTargetException e){
@@ -224,8 +228,28 @@ public class Lobby implements customgo.Lobby, CycleUpdate {
 			}
 		}
 
-
 		return null;
+	}
+
+	/**
+	 * "安全地"进行java函数调用。
+	 * 在调用时如果出现类型不匹配，会先尝试用TypeCastFactory进行类型转化。
+	 * @param meth
+	 * @param para
+	 * @return
+	 * @throws InvocationTargetException
+	 * @throws IllegalAccessException
+	 */
+	private Object safeCallJavaFunction(Method meth, Object... para) throws InvocationTargetException, IllegalAccessException {
+		Type[] require_list = meth.getGenericParameterTypes();
+		if(require_list.length > para.length){
+			throw new ClassCastException("param not enough");
+		}
+		Object[] cast_list = new Object[require_list.length];
+		for(int a = 0;a<require_list.length;a++){
+			cast_list[a] = TypeCastFactory.castObject(para[a],require_list[a]);
+		}
+		return meth.invoke(javaTaskInstance,cast_list);
 	}
 
 	public Group findGroupOfPlayer(Player p){
@@ -269,7 +293,7 @@ public class Lobby implements customgo.Lobby, CycleUpdate {
 					if(meth.isAnnotationPresent(CsgTaskListener.class)){
 						CsgTaskListener ls = meth.getAnnotation(CsgTaskListener.class);
 						if(ls.name().equals(name)){
-							meth.invoke(javaTaskInstance,para);
+							safeCallJavaFunction(meth, para);
 						}
 					}
 				}
@@ -589,9 +613,7 @@ public class Lobby implements customgo.Lobby, CycleUpdate {
 
 		PlayerLeaveLobbyEvent e = new PlayerLeaveLobbyEvent(player,this);
 		Data.fmain.getServer().getPluginManager().callEvent(e);
-
 		callListener("onPlayerRest",null,getPlayerAmount());
-
 	}
 
 	public void ChangeGroup(Player player,String groupname){

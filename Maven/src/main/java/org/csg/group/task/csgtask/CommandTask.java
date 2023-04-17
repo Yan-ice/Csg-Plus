@@ -143,6 +143,7 @@ public class CommandTask extends Task {
         return next;
     }
 
+
     private boolean RunTask(TaskExecuter executer, Player Target) throws NullPointerException,NumberFormatException,IndexOutOfBoundsException{
 
         Object return_obj = null;
