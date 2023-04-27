@@ -21,6 +21,7 @@ public class TypeCastFactory {
         caster_list.add(new StringTypeCaster());
         caster_list.add(new ArrayListTypeCaster());
         caster_list.add(new PlayerTypeCaster());
+        caster_list.add(new GroupTypeCaster());
     }
 
     /**
@@ -131,45 +132,46 @@ public class TypeCastFactory {
         return null;
     }
 
-//    以下是对类型转换功能的测试代码。
-//    public void Invo(List<String> arg,List<List<String>> h_arg){
-//        System.out.println("Success！");
-//        for(String s : arg){
-//            System.out.println("arg: "+s);
-//        }
-//        for(List<String> sarg : h_arg){
-//            for(String s : sarg) {
-//                System.out.println("h_arg: " + s);
-//            }
-//        }
-//
-//    }
-//    public static void main(String[] ar){
-//        Object[] params = new Object[]{"[str]","[[aaaaaw w], [yanice, ww], [aa]]"};
-//        TypeCastFactory fac = new TypeCastFactory();
-//        for(Method m :fac.getClass().getMethods()){
-//            if(m.getName().equals("Invo")){
-//                fac.safeCallJavaFunction(m,params);
-//            }
-//        }
-//    }
-//    private Object safeCallJavaFunction(Method meth, Object... para){
-//        Type[] require_list = meth.getGenericParameterTypes();
-//        if(require_list.length > para.length){
-//            throw new ClassCastException("param not enough");
-//        }
-//        Object[] cast_list = new Object[require_list.length];
-//        for(int a = 0;a<require_list.length;a++){
-//            cast_list[a] = TypeCastFactory.castObject(para[a],require_list[a]);
-//
-//        }
-//        try {
-//            return meth.invoke(this,cast_list);
-//        } catch (IllegalAccessException e) {
-//            throw new RuntimeException(e);
-//        } catch (InvocationTargetException e) {
-//            throw new RuntimeException(e);
-//        }
-//    }
+    //以下是对类型转换功能的测试代码。
+    /*
+    public void Invo(List<String> arg,List<List<String>> h_arg){
+        System.out.println("Success！");
+        for(String s : arg){
+            System.out.println("arg: "+s);
+        }
+        for(List<String> sarg : h_arg){
+            for(String s : sarg) {
+                System.out.println("h_arg: " + s);
+            }
+        }
 
+    }
+    public static void main(String[] ar){
+        Object[] params = new Object[]{"[str]","[[aaaaaw w], [yanice, ww], [aa]]"};
+        TypeCastFactory fac = new TypeCastFactory();
+        for(Method m :fac.getClass().getMethods()){
+            if(m.getName().equals("Invo")){
+                fac.safeCallJavaFunction(m,params);
+            }
+        }
+    }
+    private Object safeCallJavaFunction(Method meth, Object... para){
+        Type[] require_list = meth.getGenericParameterTypes();
+        if(require_list.length > para.length){
+            throw new ClassCastException("param not enough");
+        }
+        Object[] cast_list = new Object[require_list.length];
+        for(int a = 0;a<require_list.length;a++){
+            cast_list[a] = TypeCastFactory.castObject(para[a],require_list[a]);
+
+        }
+        try {
+            return meth.invoke(this,cast_list);
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
+        } catch (InvocationTargetException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    */
 }

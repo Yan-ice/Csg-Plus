@@ -121,9 +121,13 @@ public class Fwmain extends JavaPlugin implements Listener {
 
 			SendToData();
 			loadWorldPath();
-
-			File root = new File("./");
-			LoadBukkitCore(root);
+			if(Data.isPaper){
+				File root = new File("./libraries");
+				LoadBukkitCore(root,true);
+			}else{
+				File root = new File("./");
+				LoadBukkitCore(root,false);
+			}
 
 			csgCmd = new CsgCmd(Bukkit.getPluginCommand("csg"));
 
@@ -166,9 +170,12 @@ public class Fwmain extends JavaPlugin implements Listener {
 		SendToData();
 		loadWorldPath();
 
-
-		File root = new File("./");
-		LoadBukkitCore(root);
+		File root = new File("./libraries");
+		if(root.exists()){
+			LoadBukkitCore(root,true);
+		}
+		root = new File("./");
+		LoadBukkitCore(root,false);
 
 		Lobby.LoadAll(lobby);
 

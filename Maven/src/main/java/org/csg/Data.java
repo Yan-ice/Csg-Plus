@@ -16,7 +16,7 @@ public class Data {
 	public static String worldpath = "";
 	public static Location defaultLocation = new Location(Bukkit.getWorlds().get(0),0,80,0);
 
-	public static String Version = "Beta1.7";
+	public static String Version = "1.9.1 - Beta";
 
 	public static Random random = new Random();
 	public static boolean onDisable = false;
@@ -57,14 +57,14 @@ public class Data {
 		}
 	}
 	public static void ConsoleInfo(String info) {
-		fmain.getLogger().info("§a[信息]§r " + info);
+		fmain.getLogger().info(ChatColor.translateAlternateColorCodes('&',"&a[信息]&r " + info));
 	}
 	public static void ConsoleError(String info) {
-		fmain.getLogger().info(ChatColor.RED+"ERROR: "+info);
+		fmain.getLogger().info(ChatColor.translateAlternateColorCodes('&',"&c[错误]&r " + info));
 	}
 	public static void Debug(String str){
 		if(debug){
-			ConsoleInfo("[Debug] "+str);
+			fmain.getLogger().info(ChatColor.translateAlternateColorCodes('&',"&e[调试]&r " + str));
 		}
 	}
 

@@ -45,28 +45,41 @@ public class VarTable {
         }
         return 2;
     }
-    public void LoadMacro(ConfigurationSection config){
-        for(String key : config.getKeys(false)){
 
+
+    public void LoadMacro(ConfigurationSection config, String parentKey){
+        for(String key : config.getKeys(false)){
+            Object value;
             if(config.isList(key)) {
                 List<String> try1 = config.getStringList(key);
-                macros.put(key, try1.toArray(new String[0]));
+                value = try1.toArray(new String[0]);
             }else
             if(config.isDouble(key)){
-                macros.put(key,config.getDouble(key));
+                value = config.getDouble(key);
             }else
             if(config.isInt(key)){
-                macros.put(key,config.getInt(key));
+                value = config.getInt(key);
             }else
             if(config.isString(key)){
-                macros.put(key,config.getString(key));
+                value = config.getString(key);
             }else
             if(config.isConfigurationSection(key)){
-                LoadMacro(config.getConfigurationSection(key));
+                String childPAth = key;
+                if(parentKey != null && !parentKey.isEmpty()) {
+                    childPAth = parentKey + "." + childPAth;
+                }
+                LoadMacro(config.getConfigurationSection(key), childPAth);
+                continue;
             }else{
-                macros.put(key,config.get(key));
+                value = config.get(key);
             }
+
+            if(parentKey != null && !parentKey.isEmpty()) {
+                key = parentKey + "." + key;
+            }
+            macros.put(key, value);
         }
+
     }
 
     public void AddVariable(TaskExecuter ex, String key, Object obj){

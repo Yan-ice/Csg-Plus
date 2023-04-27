@@ -6,7 +6,7 @@
 
     <groupId>csg</groupId>
     <artifactId>CsgPlusPro</artifactId>
-    <version>1.9.0-Beta1</version>
+    <version>1.9.1-Beta</version>
 
     <properties>
         <maven.compiler.source>8</maven.compiler.source>
@@ -24,31 +24,18 @@
         </repository>
     </repositories>
     <dependencies>
+        <!-- druid连接池 -->
         <dependency>
-            <groupId>spigot</groupId>
-            <artifactId>spigot</artifactId>
-            <version>1.12.2</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/libs/[修复版]spigot-1.12.2.jar</systemPath>
+            <groupId>com.alibaba</groupId>
+            <artifactId>druid</artifactId>
+            <version>1.2.16</version>
         </dependency>
+        <!-- Spigot核心 -->
         <dependency>
-            <groupId>papi</groupId>
-            <artifactId>papi</artifactId>
-            <version>1.12.2</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/libs/PlaceholderAPI-2.9.2.jar</systemPath>
-        </dependency>
-<!--        <dependency>-->
-<!--            <groupId>org.openjdk.nashorn</groupId>-->
-<!--            <artifactId>nashorn-core</artifactId>-->
-<!--            <version>15.4</version>-->
-<!--        </dependency>-->
-        <dependency>
-            <groupId>nashorn</groupId>
-            <artifactId>nashorn</artifactId>
-            <version>15.4</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/libs/nashorn.jar</systemPath>
+            <groupId>org.spigotmc</groupId>
+            <artifactId>spigot-api</artifactId>
+            <version>1.12.2-R0.1-SNAPSHOT</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.javassist</groupId>

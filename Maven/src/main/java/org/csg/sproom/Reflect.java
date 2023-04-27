@@ -4,7 +4,6 @@ package org.csg.sproom;
 import com.grinderwolf.swm.api.world.SlimeWorld;
 
 import customgo.event.PlayerLeaveLobbyEvent;
-import net.minecraft.server.v1_12_R1.GameRules;
 import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -105,13 +104,13 @@ public class Reflect implements Listener {
 	}
 	public boolean Join(Player p){
 		if(statu!=ReflectStatu.WAITING){
-			p.sendMessage(ChatColor.RED+"房间正在准备中！请您稍等片刻...");
+			p.sendMessage(ChatColor.GREEN +"房间正在准备中！请您稍等片刻...");
 			return false;
 		}
 		lobby.Join(p);
 		return true;
 	}
-	
+
 	public boolean hasPlayer(Player p){
 		if(lobby!=null){
 			return lobby.getPlayerList().contains(p);
@@ -134,7 +133,7 @@ public class Reflect implements Listener {
 		}
 		HandlerList.unregisterAll(this);
 	}
-	
+
 	@EventHandler(priority=EventPriority.MONITOR)
 	public void st(PlayerRespawnEvent evt){
 		if(lobby!=null && lobby.hasPlayer(evt.getPlayer())){

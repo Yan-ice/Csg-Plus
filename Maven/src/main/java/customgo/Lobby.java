@@ -7,6 +7,7 @@ import org.bukkit.entity.Player;
 import org.csg.Data;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -100,6 +101,20 @@ public interface Lobby {
      * @return
      */
     public Object getMacro(String key);
+
+    /**
+     * 模糊的查询是否存在Macro键
+     * @param key
+     * @return
+     */
+    public boolean hasMacroForLike(String key);
+
+    /**
+     * 模糊的查询包含Macro键的所有键值
+     * @param key
+     * @return
+     */
+    public Map<String, Object> getMacroForLike(String key);
 
     /**
      * 使玩家转移到游戏内的另一队伍。

@@ -69,6 +69,30 @@ public class Lobby implements customgo.Lobby, CycleUpdate {
 		this.open = open;
 	}
 
+	public boolean hasMacroForLike(String key) {
+		if(macros.macros.containsKey(key)) { // 存在key
+			return true;
+		}
+		// 模糊查询是否有key的值等于查询key
+		for (String str : macros.macros.keySet()) {
+			if (str.startsWith(key+".")) { // 如果有说明查询的节点是父级Key
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public Map<String, Object> getMacroForLike(String key) {
+		Map<String, Object> macroList = new HashMap<>();
+		// 模糊查询是否有key的值等于查询key
+		for (String str : macros.macros.keySet()) {
+			if (str.startsWith(key+".")) { // 如果有说明查询的节点是父级Key
+				macroList.put(str, macros.macros.get(str));
+			}
+		}
+		return macroList;
+	}
+
 	public Object getMacro(String key){
 		return macros.macros.get(key);
 	}
@@ -191,7 +215,7 @@ public class Lobby implements customgo.Lobby, CycleUpdate {
 					}
 				}
 				for(Method meth : javaFunctionClass.getMethods()){
-					if(meth.getName().equals(name)){
+					if(meth.getName().equals(name) && meth.getGenericParameterTypes().length == para.length){
 						safeCallJavaFunction(meth,para);
 					}
 				}
@@ -218,7 +242,7 @@ public class Lobby implements customgo.Lobby, CycleUpdate {
 					}
 				}
 				for(Method meth : javaFunctionClass.getMethods()){
-					if(meth.getName().equals(name)){
+					if(meth.getName().equals(name) && meth.getGenericParameterTypes().length == para.length){
 						return safeCallJavaFunction(meth,para);
 					}
 				}
@@ -242,9 +266,6 @@ public class Lobby implements customgo.Lobby, CycleUpdate {
 	 */
 	private Object safeCallJavaFunction(Method meth, Object... para) throws InvocationTargetException, IllegalAccessException {
 		Type[] require_list = meth.getGenericParameterTypes();
-		if(require_list.length > para.length){
-			throw new ClassCastException("param not enough");
-		}
 		Object[] cast_list = new Object[require_list.length];
 		for(int a = 0;a<require_list.length;a++){
 			cast_list[a] = TypeCastFactory.castObject(para[a],require_list[a]);
@@ -292,7 +313,7 @@ public class Lobby implements customgo.Lobby, CycleUpdate {
 				for(Method meth : javaFunctionClass.getMethods()){
 					if(meth.isAnnotationPresent(CsgTaskListener.class)){
 						CsgTaskListener ls = meth.getAnnotation(CsgTaskListener.class);
-						if(ls.name().equals(name)){
+						if(ls.name().equals(name) && meth.getGenericParameterTypes().length == para.length){
 							safeCallJavaFunction(meth, para);
 						}
 					}
@@ -414,7 +435,7 @@ public class Lobby implements customgo.Lobby, CycleUpdate {
 				if(direct){
 					default_macro_file = f;
 				}else{
-					macros.LoadMacro(Data.fmain.load(f));
+					macros.LoadMacro(Data.fmain.load(f), null);
 				}
 			}
 		}
@@ -426,7 +447,7 @@ public class Lobby implements customgo.Lobby, CycleUpdate {
 
 		if(default_macro_file!=null){
 			//Data.ConsoleInfo("正在加载Macro预设宏");
-			macros.LoadMacro(Data.fmain.load(default_macro_file));
+			macros.LoadMacro(Data.fmain.load(default_macro_file), null);
 		}else{
 			default_macro_file = new File(folder.getPath()+"/macro.yml");
 			default_macro_file.createNewFile();
@@ -456,7 +477,7 @@ public class Lobby implements customgo.Lobby, CycleUpdate {
 		grouplist.clear();
 		functions.clear();
 		listener.clear();
-		Data.ConsoleInfo("===== | §b正在加载大厅 "+Name+" §r| =====");
+		Data.ConsoleInfo("===== | &b正在加载大厅 "+Name+" &r| =====");
 
 		if(Data.isBungee){
 			new BungeeSupport((this));
@@ -485,13 +506,14 @@ public class Lobby implements customgo.Lobby, CycleUpdate {
 					new Room(this,f);
 					break;
 				}
+
 			}
 
-			Data.ConsoleInfo("===== | §a大厅 "+Name+"加载成功 §r| =====");
+			Data.ConsoleInfo("===== | &a大厅 "+Name+"加载成功 &r| =====");
 			SecondCycle.registerCall(this);
 
 		}else{
-			Data.ConsoleInfo("===== | §c大厅 "+Name+"加载失败 §r| =====");
+			Data.ConsoleInfo("===== | &c大厅 "+Name+"加载失败 &r| =====");
 		}
 	}
 
