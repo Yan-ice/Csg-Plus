@@ -103,6 +103,21 @@ public interface Lobby {
     public Object getMacro(String key);
 
     /**
+     * 设置一个全局变量宏
+     * @param key
+     * @param value
+     */
+    public void setMacro(String key, Object value);
+
+    /**
+     * 设置一个全局变量
+     * @param player
+     * @param key
+     * @param value
+     */
+    public void setValue(Player player, String key, Double value);
+
+    /**
      * 模糊的查询是否存在Macro键
      * @param key
      * @return

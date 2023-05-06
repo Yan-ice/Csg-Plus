@@ -96,6 +96,17 @@ public class Lobby implements customgo.Lobby, CycleUpdate {
 	public Object getMacro(String key){
 		return macros.macros.get(key);
 	}
+
+	public void setMacro(String key, Object value) {
+		macros.AddMacro(key, value);
+	}
+
+	public void setValue(Player player, String key, Double value) {
+		macros.AddScore(player, key, value);
+	}
+
+
+
 	public boolean requireMacro(String line){
 		String annotation;
 		String s;
