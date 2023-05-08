@@ -13,7 +13,7 @@ enum TargetType{
 
 public abstract class Task {
     public Task next = null;
-    public String field = "";
+
     /**
      * 执行此命令并返回下一条命令。
      * @return
@@ -22,10 +22,9 @@ public abstract class Task {
 
     public void set_next(Task task){
         next = task;
-        if(next!=null){
-            next.field = field;
-        }
-
+//        if(next!=null && field!=null){
+//            next.field = field;
+//        }
     }
 
     public void destroy(){

@@ -6,6 +6,7 @@ import org.csg.group.Group;
 import org.csg.group.Lobby;
 
 import java.lang.reflect.Type;
+import java.util.Vector;
 
 public class LobbyTypeCaster extends TypeCaster{
     public Class<?> targetType(){
@@ -33,8 +34,11 @@ public class LobbyTypeCaster extends TypeCaster{
                 return l;
             }
         }
+
         return null;
     }
+
+
 }
 
 

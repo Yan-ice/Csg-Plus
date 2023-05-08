@@ -8,6 +8,13 @@ import java.util.UUID;
 public class FunctionTask extends Task {
     String name;
     String[] args;
+
+    private String field = null;
+
+    public String getField(){
+        return field;
+    }
+
     public FunctionTask(String lb, String arg, String field) throws TaskSyntaxError {
         this.field = field;
         try{

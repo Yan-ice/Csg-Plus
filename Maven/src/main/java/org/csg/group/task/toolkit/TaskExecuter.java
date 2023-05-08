@@ -5,6 +5,7 @@ import org.csg.Data;
 import org.csg.group.Group;
 import org.csg.group.Lobby;
 import org.csg.group.task.VarTable;
+import org.csg.group.task.csgtask.FunctionTask;
 import org.csg.group.task.csgtask.Task;
 import org.csg.location.Teleporter;
 import org.csg.update.CycleUpdate;
@@ -26,19 +27,20 @@ public class TaskExecuter implements CycleUpdate {
     public boolean endWhenNoTarget = false;
 
     int cooldown = 0;
-    public Task begin;
+    public FunctionTask begin;
     Task next;
-    public TaskExecuter(Task begin, Lobby lobby){
+
+    public TaskExecuter(FunctionTask begin, Lobby lobby){
         this.begin = begin;
         this.lobby = lobby;
     }
 
     public List<UUID> getField(){
-        if(!begin.field.contains(",")){
+        if(begin.getField() == null){
             return lobby.getPlayerList();
         }
         List<UUID> l = new ArrayList<>();
-        for(String s : begin.field.split(",,")){
+        for(String s : begin.getField().split(",,")){
             Group g = lobby.getGroup(s);
             if(g!=null){
                 l.addAll(g.getPlayerList());
