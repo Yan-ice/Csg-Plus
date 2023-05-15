@@ -42,10 +42,10 @@ public class Lobby implements customgo.Lobby, CycleUpdate {
 		return LobbyList;
 	}
 
-	public FwHologram hd = new FwHologram();
-	Map<UUID,Location> spawnpoint = new HashMap<>();
-	public void setSpawn(Player p,Location loc){
-		if(loc==null||p==null){
+			public FwHologram hd = new FwHologram();
+			Map<UUID,Location> spawnpoint = new HashMap<>();
+			public void setSpawn(Player p,Location loc){
+				if(loc==null||p==null){
 			return;
 		}
 		if(!hasPlayer(p)){
