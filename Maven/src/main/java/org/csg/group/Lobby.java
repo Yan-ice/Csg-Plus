@@ -13,6 +13,7 @@ import java.util.*;
 import customgo.event.ListenerCalledEvent;
 import customgo.event.PlayerJoinLobbyEvent;
 import customgo.event.PlayerLeaveLobbyEvent;
+import org.apache.commons.lang.StringUtils;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.csg.BungeeSupport;
@@ -304,13 +305,25 @@ public class Lobby implements customgo.Lobby, CycleUpdate {
 			return;
 		}
 		for(ListenerTask task : listener){
-			if(task.getName().equals(name)){
-				ListenerCalledEvent call = new ListenerCalledEvent(name,this,p,para);
-				Data.fmain.getServer().getPluginManager().callEvent(call);
 
-				TaskExecuter executer = new TaskExecuter(task,this);
-				task.loadArgs(executer,para);
-				executer.execute(p!=null ? p.getUniqueId() : null);
+
+			if(task.getName().equals(name)){
+				List<String> canGroup = new ArrayList<>(Arrays.asList(task.getField().split(",,")));
+				Group groupOfPlayer = null;
+				if(p != null) {
+					groupOfPlayer = this.findGroupOfPlayer(p);
+				}
+				if (groupOfPlayer == null ||
+						canGroup.size() > 0
+								&& StringUtils.isNotBlank(canGroup.get(0))
+								&& canGroup.contains(groupOfPlayer.getName())) {
+					ListenerCalledEvent call = new ListenerCalledEvent(name, this, p, para);
+					Data.fmain.getServer().getPluginManager().callEvent(call);
+
+					TaskExecuter executer = new TaskExecuter(task, this);
+					task.loadArgs(executer, para);
+					executer.execute(p != null ? p.getUniqueId() : null);
+				}
 			}
 		}
 		if(javaFunctionClass !=null){
