@@ -293,37 +293,6 @@ public class Fwmain extends JavaPlugin implements Listener {
 		Data.data = d;
 		Data.LoadOption();
 	}
-
-	@EventHandler
-	private void PlayerJoinTip(PlayerJoinEvent evt){
-		final Player sender = evt.getPlayer();
-		if(evt.getPlayer().isOp()) {
-			if(Lobby.getLobby("CustomGoTec")==null){
-
-				new BukkitRunnable() {
-
-					@Override
-					public void run() {
-
-						if(sender.isOp()) {
-							sender.sendMessage("§a*************************************");
-							sender.sendMessage("§a检测到可以进行教程模板加载/更新！");
-							sender.sendMessage("§a如果你是第一次使用插件，教程会对你有很大帮助哦~！");
-							sender.sendMessage("§a");
-							sender.sendMessage("想要加载/更新教程，请输入 §d/csg teach");
-							sender.sendMessage("§a");
-							sender.sendMessage("§7(附加提示：更新教程会重载插件~)");
-							sender.sendMessage("§a*************************************");
-						}
-
-					}
-
-				}.runTaskLater(this, 100);
-
-			}
-		}
-	}
-
 	@EventHandler
 	private void LListen(PlayerQuitEvent evt){
 		Lobby.AutoLeave(evt.getPlayer(),false);
