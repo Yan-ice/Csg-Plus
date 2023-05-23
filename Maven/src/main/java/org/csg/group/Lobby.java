@@ -111,8 +111,8 @@ public class Lobby implements customgo.Lobby, CycleUpdate {
 	}
 
 
-	public void getScore(Player player, String key) {
-		macros.getScore(player, key);
+	public double getScore(Player player, String key) {
+		return macros.getScore(player, key);
 	}
 
 
