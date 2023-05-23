@@ -111,6 +111,10 @@ public class Lobby implements customgo.Lobby, CycleUpdate {
 	}
 
 
+	public void getScore(Player player, String key) {
+		macros.getScore(player, key);
+	}
+
 
 	public boolean requireMacro(String line){
 		String annotation;

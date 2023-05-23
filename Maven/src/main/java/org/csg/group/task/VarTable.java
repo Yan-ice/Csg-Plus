@@ -117,6 +117,16 @@ public class VarTable {
         }
     }
 
+    public double getScore(Player p, String key) {
+        if(scores.containsKey(key)) {
+            Map<UUID, Double> m = scores.get(key);
+            if(m.containsKey(p.getUniqueId())) {
+                return m.get(p.getUniqueId());
+            }
+        }
+        return 0;
+    }
+
     public static String objToString(Object origin){
         if(origin==null){
             return "[null]";
