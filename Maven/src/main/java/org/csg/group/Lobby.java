@@ -98,6 +98,10 @@ public class Lobby implements customgo.Lobby, CycleUpdate {
 		return macros.macros.get(key);
 	}
 
+	public <T> T getMacro(String key, Class<T> clazz) {
+		return clazz.cast(macros.macros.get(key));
+	}
+
 	public void setMacro(String key, Object value) {
 		macros.AddMacro(key, value);
 	}

@@ -51,8 +51,7 @@ public class VarTable {
         for(String key : config.getKeys(false)){
             Object value;
             if(config.isList(key)) {
-                List<String> try1 = config.getStringList(key);
-                value = try1.toArray(new String[0]);
+                value = config.getStringList(key);
             }else
             if(config.isDouble(key)){
                 value = config.getDouble(key);

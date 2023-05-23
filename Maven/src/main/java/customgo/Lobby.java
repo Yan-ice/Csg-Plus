@@ -103,6 +103,15 @@ public interface Lobby {
     public Object getMacro(String key);
 
     /**
+     * 获取大厅内的宏，不会字符串化。
+     * @param key
+     * @param clazz
+     * @return
+     * @param <T>
+     */
+    public <T> T getMacro(String key, Class<T> clazz);
+
+    /**
      * 设置一个全局变量宏
      * @param key
      * @param value
