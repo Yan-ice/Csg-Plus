@@ -94,6 +94,8 @@ public interface Lobby {
      */
     public String getVariable(Player p, String key);
 
+    public double getScore(Player p, String key);
+
     /**
      * 获取大厅内的宏，不会字符串化。
      * 自动字符串化。
