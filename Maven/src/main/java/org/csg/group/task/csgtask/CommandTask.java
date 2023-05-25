@@ -358,7 +358,16 @@ public class CommandTask extends Task {
                         }
                     }
                 } else {
-                    executer.lobby.macros.AddMacro(args[0], args[1]);
+                    // 判断是否为数字
+                    if (CommonUtils.isNumeric(args[1])) {
+                        if (args[1].contains(".")) {
+                            executer.lobby.macros.AddMacro(args[0], Double.parseDouble(args[1]));
+                        } else {
+                            executer.lobby.macros.AddMacro(args[0], Integer.parseInt(args[1]));
+                        }
+                    } else {
+                        executer.lobby.macros.AddMacro(args[0], args[1]);
+                    }
                 }
                 break;
             case "setscore":
