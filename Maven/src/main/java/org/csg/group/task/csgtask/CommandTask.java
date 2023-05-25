@@ -6,6 +6,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.csg.Data;
+import org.csg.Utils.CommonUtils;
 import org.csg.group.Group;
 import org.csg.group.Lobby;
 import org.csg.group.task.ItemCheck;
@@ -317,7 +318,48 @@ public class CommandTask extends Task {
 
                 break;
             case "macro":
-                executer.lobby.macros.AddMacro(args[0], args[1]);
+                // 判断 设置的值是否为 + || ~开头
+                if (args[1].startsWith("+") || args[1].startsWith("-")) {
+
+                    // 判断是加还是减
+                    boolean addOrSub = args[1].startsWith("+");
+                    // 截取字符判断是否
+                    String isNumberStr = args[1].substring(1);
+                    // 判断是否为数字
+                    if (CommonUtils.isNumeric(isNumberStr)) {
+                        // 判断是否包含.
+                        if (isNumberStr.contains(".")) {
+                            // 小数
+                            double num = Double.parseDouble(args[1]);
+                            Object objValue =executer.lobby.getMacro(args[0]);
+                            if (objValue instanceof Double) {
+                                if (addOrSub) {
+                                    executer.lobby.macros.AddMacro(args[0], (double) objValue + num);
+                                } else {
+                                    executer.lobby.macros.AddMacro(args[0], (double) objValue - num);
+                                }
+                            } else {
+                                executer.lobby.macros.AddMacro(args[0], args[1]);
+                            }
+
+                        } else {
+                            // 整数
+                            int num = Integer.parseInt(args[1]);
+                            Object objValue =executer.lobby.getMacro(args[0]);
+                            if (objValue instanceof Integer) {
+                                if (addOrSub) {
+                                    executer.lobby.macros.AddMacro(args[0], (int) objValue + num);
+                                } else {
+                                    executer.lobby.macros.AddMacro(args[0], (int) objValue - num);
+                                }
+                            } else {
+                                executer.lobby.macros.AddMacro(args[0], args[1]);
+                            }
+                        }
+                    }
+                } else {
+                    executer.lobby.macros.AddMacro(args[0], args[1]);
+                }
                 break;
             case "setscore":
                 //为了兼容性
