@@ -247,6 +247,22 @@ public class VarTable {
                 }
             }
         }
+
+        if (origin instanceof List) {
+            List list = (List) origin;
+            if (memberKey.equals("length")) {
+                return list.size();
+            }
+            if (memberKey.equals("random")) {
+                return list.get(Data.Random(0, list.size()));
+            }
+            for (int a = list.size() - 1; a >= 0; a--) {
+                if (memberKey.equals(a + "")) {
+                    return list.get(a);
+                }
+            }
+        }
+
         if(origin instanceof Double){
             double d = (Double)origin;
             String v;
