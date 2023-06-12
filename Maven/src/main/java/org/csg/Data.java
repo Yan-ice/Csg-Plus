@@ -16,7 +16,7 @@ public class Data {
 	public static String worldpath = "";
 	public static Location defaultLocation = new Location(Bukkit.getWorlds().get(0),0,80,0);
 
-	public static String Version = "1.9.3 - Beta";
+	public static String Version = "1.9.4 - Beta";
 
 	public static Random random = new Random();
 	public static boolean onDisable = false;

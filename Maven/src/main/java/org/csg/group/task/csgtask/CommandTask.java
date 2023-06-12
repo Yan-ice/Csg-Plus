@@ -318,57 +318,85 @@ public class CommandTask extends Task {
 
                 break;
             case "macro":
-                // 判断 设置的值是否为 + || ~开头
-                if (args[1].startsWith("+") || args[1].startsWith("-")) {
+                if(args.length == 2) { // 两位参数
+                    // 判断 设置的值是否为 + || ~开头
+                    if (args[1].startsWith("+") || args[1].startsWith("-")) {
 
-                    // 判断是加还是减
-                    boolean addOrSub = args[1].startsWith("+");
-                    // 截取字符判断是否
-                    String isNumberStr = args[1].substring(1);
-                    // 判断是否为数字
-                    if (CommonUtils.isNumeric(isNumberStr)) {
-                        // 判断是否包含.
-                        if (isNumberStr.contains(".")) {
-                            // 小数
-                            double num = Double.parseDouble(args[1]);
-                            Object objValue =executer.lobby.getMacro(args[0]);
-                            if (objValue instanceof Double) {
-                                if (addOrSub) {
-                                    executer.lobby.macros.AddMacro(args[0], (double) objValue + num);
+                        // 判断是加还是减
+                        boolean addOrSub = args[1].startsWith("+");
+                        // 截取字符判断是否
+                        String isNumberStr = args[1].substring(1);
+                        // 判断是否为数字
+                        if (CommonUtils.isNumeric(isNumberStr)) {
+                            // 判断是否包含.
+                            if (isNumberStr.contains(".")) {
+                                // 小数
+                                double num = Double.parseDouble(args[1]);
+                                Object objValue =executer.lobby.getMacro(args[0]);
+                                if (objValue instanceof Double) {
+                                    if (addOrSub) {
+                                        executer.lobby.macros.AddMacro(args[0], (double) objValue + num);
+                                    } else {
+                                        executer.lobby.macros.AddMacro(args[0], (double) objValue - num);
+                                    }
                                 } else {
-                                    executer.lobby.macros.AddMacro(args[0], (double) objValue - num);
+                                    executer.lobby.macros.AddMacro(args[0], args[1]);
                                 }
-                            } else {
-                                executer.lobby.macros.AddMacro(args[0], args[1]);
-                            }
 
-                        } else {
-                            // 整数
-                            int num = Integer.parseInt(args[1]);
-                            Object objValue =executer.lobby.getMacro(args[0]);
-                            if (objValue instanceof Integer) {
-                                if (addOrSub) {
-                                    executer.lobby.macros.AddMacro(args[0], (int) objValue + num);
-                                } else {
-                                    executer.lobby.macros.AddMacro(args[0], (int) objValue - num);
-                                }
                             } else {
-                                executer.lobby.macros.AddMacro(args[0], args[1]);
+                                // 整数
+                                int num = Integer.parseInt(args[1]);
+                                Object objValue =executer.lobby.getMacro(args[0]);
+                                if (objValue instanceof Integer) {
+                                    if (addOrSub) {
+                                        executer.lobby.macros.AddMacro(args[0], (int) objValue + num);
+                                    } else {
+                                        executer.lobby.macros.AddMacro(args[0], (int) objValue - num);
+                                    }
+                                } else {
+                                    executer.lobby.macros.AddMacro(args[0], args[1]);
+                                }
                             }
-                        }
-                    }
-                } else {
-                    // 判断是否为数字
-                    if (CommonUtils.isNumeric(args[1])) {
-                        if (args[1].contains(".")) {
-                            executer.lobby.macros.AddMacro(args[0], Double.parseDouble(args[1]));
-                        } else {
-                            executer.lobby.macros.AddMacro(args[0], Integer.parseInt(args[1]));
                         }
                     } else {
-                        executer.lobby.macros.AddMacro(args[0], args[1]);
+                        // 判断是否为数字
+                        if (CommonUtils.isNumeric(args[1])) {
+                            if (args[1].contains(".")) {
+                                executer.lobby.macros.AddMacro(args[0], Double.parseDouble(args[1]));
+                            } else {
+                                executer.lobby.macros.AddMacro(args[0], Integer.parseInt(args[1]));
+                            }
+                        } else {
+                            executer.lobby.macros.AddMacro(args[0], args[1]);
+                        }
+                    }
+                } else if (args.length == 3) {
+                    switch (args[1]) {
+                        case "add": // 新增
+                            if (executer.lobby.getMacro(args[0]) != null && executer.lobby.getMacro(args[0]) instanceof List) {
+                                List<String> list = (List<String>) executer.lobby.getMacro(args[0]);
+                                list.add(args[2]);
+                                executer.lobby.macros.AddMacro(args[0], list);
+                            } else {
+                                List<String> list = new ArrayList<>();
+                                list.add(args[2]);
+                                executer.lobby.macros.AddMacro(args[0], list);
+                            }
+                            break;
+                        case "del": // 删除
+                            if (executer.lobby.getMacro(args[0]) != null && executer.lobby.getMacro(args[0]) instanceof List) {
+                                List<String> list = (List<String>) executer.lobby.getMacro(args[0]);
+                                list.remove(args[2]);
+                                executer.lobby.macros.AddMacro(args[0], list);
+                            } else {
+                                Data.ConsoleError("宏 【" + args[0] + "】不存在无法删除某个元素");
+                            }
+                            break;
+                        default:
+                            executer.lobby.macros.AddMacro(args[0], args[1] + "." + args[2]);
                     }
                 }
+
                 break;
             case "setscore":
                 //为了兼容性
