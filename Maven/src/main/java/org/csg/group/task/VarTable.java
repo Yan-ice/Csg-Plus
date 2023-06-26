@@ -13,8 +13,12 @@ import java.text.DecimalFormat;
 import java.util.*;
 
 public class VarTable {
+    // 全局宏
     public Map<String,Object> macros = new HashMap<String,Object>();
+    // 玩家/全局分数
     public Map<String,Map<UUID, Double>> scores = new HashMap<>();
+    // 玩家键值对
+    public Map<String,Map<UUID, String>> values = new HashMap<>();
     public Map<TaskExecuter, Map<String,Object>> variables = new HashMap<>();
 
     public void AddMacro(String key,Object obj){
@@ -23,6 +27,52 @@ public class VarTable {
         }else{
             macros.put(key,obj);
         }
+    }
+
+    /**
+     * 添加玩家键值对
+     * @param key
+     * @param uuid
+     * @param value
+     */
+    public void addValues(String key, UUID uuid, String value){
+        // 如果已经存在这个键值对，就替换
+        if(values.containsKey(key)){
+            values.get(key).put(uuid,value);
+        }else{
+            // 如果不存在这个键值对，就新建
+            Map<UUID, String> map = new HashMap<>();
+            map.put(uuid,value);
+            values.put(key,map);
+        }
+    }
+
+    /**
+     * 移除玩家键值对
+     * @param key 键
+     * @param uuid 玩家
+     * @return 是否成功移除
+     */
+    public boolean removeValues(String key, UUID uuid) {
+        // 如果存在这个键值对，就移除
+        if (values.containsKey(key)) {
+            values.get(key).remove(uuid);
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * 获得玩家键值对
+     * @param key 键
+     * @param uuid 玩家
+     * @return 值
+     */
+    public String getValues(String key, UUID uuid){
+        if(values.containsKey(key)){
+            return values.get(key).get(uuid);
+        }
+        return "[未知变量]";
     }
 
     /**

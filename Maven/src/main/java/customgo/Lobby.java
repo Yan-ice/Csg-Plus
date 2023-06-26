@@ -94,8 +94,6 @@ public interface Lobby {
      */
     public String getVariable(Player p, String key);
 
-    public double getScore(Player p, String key);
-
     /**
      * 获取大厅内的宏，不会字符串化。
      * 自动字符串化。
@@ -105,7 +103,7 @@ public interface Lobby {
     public Object getMacro(String key);
 
     /**
-     * 获取大厅内的宏，不会字符串化。
+     * 获取一个宏，需指定需要的类型
      * @param key
      * @param clazz
      * @return
@@ -114,19 +112,85 @@ public interface Lobby {
     public <T> T getMacro(String key, Class<T> clazz);
 
     /**
-     * 设置一个全局变量宏
+     * 获取宏转换为整数
+     * @param key
+     * @return
+     */
+    public int getMacroInt(String key);
+
+    /**
+     * 获取宏转换为浮点数
+     * @param key
+     * @return
+     */
+    public double getMacroDouble(String key);
+
+    /**
+     * 获取宏转换为字符串
+     * @param key
+     * @return
+     */
+    public String getMacroString(String key);
+
+    /**
+     * 获取宏转换为布尔值
+     * @param key
+     * @return
+     */
+    public boolean getMacroBoolean(String key);
+
+    /**
+     * 获取宏转换为列表
+     * @param key
+     * @return
+     */
+    public List<String> getMacroList(String key);
+
+
+    /**
+     * 添加一个全局变量宏
      * @param key
      * @param value
      */
-    public void setMacro(String key, Object value);
+    public void addMacro(String key, Object value);
 
     /**
-     * 设置一个全局变量
+     * 获取全局/玩家得分。
+     * @param p
+     * @param key
+     * @return
+     */
+    public double getScore(Player p, String key);
+
+    /**
+     * 添加全局/玩家得分。
      * @param player
      * @param key
      * @param value
      */
-    public void setValue(Player player, String key, Double value);
+    public void addScore(Player player, String key, Double value);
+
+    /**
+     * 添加玩家键值对
+     * @param key 键
+     * @param player 玩家
+     * @param value 值
+     */
+    public void addValues(String key, Player player, String value);
+
+    /**
+     * 移除玩家键值对
+     * @param key 键
+     * @param player 玩家
+     */
+    public void removeValues(String key, Player player);
+
+    /**
+     * 获取玩家键值对
+     * @param key 键
+     * @param player 玩家
+     */
+    public void getValues(String key, Player player);
 
     /**
      * 模糊的查询是否存在Macro键

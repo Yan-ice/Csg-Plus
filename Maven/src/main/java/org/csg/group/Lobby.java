@@ -98,15 +98,67 @@ public class Lobby implements customgo.Lobby, CycleUpdate {
 		return macros.macros.get(key);
 	}
 
+
+
 	public <T> T getMacro(String key, Class<T> clazz) {
 		return clazz.cast(macros.macros.get(key));
 	}
 
-	public void setMacro(String key, Object value) {
+	/**
+	 * 获取宏的值转换为int
+	 * @param key
+	 * @return
+	 */
+	@Override
+	public int getMacroInt(String key) {
+		return (int) macros.macros.get(key);
+	}
+
+	/**
+	 * 获取宏的值转换为double
+	 * @param key
+	 * @return
+	 */
+	@Override
+	public double getMacroDouble(String key) {
+		return (double) macros.macros.get(key);
+	}
+
+	/**
+	 * 获取宏的值转换为String
+	 * @param key
+	 * @return
+	 */
+	@Override
+	public String getMacroString(String key) {
+		return (String) macros.macros.get(key);
+	}
+
+	/**
+	 * 获取宏的值转换为boolean
+	 * @param key
+	 * @return
+	 */
+	@Override
+	public boolean getMacroBoolean(String key) {
+		return (boolean) macros.macros.get(key);
+	}
+
+	/**
+	 * 获取宏的值转换为List<String>
+	 * @param key
+	 * @return
+	 */
+	@Override
+	public List<String> getMacroList(String key) {
+		return (List<String>) macros.macros.get(key);
+	}
+
+	public void addMacro(String key, Object value) {
 		macros.AddMacro(key, value);
 	}
 
-	public void setValue(Player player, String key, Double value) {
+	public void addScore(Player player, String key, Double value) {
 		macros.AddScore(player, key, value);
 	}
 
@@ -725,4 +777,31 @@ public class Lobby implements customgo.Lobby, CycleUpdate {
 		callListener("onEverySecond",null);
 	}
 
+	/**
+	 * 添加玩家键值对
+	 * @param key 键
+	 * @param player 玩家
+	 * @param value 值
+	 */
+	public void addValues(String key, Player player, String value) {
+		macros.addValues(key,player.getUniqueId(),value);
+	}
+
+	/**
+	 * 移除玩家键值对
+	 * @param key 键
+	 * @param player 玩家
+	 */
+	public void removeValues(String key, Player player) {
+		macros.removeValues(key,player.getUniqueId());
+	}
+
+	/**
+	 * 获取玩家键值对
+	 * @param key 键
+	 * @param player 玩家
+	 */
+	public void getValues(String key, Player player) {
+		macros.getValues(key,player.getUniqueId());
+	}
 }
