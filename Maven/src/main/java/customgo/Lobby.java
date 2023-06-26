@@ -183,14 +183,14 @@ public interface Lobby {
      * @param key 键
      * @param player 玩家
      */
-    public void removeValues(String key, Player player);
+    public boolean removeValues(String key, Player player);
 
     /**
      * 获取玩家键值对
      * @param key 键
      * @param player 玩家
      */
-    public void getValues(String key, Player player);
+    public String getValues(String key, Player player);
 
     /**
      * 模糊的查询是否存在Macro键

@@ -792,8 +792,8 @@ public class Lobby implements customgo.Lobby, CycleUpdate {
 	 * @param key 键
 	 * @param player 玩家
 	 */
-	public void removeValues(String key, Player player) {
-		macros.removeValues(key,player.getUniqueId());
+	public boolean removeValues(String key, Player player) {
+		return macros.removeValues(key,player.getUniqueId());
 	}
 
 	/**
@@ -801,7 +801,7 @@ public class Lobby implements customgo.Lobby, CycleUpdate {
 	 * @param key 键
 	 * @param player 玩家
 	 */
-	public void getValues(String key, Player player) {
-		macros.getValues(key,player.getUniqueId());
+	public String getValues(String key, Player player) {
+		return macros.getValues(key,player.getUniqueId());
 	}
 }

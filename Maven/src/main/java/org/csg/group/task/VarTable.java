@@ -72,7 +72,7 @@ public class VarTable {
         if(values.containsKey(key)){
             return values.get(key).get(uuid);
         }
-        return "[未知变量]";
+        return null;
     }
 
     /**
