@@ -9,6 +9,7 @@ import org.csg.Data;
 import org.csg.Utils.CommonUtils;
 import org.csg.group.Group;
 import org.csg.group.Lobby;
+import org.csg.group.model.TeamManager;
 import org.csg.group.task.ItemCheck;
 import org.csg.group.task.toolkit.Calculator;
 import org.csg.group.task.toolkit.TaskExecuter;
@@ -255,11 +256,6 @@ public class CommandTask extends Task {
                     return false;
                 }
                 break;
-            case "divide":
-                if(Target==null){
-                    return false;
-                }
-                return_obj = Target;
             case "setproperty":
                 if (Target == null) {
                     return false;
@@ -539,7 +535,6 @@ public class CommandTask extends Task {
                 Target.addPotionEffect(effect);
                 break;
             case "removemobs":
-
                 FArena arena = new FArena(args[0],autoworld);
                 if(arena.isComplete()){
                     List<LivingEntity> e;
@@ -557,6 +552,82 @@ public class CommandTask extends Task {
                         }
                     }
                 }
+                break;
+            case "team":
+                if(args.length==0){
+                    return false;
+                }
+                switch(args[0]){
+                    case "add":
+                        if(args.length<2){
+                            return false;
+                        }
+                        TeamManager.addTeam(args[1]);
+                        break;
+                    case "del":
+                        if(args.length<2){
+                            return false;
+                        }
+                        TeamManager.delTeam(args[1]);
+                        break;
+                    case "unregister":
+                        TeamManager.unregister();
+                        break;
+                    case "join":
+                        if(args.length<2){
+                            return false;
+                        }
+                        TeamManager.joinTeam(args[1],Target.getName());
+                        break;
+                    case "leave":
+                        if(args.length<2){
+                            return false;
+                        }
+                        TeamManager.leaveTeam(args[1], Target.getName());
+                        break;
+                    case "set":
+                        if(args.length<3){
+                            return false;
+                        }
+                        TeamManager.setTeamOption(args[1],args[2],args[3]);
+                        break;
+                    case "clear":
+                        TeamManager.clear(args[1]);
+                        break;
+                    case "size":
+                        if(args.length<2){
+                            return false;
+                        }
+                        return_obj = TeamManager.size(args[1]);
+                        break;
+                    case "info":
+                        if(args.length<2){
+                            return false;
+                        }
+                        TeamManager.infoTeam(args[1], Target);
+                        break;
+                }
+                break;
+            case "divide":
+                if(args.length > 2){
+                    return false;
+                }
+                String driverGroup = args[0];
+                int driverCount = Integer.MAX_VALUE;
+                // 获取最少人数的队列
+                for (String groupName : args) {
+                    // 获取该队列是否存在
+                    if (executer.lobby.getGroup(groupName) != null) {
+                        if (executer.lobby.getGroup(groupName).getPlayerList().size() < driverCount) {
+                            driverGroup = groupName;
+                            driverCount = executer.lobby.getGroup(groupName).getPlayerList().size();
+                        }
+                    } else {
+                        driverGroup = groupName;
+                        driverCount = 0;
+                    }
+                }
+                executer.lobby.ChangeGroup(Target,driverGroup);
                 break;
             default:
                 if(label.startsWith("on")){
