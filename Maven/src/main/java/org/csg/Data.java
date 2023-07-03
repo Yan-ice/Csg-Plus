@@ -16,7 +16,7 @@ public class Data {
 	public static String worldpath = "";
 	public static Location defaultLocation = new Location(Bukkit.getWorlds().get(0),0,80,0);
 
-	public static String Version = "1.9.4 - Beta";
+	public static String Version = "1.9.5 - Beta";
 
 	public static Random random = new Random();
 	public static boolean onDisable = false;
@@ -59,6 +59,11 @@ public class Data {
 	public static void ConsoleInfo(String info) {
 		fmain.getLogger().info(ChatColor.translateAlternateColorCodes('&',"&a[信息]&r " + info));
 	}
+
+	public static void ConsoleWarn(String info) {
+		fmain.getLogger().info(ChatColor.translateAlternateColorCodes('&',"&e[警告]&r " + info));
+	}
+
 	public static void ConsoleError(String info) {
 		fmain.getLogger().info(ChatColor.translateAlternateColorCodes('&',"&c[错误]&r " + info));
 	}
