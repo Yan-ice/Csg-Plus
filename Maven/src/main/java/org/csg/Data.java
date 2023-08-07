@@ -4,13 +4,10 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
-import org.csg.Fwmain;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.configuration.file.FileConfiguration;
-
-import org.csg.group.task.ValueData;
 
 public class Data {
 	public static String worldpath = "";

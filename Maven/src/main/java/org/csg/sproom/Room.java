@@ -7,7 +7,6 @@ import com.grinderwolf.swm.api.world.properties.SlimeProperties;
 import com.grinderwolf.swm.api.world.properties.SlimePropertyMap;
 import org.bukkit.*;
 import org.bukkit.command.CommandSender;
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.csg.Data;
 import org.csg.FileMng;
@@ -26,7 +25,7 @@ public class Room {
 
 	public Settings roomSetting;
 
-	
+
 	public static Room searchRoom(String Name){
 		for(Room r : rooms){
 			if(r.name.equals(Name)){
@@ -224,7 +223,7 @@ public class Room {
 				return;
 			}
 		}
-		
+
 		switch(joining.getStatu()){
 		case WAITING:
 			if(!joining.Join(p)){
@@ -263,7 +262,7 @@ public class Room {
 		}
 
 	}
-	
+
 	public void autoCreateReflect() {
 		for(Reflect rf : allreflects){
 			if(rf.getStatu()==ReflectStatu.WAITING){
@@ -272,7 +271,7 @@ public class Room {
 		}
 		joining = createReflect();
 	}
-	
+
 	public Reflect createReflect(){
 		for(Reflect rf : allreflects){
 			if(rf.getStatu()==ReflectStatu.ENDED){
@@ -288,7 +287,7 @@ public class Room {
 		}else{
 			return null;
 		}
-		
+
 	}
 
 	public String getName(){
@@ -309,7 +308,7 @@ public class Room {
 	public void setAllowBuilding(boolean allow){
 		roomSetting.allowBuilding = allow;
 	}
-	
+
 	public static void autoLeave(Player p){
 		for(Room r: rooms){
 			for(Reflect rf : r.allreflects){

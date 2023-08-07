@@ -5,7 +5,6 @@ import customgo.Group;
 import org.csg.group.Lobby;
 
 import java.lang.reflect.Type;
-import java.util.List;
 
 public class GroupTypeCaster extends TypeCaster{
     @Override

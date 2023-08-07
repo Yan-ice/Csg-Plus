@@ -1,12 +1,9 @@
 package org.csg.group.task.cast;
 
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
-import org.csg.group.Group;
 import org.csg.group.Lobby;
 
 import java.lang.reflect.Type;
-import java.util.Vector;
 
 public class LobbyTypeCaster extends TypeCaster{
     public Class<?> targetType(){

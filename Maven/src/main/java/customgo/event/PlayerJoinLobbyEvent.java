@@ -1,9 +1,8 @@
 package customgo.event;
 
-import customgo.Lobby;
+import customgo.LobbyAPI;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
-import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.player.PlayerEvent;
 
@@ -11,12 +10,12 @@ public class PlayerJoinLobbyEvent extends PlayerEvent implements Cancellable {
 
     private static final HandlerList handlers = new HandlerList();
 
-    private Lobby lobby;
-    public PlayerJoinLobbyEvent(Player who, Lobby lb) {
+    private LobbyAPI lobby;
+    public PlayerJoinLobbyEvent(Player who, LobbyAPI lb) {
         super(who);
         lobby = lb;
     }
-    public Lobby getLobby(){
+    public LobbyAPI getLobby(){
         return lobby;
     }
     public HandlerList getHandlers() {

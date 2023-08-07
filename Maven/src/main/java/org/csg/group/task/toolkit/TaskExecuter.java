@@ -1,6 +1,5 @@
 package org.csg.group.task.toolkit;
 
-import org.bukkit.World;
 import org.csg.Data;
 import org.csg.group.Group;
 import org.csg.group.Lobby;

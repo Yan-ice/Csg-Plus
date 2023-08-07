@@ -1,16 +1,14 @@
 package org.csg;
 
-import com.google.gson.Gson;
+import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.World;
-import org.bukkit.WorldCreator;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.ArmorStand;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -18,46 +16,107 @@ import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.scheduler.BukkitRunnable;
+import org.csg.Utils.OSUtils;
 import org.csg.cmd.CsgCmd;
-import org.csg.group.Group;
 import org.csg.group.Lobby;
-import org.csg.group.task.ValueData;
 import org.csg.group.task.toolkit.ListenerFactory;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
 public class Fwmain extends JavaPlugin implements Listener {
 
-	static CsgCmd csgCmd;
+	// 实例
+	private static Fwmain instance;
 
-	public static String getOsName() {
-		return Fwmain.osName;
+	public static Fwmain getInstance() {
+		return instance;
+	}
+
+	// 系统名称
+	@Getter
+	private static String osName;
+
+	// 配置文件
+	protected static FileConfiguration optionFile;
+
+	// Lobby 游戏列表
+	private static List<Lobby> LobbyList = new ArrayList<>();
+
+	// 获取 Lobby 目录
+	protected File lobbyFolder = new File(getDataFolder(), "lobby");
+
+	// 命令依赖
+	private static CsgCmd csgCmd;
+
+	// 插件启动
+	public void onEnable() {
+		// 初始化
+		instance = this;
+
+		ListenerFactory.enable();
+		// 注册监听器
+		Bukkit.getServer().getPluginManager().registerEvents(this, this);
+
+		//分析操作系统
+		osName =  OSUtils.analyseOs();
+
+		// 输出调试信息
+		if(Data.debug) {
+			System.out.print("-------------Properties------------");
+			System.getProperties().forEach((k,v)->System.out.printf("%s: %s%n",k,v));
+			System.out.print("-----------------------------------");
+		}
+
+
+		try{
+			// 检查插件文件夹是否存在
+			OSUtils.checkFolder(lobbyFolder);
+			// 读取Option.yml文件
+			optionFile = OSUtils.loadFileConfiguration(new File(getDataFolder(), "Option.yml"));
+
+			loadWorldPath();
+			if(Data.isPaper){
+				File root = new File("./libraries");
+				LoadBukkitCore(root,true);
+			}else{
+				File root = new File("./");
+				LoadBukkitCore(root,false);
+			}
+
+			csgCmd = new CsgCmd(Bukkit.getPluginCommand("csg"));
+
+			// 加载所有Lobby游戏列表
+			OSUtils.loadAllLobby(lobbyFolder);
+
+			getLogger().info("插件启动成功！ [Csg-Plus " + Data.Version + " ]");
+
+		}catch(LinkageError e){
+			getLogger().info("=====[出现链接错误！]=====");
+			getLogger().info("请检查是否有以下任何情况发生：");
+			getLogger().info("【1】用了plugman/YUM重载插件(重启解决)");
+			getLogger().info("===========================");
+
+		}
+
 	}
 
 	public static List<String> getOptionDepends() {
 		return Fwmain.optionDepends;
 	}
 
-	public static void setOsName(String osName) {
-		Fwmain.osName = osName;
-	}
 
 	public static void setOptionDepends(List<String> optionDepends) {
 		Fwmain.optionDepends = optionDepends;
 	}
 
 
-	public FileConfiguration load(File file) {
+	public FileConfiguration loadFileConfiguration(File file) {
 		if (!file.exists()) {
 			saveResource(file.getName(), true);
 		}
@@ -106,44 +165,7 @@ public class Fwmain extends JavaPlugin implements Listener {
 		}
 	}
 
-	public void onEnable() {
-		Data.fmain = this;
-		ListenerFactory.enable();
-		getServer().getPluginManager().registerEvents(this, this);
-		//分析操作系统
-		analyseOs();
-		if(Data.debug) {
-			System.out.print("-------------Properties------------");
-			System.getProperties().forEach((k,v)->System.out.printf("%s: %s%n",k,v));
-			System.out.print("-----------------------------------");
-		}
-		try{
 
-			SendToData();
-			loadWorldPath();
-			if(Data.isPaper){
-				File root = new File("./libraries");
-				LoadBukkitCore(root,true);
-			}else{
-				File root = new File("./");
-				LoadBukkitCore(root,false);
-			}
-
-			csgCmd = new CsgCmd(Bukkit.getPluginCommand("csg"));
-
-			Lobby.LoadAll(lobby);
-
-			getLogger().info("插件启动成功！ [Csg-Plus " + Data.Version + " ]");
-
-		}catch(LinkageError e){
-			getLogger().info("=====[出现链接错误！]=====");
-			getLogger().info("请检查是否有以下任何情况发生：");
-			getLogger().info("【1】用了plugman/YUM重载插件(重启解决)");
-			getLogger().info("===========================");
-
-		}
-
-	}
 
 	public void onDisable() {
 		Data.onDisable=true;
@@ -188,15 +210,6 @@ public class Fwmain extends JavaPlugin implements Listener {
 	}
 
 
-	protected File lobby = new File(getDataFolder(), "lobby");
-	protected File itemd = new File(getDataFolder(), "itemtask");
-	protected File func = new File(getDataFolder(), "function");
-	public File data;
-	protected File option;
-	protected static FileConfiguration optionfile;
-	protected static ValueData d;
-
-	private static String osName;
 
 	private static List<String> optionDepends;
 
@@ -264,34 +277,12 @@ public class Fwmain extends JavaPlugin implements Listener {
 		}
 	}
 
-	public static void analyseOs() {
-		String os = System.getProperty("os.name");
-		if(os.toLowerCase().contains("windows")) setOsName("win");
-		else setOsName("linux");
-	}
 
 	private void SendToData() {
 
 		Data.fmain = this;
 
-		if (!getDataFolder().exists()) {
-			getDataFolder().mkdir();
-		}
-		if (!lobby.exists()) {
-			lobby.mkdir();
-		}
 
-		data = new File(getDataFolder(), "Data.yml");
-		option = new File(getDataFolder(), "Option.yml");
-		optionfile = load(option);
-		d = new ValueData(load(data));
-
-		Data.optionFile = option;
-		Data.lobbyDir = lobby;
-		Data.optionFileConf = optionfile;
-
-		Data.data = d;
-		Data.LoadOption();
 	}
 	@EventHandler
 	private void LListen(PlayerQuitEvent evt){

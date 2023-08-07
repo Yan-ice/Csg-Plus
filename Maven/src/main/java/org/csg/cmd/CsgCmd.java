@@ -1,9 +1,7 @@
 package org.csg.cmd;
 
-import org.bukkit.BanList;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -11,7 +9,6 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.csg.Data;
-import org.csg.Fwmain;
 import org.csg.Upgrader;
 import org.csg.group.Group;
 import org.csg.group.Lobby;

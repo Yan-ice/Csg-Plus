@@ -16,11 +16,8 @@ import org.bukkit.event.player.PlayerRespawnEvent;
 
 import org.bukkit.scheduler.BukkitRunnable;
 import org.csg.Data;
-import org.csg.FileMng;
 import org.csg.group.Lobby;
 
-import java.io.*;
-import java.util.List;
 import java.util.Map;
 
 public class Reflect implements Listener {

@@ -1,6 +1,6 @@
 package customgo.event;
 
-import customgo.Lobby;
+import customgo.LobbyAPI;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
@@ -9,11 +9,11 @@ public class ListenerCalledEvent extends Event {
 
     private static final HandlerList handlers = new HandlerList();
 
-    private Lobby lobby;
+    private LobbyAPI lobby;
     private Player player;
     private Object[] args;
     private String listener;
-    public ListenerCalledEvent(String li, Lobby lb, Player p, Object[] a) {
+    public ListenerCalledEvent(String li, LobbyAPI lb, Player p, Object[] a) {
         super();
         listener = li;
         lobby = lb;
@@ -21,7 +21,7 @@ public class ListenerCalledEvent extends Event {
         args = a;
     }
 
-    public Lobby getLobby(){
+    public LobbyAPI getLobby(){
         return lobby;
     }
     public Player getStriker(){

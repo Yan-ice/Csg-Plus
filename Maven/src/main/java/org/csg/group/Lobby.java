@@ -5,21 +5,19 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
+import customgo.LobbyAPI;
 import customgo.event.ListenerCalledEvent;
 import customgo.event.PlayerJoinLobbyEvent;
 import customgo.event.PlayerLeaveLobbyEvent;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.event.player.PlayerMoveEvent;
 import org.csg.BungeeSupport;
 import org.csg.Utils.GameMethodUtils;
 import org.csg.group.hologram.FwHologram;
-import org.csg.group.model.TeamManager;
 import org.csg.group.task.VarTable;
 import customgo.CsgTaskListener;
 import org.csg.group.task.cast.TypeCastFactory;
@@ -37,15 +35,9 @@ import org.csg.update.CycleUpdate;
 import org.csg.update.MainCycle;
 import org.csg.update.SecondCycle;
 
-public class Lobby implements customgo.Lobby, CycleUpdate {
+public class Lobby implements CycleUpdate, LobbyAPI {
 
-	// Lobby 游戏列表
-	private static List<Lobby> LobbyList = new ArrayList<>();
 
-	// 获取 Lobby 列表
-	public static List<Lobby> getLobbyList(){
-		return LobbyList;
-	}
 
 	// 全息显示
 	public FwHologram hd = new FwHologram();
@@ -450,7 +442,7 @@ public class Lobby implements customgo.Lobby, CycleUpdate {
 		this.Name = folder.getName();
 		load();
 	}
-	private Lobby(File folder,int p){
+	private Lobby(File folder, int p){
 		sproom_control = true;
 
 		Folder = folder;

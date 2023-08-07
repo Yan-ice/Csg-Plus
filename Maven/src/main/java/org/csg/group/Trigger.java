@@ -2,9 +2,6 @@ package org.csg.group;
 
 import org.bukkit.Bukkit;
 import org.bukkit.event.entity.PlayerDeathEvent;
-import org.csg.Data;
-import org.csg.group.Group;
-import org.csg.group.Lobby;
 import org.csg.update.CycleUpdate;
 import org.bukkit.Location;
 import org.bukkit.block.Block;

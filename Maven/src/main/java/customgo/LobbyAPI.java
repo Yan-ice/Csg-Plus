@@ -1,17 +1,14 @@
 package customgo;
 
-import customgo.event.PlayerJoinLobbyEvent;
-import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
-import org.csg.Data;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-public interface Lobby {
+public interface LobbyAPI {
     /**
      * 获得该大厅内的所有玩家。
      * @return
@@ -65,7 +62,7 @@ public interface Lobby {
     public String getName();
 
 
-    public Lobby clone();
+    public LobbyAPI clone();
 
     /**
      * 获得大厅的初始队伍。

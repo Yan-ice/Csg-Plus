@@ -5,7 +5,6 @@ import java.util.*;
 import org.bukkit.entity.*;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.Location;
 import org.bukkit.command.CommandSender;
 
 
@@ -25,7 +24,7 @@ public class Group implements customgo.Group{
 
 	protected List<UUID> playerList = new ArrayList<>();
 
-	public Group(Lobby byLobby,String name) {
+	public Group(Lobby byLobby, String name) {
 		Name = name;
 		this.byLobby = byLobby;
 		byLobby.callListener("onGroupLoaded",null,this);

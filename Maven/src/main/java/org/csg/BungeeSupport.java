@@ -1,6 +1,6 @@
 package org.csg;
 
-import customgo.Lobby;
+import customgo.LobbyAPI;
 import customgo.event.PlayerLeaveLobbyEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
@@ -11,8 +11,8 @@ import org.bukkit.event.player.PlayerJoinEvent;
 public class BungeeSupport implements Listener {
     private static BungeeSupport singleton;
 
-    Lobby lb;
-    public BungeeSupport(Lobby lobby){
+    LobbyAPI lb;
+    public BungeeSupport(LobbyAPI lobby){
         if(singleton!=null){
             HandlerList.unregisterAll(singleton);
             singleton = this;
