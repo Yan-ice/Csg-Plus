@@ -17,6 +17,7 @@ import org.apache.commons.lang.StringUtils;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.csg.BungeeSupport;
+import org.csg.Utils.GameMethodUtils;
 import org.csg.group.hologram.FwHologram;
 import org.csg.group.model.TeamManager;
 import org.csg.group.task.VarTable;
@@ -37,35 +38,23 @@ import org.csg.update.MainCycle;
 import org.csg.update.SecondCycle;
 
 public class Lobby implements customgo.Lobby, CycleUpdate {
+
+	// Lobby 游戏列表
 	private static List<Lobby> LobbyList = new ArrayList<>();
 
+	// 获取 Lobby 列表
 	public static List<Lobby> getLobbyList(){
 		return LobbyList;
 	}
 
-			public FwHologram hd = new FwHologram();
-			Map<UUID,Location> spawnpoint = new HashMap<>();
-			public void setSpawn(Player p,Location loc){
-				if(loc==null||p==null){
-			return;
-		}
-		if(!hasPlayer(p)){
-			return;
-		}
-		if(spawnpoint.containsKey(p.getUniqueId())){
-			spawnpoint.replace(p.getUniqueId(),loc);
-		}else{
-			spawnpoint.put(p.getUniqueId(),loc);
-		}
-	}
+	// 全息显示
+	public FwHologram hd = new FwHologram();
+
+	// 游戏方法工具类
+	public GameMethodUtils gameMethodUtils = new GameMethodUtils(this);
+
 	public boolean open = true;
 
-	public Location getSpawn(Player p){
-		if(p==null || !hasPlayer(p)){
-			return null;
-		}
-		return spawnpoint.get(p.getUniqueId());
-	}
 
 	public void setCanJoin(boolean open){
 		this.open = open;

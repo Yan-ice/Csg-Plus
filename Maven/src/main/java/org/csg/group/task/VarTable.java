@@ -167,6 +167,29 @@ public class VarTable {
         }
     }
 
+    /**
+     * 递增分数
+     * @param incr
+     */
+    public void incrScore(Player p, String key, double incr) {
+        // 判断是否存在这个分数变量
+        if(scores.containsKey(key)) {
+            // 获取对应的分数变量
+            Map<UUID, Double> m = scores.get(key);
+            if(m.containsKey(p.getUniqueId())) {
+                // 替换值
+                m.replace(p.getUniqueId(), m.get(p.getUniqueId()) + incr);
+            }else{
+                // 新建值
+                m.put(p.getUniqueId(), incr);
+            }
+        }else{
+            // 如果不存在这个分数变量，就新建
+            scores.put(key,new HashMap<UUID, Double>());
+            incrScore(p,key,incr);
+        }
+    }
+
     public double getScore(Player p, String key) {
         if(scores.containsKey(key)) {
             Map<UUID, Double> m = scores.get(key);
@@ -244,7 +267,7 @@ public class VarTable {
         value = macros.get(key);
         if(value!=null) return value;
 
-        return key;
+        return "";
     }
 
     private Object getMember(Object origin, String memberKey){

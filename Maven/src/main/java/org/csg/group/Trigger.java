@@ -38,7 +38,7 @@ public class Trigger implements Listener, CycleUpdate {
 	}
 	@EventHandler(priority= EventPriority.HIGHEST)
 	protected void Listen(PlayerRespawnEvent evt2) {
-		Location l = lobby.getSpawn(evt2.getPlayer());
+		Location l = lobby.gameMethodUtils.getSpawn(evt2.getPlayer());
 		if(l!=null){
 			evt2.setRespawnLocation(l);
 		}

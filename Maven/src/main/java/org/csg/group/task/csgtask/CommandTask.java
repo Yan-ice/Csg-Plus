@@ -220,7 +220,7 @@ public class CommandTask extends Task {
                 if(l==null){
                     l = Target.getLocation();
                 }
-                executer.lobby.setSpawn(Target,l);
+                executer.lobby.gameMethodUtils.setSpawn(Target,l);
                 break;
             case "say":
                 if (args.length==0 || Target==null) {
