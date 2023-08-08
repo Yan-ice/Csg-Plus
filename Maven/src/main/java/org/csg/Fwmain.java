@@ -2,23 +2,16 @@ package org.csg;
 
 import lombok.Getter;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.World;
-import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.entity.ArmorStand;
-import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.csg.Utils.CommonUtils;
 import org.csg.Utils.OSUtils;
 import org.csg.cmd.CsgCmd;
 import org.csg.group.Lobby;
@@ -26,8 +19,6 @@ import org.csg.group.task.toolkit.ListenerFactory;
 
 import java.io.File;
 import java.util.*;
-import java.util.jar.JarEntry;
-import java.util.jar.JarFile;
 
 public class Fwmain extends JavaPlugin implements Listener {
 
@@ -40,13 +31,25 @@ public class Fwmain extends JavaPlugin implements Listener {
 
 	// 系统名称
 	@Getter
-	private static String osName;
+	private String osName;
+
+	@Getter
+	private String worldpath;
+
+	// 核心JAR文件列表
+	@Getter
+	public List<File> bukkitCoreList = new ArrayList<>();
+
+	// 调试模式
+	@Getter
+	private Boolean debug;
 
 	// 配置文件
-	protected static FileConfiguration optionFile;
+	protected static FileConfiguration optionFileConfiguration;
 
 	// Lobby 游戏列表
-	private static List<Lobby> LobbyList = new ArrayList<>();
+	@Getter
+	private List<Lobby> lobbyList = new ArrayList<>();
 
 	// 获取 Lobby 目录
 	protected File lobbyFolder = new File(getDataFolder(), "lobby");
@@ -59,7 +62,9 @@ public class Fwmain extends JavaPlugin implements Listener {
 		// 初始化
 		instance = this;
 
+		// 注册监听器工厂
 		ListenerFactory.enable();
+
 		// 注册监听器
 		Bukkit.getServer().getPluginManager().registerEvents(this, this);
 
@@ -74,21 +79,26 @@ public class Fwmain extends JavaPlugin implements Listener {
 		}
 
 
+		Set<Player> playerList = new HashSet<>();
+
 		try{
 			// 检查插件文件夹是否存在
 			OSUtils.checkFolder(lobbyFolder);
 			// 读取Option.yml文件
-			optionFile = OSUtils.loadFileConfiguration(new File(getDataFolder(), "Option.yml"));
+			optionFileConfiguration = OSUtils.loadFileConfiguration(new File(getDataFolder(), "Option.yml"));
+			// 读取世界路径
+			worldpath = OSUtils.loadWorldPath();
 
-			loadWorldPath();
-			if(Data.isPaper){
+			// 判断是否为Paper
+			if(Bukkit.getVersion().contains("Paper")){
 				File root = new File("./libraries");
-				LoadBukkitCore(root,true);
+				OSUtils.loadBukkitCore(root,true);
 			}else{
 				File root = new File("./");
-				LoadBukkitCore(root,false);
+				OSUtils.loadBukkitCore(root,false);
 			}
 
+			// 加载命令
 			csgCmd = new CsgCmd(Bukkit.getPluginCommand("csg"));
 
 			// 加载所有Lobby游戏列表
@@ -106,74 +116,17 @@ public class Fwmain extends JavaPlugin implements Listener {
 
 	}
 
-	public static List<String> getOptionDepends() {
-		return Fwmain.optionDepends;
-	}
-
-
-	public static void setOptionDepends(List<String> optionDepends) {
-		Fwmain.optionDepends = optionDepends;
-	}
-
-
-	public FileConfiguration loadFileConfiguration(File file) {
-		if (!file.exists()) {
-			saveResource(file.getName(), true);
-		}
-		return YamlConfiguration.loadConfiguration(file);
-	}
-
-	Set<Player> plist = new HashSet<>();
-	Set<Player> vexlist = new HashSet<>();
-
-	/**
-	 * 发送大厅列表。
-	 * @param player 要发送的玩家
-	 */
-	public void showList(CommandSender player) {
-		String Glist = "";
-		List<Lobby> Lobbylist = Lobby.getLobbyList();
-		for (Lobby l : Lobbylist) {
-			String Name;
-			if (l.isComplete()) {
-				Name = ChatColor.GREEN + l.getName() + ChatColor.AQUA;
-			} else {
-				Name = ChatColor.RED + l.getName() + ChatColor.AQUA;
-			}
-			if (Glist != "") {
-				Glist = Glist + "、" + Name;
-			} else {
-				Glist = Name;
-			}
-		}
-		player.sendMessage(ChatColor.AQUA + "当前游戏列表:");
-		player.sendMessage(Glist);
-	}
-	/**
-	 * 检查一个玩家的一项权限。
-	 * csg.admin可以直接通过检查而无需验证是否有需要权限。
-	 * @param sender 被检查的玩家
-	 * @param Permission 需要检查的权限
-	 * @return 是否通过检查
-	 */
-	public static boolean CheckPerm(CommandSender sender, String Permission) {
-		if (sender.hasPermission("csg.admin") || sender.hasPermission(Permission)) {
-			return true;
-		} else {
-			sender.sendMessage(ChatColor.RED+"您没有权限这样做！缺少权限："+Permission);
-			return false;
-		}
-	}
-
-
-
 	public void onDisable() {
-		Data.onDisable=true;
-		ListenerFactory.disable();
-		getLogger().info("正在无触发器退出所有玩家...");
-		Lobby.UnLoadAll();
 
-		Data.data.Save();
+		// 注销监听器工厂
+		ListenerFactory.disable();
+
+		CommonUtils.ConsoleInfoMsg("正在退出所有玩家");
+
+		// 注销所有 Lobby游戏列表
+		unloadAllLobby();
+
+		// 注销监听器
 		HandlerList.unregisterAll((Plugin)this);
 
 		getLogger().info("插件关闭成功！");
@@ -184,174 +137,54 @@ public class Fwmain extends JavaPlugin implements Listener {
 	 */
 	public void Reload(CommandSender sender) {
 
-		Lobby.UnLoadAll();
+		// 注销所有 Lobby游戏列表
+		unloadAllLobby();
 
+		// 注销监听器
 		HandlerList.unregisterAll((Plugin)this);
-		Data.data.Save();
 
-		SendToData();
-		loadWorldPath();
+		// 读取Option.yml文件
+		optionFileConfiguration = OSUtils.loadFileConfiguration(new File(getDataFolder(), "Option.yml"));
 
-		File root = new File("./libraries");
-		if(root.exists()){
-			LoadBukkitCore(root,true);
+		// 检查插件文件夹是否存在
+		OSUtils.checkFolder(lobbyFolder);
+
+		// 读取世界路径
+		worldpath = OSUtils.loadWorldPath();
+
+		// 判断是否为Paper
+		if(Bukkit.getVersion().contains("Paper")){
+			File root = new File("./libraries");
+			OSUtils.loadBukkitCore(root,true);
+		}else{
+			File root = new File("./");
+			OSUtils.loadBukkitCore(root,false);
 		}
-		root = new File("./");
-		LoadBukkitCore(root,false);
 
-		Lobby.LoadAll(lobby);
+		// 加载所有Lobby游戏列表
+		OSUtils.loadAllLobby(lobbyFolder);
 
+		// 注册所有监听器
 		getServer().getPluginManager().registerEvents(this, this);
 
 		if(sender != null){
-			sender.sendMessage("插件重载成功！ [CustomGo-Plus " + Data.Version + " ]");
+			sender.sendMessage("插件重载成功！");
 		}
 
 	}
 
-
-
-	private static List<String> optionDepends;
-
-	private void loadWorldPath(){
-		boolean in_world = true;
-		String default_worldname = "world";
-		File csgt = new File("./");
-
-		for(World w : getServer().getWorlds()){
-			boolean pass = false;
-
-			if(w.getName().contains("_nether")){
-				default_worldname = w.getName().split("_nether")[0];
-
-				for(File f : csgt.listFiles()){
-					if(f.getName().equals(w.getName())){
-						in_world = false;
-					}
-				}
-			}
-		}
-
-		if(in_world){
-			Data.ConsoleInfo("CustomGo认为你的世界应该安装在./"+default_worldname+"中！");
-			Data.worldpath = ("./"+default_worldname+"/");
-		}else{
-			Data.ConsoleInfo("CustomGo认为你的世界应该安装在根目录中！");
-			Data.worldpath = ("./");
-		}
-	}
-	private void LoadBukkitCore(File root, boolean isPaper) {
-		if(!isPaper){
-			Arrays.stream(System.getProperty("java.class.path").split(";")).filter(e -> e.endsWith(".jar")).forEach(e -> {
-				File file = new File(e);
-				try {
-					JarFile jar = new JarFile(file);
-					JarEntry entry = jar.getJarEntry("version.json");
-
-					if(jar.getJarEntry("version.json") != null || jar.getJarEntry("mohist_libraries.txt") != null){
-						Data.ConsoleInfo("识别到核心端 " + file.getAbsolutePath());
-						Data.bukkit_core.add(file);
-					}
-					if(entry != null){
-						Data.ConsoleInfo("识别到核心端 " + file.getAbsolutePath());
-						Data.bukkit_core.add(file);
-					}
-				}catch (Exception err){
-					err.printStackTrace();
-				}
-			});
-
-		}else{
-			for(File f : root.listFiles()){
-				if(f.isDirectory()){
-					LoadBukkitCore(f,isPaper);
-				}else{
-					if(f.getName().endsWith(".jar")){
-						if(Data.debug) {
-							Data.ConsoleInfo("识别到API "+f.getName());
-						}
-						Data.bukkit_core.add(f);
-					}
-				}
-			}
-		}
-	}
-
-
-	private void SendToData() {
-
-		Data.fmain = this;
-
-
-	}
 	@EventHandler
-	private void LListen(PlayerQuitEvent evt){
+	private void LeaveServerListen(PlayerQuitEvent evt){
 		Lobby.AutoLeave(evt.getPlayer(),false);
-		Data.ConsoleInfo("玩家"+evt.getPlayer()+"因离开游戏而离开队列。");
+		CommonUtils.ConsoleInfoMsg("玩家"+evt.getPlayer()+"因离开游戏而离开队列。");
 	}
 
-	@EventHandler
-	private void LListen(EntityDamageEvent evt){
-		if(evt.getEntity() instanceof ArmorStand){
-			for(Lobby l : Lobby.getLobbyList()){
-				if(l.hd.Holograms().containsValue((ArmorStand) evt.getEntity())){
-					evt.setCancelled(true);
-				}
-			}
-
+	/**
+	 * 注销所有Lobby游戏
+	 */
+	public void unloadAllLobby() {
+		for (Lobby lobby : lobbyList) {
+			lobby.unLoad();
 		}
-
-	}
-
-	@EventHandler
-	private void Playeruuid(EntityDamageByEntityEvent evt){
-		if(evt.getDamager() instanceof Player && evt.getEntity() instanceof LivingEntity){
-			Player pl = (Player)evt.getDamager();
-			if(plist.contains(pl)){
-				plist.remove(pl);
-				pl.sendMessage("UUID: "+evt.getEntity().getUniqueId().toString());
-			}
-		}
-	}
-
-	@Deprecated
-	public List<String> DonTabComplete(CommandSender sender, Command command, String alias, String[] args) {
-		List<String> ls = new ArrayList<>();
-		if(args.length==1){
-			for(Lobby l : Lobby.getLobbyList()){
-				if(l.getName().startsWith(args[0])){
-					ls.add(l.getName());
-				}
-			}
-		}
-		return ls;
-	}
-
-	public Set<Player> getVexlist() {
-		return this.vexlist;
-	}
-
-	public File getLobby() {
-		return this.lobby;
-	}
-
-	public File getItemd() {
-		return this.itemd;
-	}
-
-	public File getFunc() {
-		return this.func;
-	}
-
-	public File getData() {
-		return this.data;
-	}
-
-	public File getOption() {
-		return this.option;
-	}
-
-	public Set<Player> getPlist() {
-		return this.plist;
 	}
 }

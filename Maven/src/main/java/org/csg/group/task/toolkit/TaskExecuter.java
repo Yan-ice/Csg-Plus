@@ -1,9 +1,12 @@
 package org.csg.group.task.toolkit;
 
-import org.csg.Data;
+import org.bukkit.ChatColor;
+import org.csg.Fwmain;
+import org.csg.Utils.CommonUtils;
 import org.csg.group.Group;
 import org.csg.group.Lobby;
 import org.csg.group.task.VarTable;
+import org.csg.group.task.csgtask.CommandTask;
 import org.csg.group.task.csgtask.FunctionTask;
 import org.csg.group.task.csgtask.Task;
 import org.csg.location.Teleporter;
@@ -70,7 +73,7 @@ public class TaskExecuter implements CycleUpdate {
             copy.replaceAll(s -> s.replace(ori, tar));
         }
 
-        origin = Data.ColorChange(origin);
+        origin = ChatColor.translateAlternateColorCodes('&',origin);
         String origin_old = "";
         while(!origin.equals(origin_old)){
             origin_old = origin;
@@ -128,11 +131,11 @@ public class TaskExecuter implements CycleUpdate {
 
                         }
                     }catch (ArrayIndexOutOfBoundsException e){
-                        Data.ConsoleInfo(String.format("解析变量 %s 时出现了数组越界！",String.format("$%s$", s)));
+                        CommonUtils.ConsoleErrorMsg(String.format("解析变量 %s 时出现了数组越界！", String.format("$%s$", s)));
                     }
                     String k = String.format("$%s$.random", s);
                     if(origin.contains(k)){
-                        String rd = acc[Data.Random(0,acc.length)];
+                        String rd = acc[CommonUtils.Random(0,acc.length)];
                         origin = origin.replace(k,rd);
                     }
                     origin = origin.replace(String.format("$%s$", s),Arrays.toString(acc));
@@ -272,7 +275,7 @@ public class TaskExecuter implements CycleUpdate {
                 }
             }catch(Exception e){
                 next = null;
-                Data.ConsoleError("在运行任务时出现错误！");
+                CommonUtils.ConsoleErrorMsg("在运行任务时出现错误！");
                 e.printStackTrace();
             }
         }else{

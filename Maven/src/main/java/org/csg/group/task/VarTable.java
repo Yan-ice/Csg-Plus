@@ -4,12 +4,11 @@ import org.bukkit.Location;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
-import org.csg.Data;
+import org.csg.Utils.CommonUtils;
 import org.csg.group.Group;
 import org.csg.group.task.toolkit.TaskExecuter;
 import org.csg.location.Teleporter;
 
-import java.text.DecimalFormat;
 import java.util.*;
 
 public class VarTable {
@@ -312,7 +311,7 @@ public class VarTable {
                 return acc.length;
             }
             if(memberKey.equals("random")){
-                return acc[Data.Random(0,acc.length)];
+                return acc[CommonUtils.Random(0,acc.length)];
             }
             for(int a = acc.length-1;a>=0;a--){
                 if(memberKey.equals(a+"")){
@@ -327,7 +326,7 @@ public class VarTable {
                 return list.size();
             }
             if (memberKey.equals("random")) {
-                return list.get(Data.Random(0, list.size()));
+                return list.get(CommonUtils.Random(0, list.size()));
             }
             for (int a = list.size() - 1; a >= 0; a--) {
                 if (memberKey.equals(a + "")) {

@@ -5,7 +5,6 @@ import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
-import org.csg.Data;
 
 public class TeamManager {
 
@@ -163,12 +162,12 @@ public class TeamManager {
             targer.sendMessage("§7队伍PVP：§a" + scoreboard.getTeam(teamName).allowFriendlyFire());
             targer.sendMessage("§7名称显示：§a" + scoreboard.getTeam(teamName).getOption(Team.Option.NAME_TAG_VISIBILITY));
         } else {
-            Data.ConsoleInfo("§7队伍名称：§a" + teamName);
-            Data.ConsoleInfo("§7队伍人数：§a" + scoreboard.getTeam(teamName).getSize());
-            Data.ConsoleInfo("§7队伍前缀：§a" + scoreboard.getTeam(teamName).getPrefix());
-            Data.ConsoleInfo("§7队伍后缀：§a" + scoreboard.getTeam(teamName).getSuffix());
-            Data.ConsoleInfo("§7队伍PVP：§a" + scoreboard.getTeam(teamName).allowFriendlyFire());
-            Data.ConsoleInfo("§7名称显示：§a" + scoreboard.getTeam(teamName).getOption(Team.Option.NAME_TAG_VISIBILITY));
+            CommonUtils.ConsoleInfoMsg("§7队伍名称：§a" + teamName);
+            CommonUtils.ConsoleInfoMsg("§7队伍人数：§a" + scoreboard.getTeam(teamName).getSize());
+            CommonUtils.ConsoleInfoMsg("§7队伍前缀：§a" + scoreboard.getTeam(teamName).getPrefix());
+            CommonUtils.ConsoleInfoMsg("§7队伍后缀：§a" + scoreboard.getTeam(teamName).getSuffix());
+            CommonUtils.ConsoleInfoMsg("§7队伍PVP：§a" + scoreboard.getTeam(teamName).allowFriendlyFire());
+            CommonUtils.ConsoleInfoMsg("§7名称显示：§a" + scoreboard.getTeam(teamName).getOption(Team.Option.NAME_TAG_VISIBILITY));
         }
     }
 

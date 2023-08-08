@@ -15,7 +15,6 @@ import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 
 import org.bukkit.scheduler.BukkitRunnable;
-import org.csg.Data;
 import org.csg.group.Lobby;
 
 import java.util.Map;

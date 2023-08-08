@@ -5,7 +5,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
-import org.csg.Data;
 import org.csg.Utils.CommonUtils;
 import org.csg.group.Group;
 import org.csg.group.Lobby;
@@ -104,7 +103,7 @@ public class CommandTask extends Task {
                 players.addAll(executer.getField());
                 if(players.size()>0){
                     int size = players.size();
-                    UUID p = players.get(Data.Random(0,size));
+                    UUID p = players.get(CommonUtils.Random(0,size));
                     players.clear();
                     players.add(p);
                 }
@@ -138,7 +137,7 @@ public class CommandTask extends Task {
             }
 
         }catch(Exception e){
-            Data.ConsoleInfo("执行任务"+command+"时出现错误：");
+            CommonUtils.ConsoleInfoMsg("执行任务"+command+"时出现错误：");
             e.printStackTrace();
         }
 
@@ -179,7 +178,7 @@ public class CommandTask extends Task {
             if(Bukkit.getPlayer(playerList.get(0))!=null){
                 autoworld = Bukkit.getPlayer(playerList.get(0)).getWorld();
             }else{
-                Data.ConsoleInfo("游戏内出现了异常的玩家数据！");
+                CommonUtils.ConsoleInfoMsg("游戏内出现了异常的玩家数据！");
             }
 
         }
@@ -201,13 +200,13 @@ public class CommandTask extends Task {
                 if (args.length==0) {
                     return false;
                 }
-                Data.ConsoleCommand(cloned_arg);
+                CommonUtils.ConsoleCommand(cloned_arg);
                 break;
             case "random":
                 if(args.length<2){
                     return false;
                 }
-                return_obj = Data.Random(Integer.parseInt(args[0]),Integer.parseInt(args[1]));
+                return_obj = CommonUtils.Random(Integer.parseInt(args[0]),Integer.parseInt(args[1]));
                 break;
             case "spawnpoint":
                 if(Target==null){
@@ -385,7 +384,7 @@ public class CommandTask extends Task {
                                 list.remove(args[2]);
                                 executer.lobby.macros.AddMacro(args[0], list);
                             } else {
-                                Data.ConsoleError("宏 【" + args[0] + "】不存在无法删除某个元素");
+                                CommonUtils.ConsoleErrorMsg("宏 【" + args[0] + "】不存在无法删除某个元素");
                             }
                             break;
                         default:
@@ -431,7 +430,7 @@ public class CommandTask extends Task {
                 return_obj = executer.lobby.macros.getValue(Target,args[0]);
                 break;
             case "log":
-                Data.ConsoleInfo("[log "+executer.lobby.getName()+"] "+args[0]);
+                CommonUtils.ConsoleInfoMsg("[log "+executer.lobby.getName()+"] "+args[0]);
                 break;
             case "end":
                 next = null;
@@ -469,9 +468,9 @@ public class CommandTask extends Task {
             case "spawnmob":
                 String[] v = args[2].split(" ");
                 if(v.length==3 && Target!=null){
-                    Data.ConsoleCommand("mm m spawn "+args[0]+" "+args[1]+" "+autoworld.getName()+","+v[0]+","+v[1]+","+v[2]);
+                    CommonUtils.ConsoleCommand("mm m spawn "+args[0]+" "+args[1]+" "+autoworld.getName()+","+v[0]+","+v[1]+","+v[2]);
                 }else if(v.length>=4){
-                    Data.ConsoleCommand("mm m spawn "+args[0]+" "+args[1]+" "+v[3]+","+v[0]+","+v[1]+","+v[2]);
+                    CommonUtils.ConsoleCommand("mm m spawn "+args[0]+" "+args[1]+" "+v[3]+","+v[0]+","+v[1]+","+v[2]);
                 }else{
                     return false;
                 }
@@ -498,7 +497,7 @@ public class CommandTask extends Task {
                 }
                 Material m = Material.getMaterial(args[0].toUpperCase());
                 if(m==null){
-                    Data.ConsoleInfo("未知的材质 "+args[0]+" ?");
+                    CommonUtils.ConsoleInfoMsg("未知的材质 "+args[0]+" ?");
                     return false;
                 }
                 int count = 1;
@@ -528,7 +527,7 @@ public class CommandTask extends Task {
                 }
                 PotionEffectType effType = PotionEffectType.getByName(args[0].toUpperCase());
                 if(effType==null){
-                    Data.ConsoleInfo("未知的药水效果 "+args[0]+" ?");
+                    CommonUtils.ConsoleInfoMsg("未知的药水效果 "+args[0]+" ?");
                     return false;
                 }
                 PotionEffect effect = new PotionEffect(effType,Integer.parseInt(args[1]),Integer.parseInt(args[2]));
@@ -643,7 +642,7 @@ public class CommandTask extends Task {
             if(return_obj!=null){
                 executer.addVariable(cloned_return,return_obj);
             }else{
-                Data.ConsoleInfo(String.format("注意：企图将无返回值的指令%s赋值给变量！",command));
+                CommonUtils.ConsoleInfoMsg(String.format("注意：企图将无返回值的指令%s赋值给变量！",command));
             }
         }
         return true;
@@ -661,7 +660,7 @@ public class CommandTask extends Task {
                 Target.setOp(false);
             }
         } else {
-            Data.ConsoleCommand(command);
+            CommonUtils.ConsoleCommand(command);
         }
     }
 
@@ -669,7 +668,7 @@ public class CommandTask extends Task {
         try{
             Bukkit.dispatchCommand(sender,command);
         }catch(Exception e){
-            Data.ConsoleInfo("执行指令 "+command+" 时出现错误：");
+            CommonUtils.ConsoleInfoMsg("执行指令 "+command+" 时出现错误：");
             e.printStackTrace();
         }
     }

@@ -16,7 +16,10 @@ import customgo.event.PlayerLeaveLobbyEvent;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.csg.BungeeSupport;
+import org.csg.Fwmain;
+import org.csg.Utils.CommonUtils;
 import org.csg.Utils.GameMethodUtils;
+import org.csg.Utils.OSUtils;
 import org.csg.group.hologram.FwHologram;
 import org.csg.group.task.VarTable;
 import customgo.CsgTaskListener;
@@ -26,7 +29,6 @@ import org.csg.group.task.csgtask.ListenerTask;
 import org.bukkit.entity.*;
 import org.bukkit.*;
 
-import org.csg.Data;
 import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.csg.group.task.toolkit.*;
@@ -34,6 +36,7 @@ import org.csg.sproom.Room;
 import org.csg.update.CycleUpdate;
 import org.csg.update.MainCycle;
 import org.csg.update.SecondCycle;
+import sun.nio.ch.IOUtil;
 
 public class Lobby implements CycleUpdate, LobbyAPI {
 
@@ -177,8 +180,8 @@ public class Lobby implements CycleUpdate, LobbyAPI {
 		s = s.trim();
 		int state = macros.HasMacro(s);
 		if(state!=2){
-			Data.ConsoleError("该大厅并未满足脚本需求的宏"+s+"！");
-			Data.ConsoleError("请在macro.yml文件设置相关内容，并重载该大厅。在此之前，相关脚本将无法使用！");
+			CommonUtils.ConsoleErrorMsg("该大厅并未满足脚本需求的宏"+s+"！");
+			CommonUtils.ConsoleErrorMsg("请在macro.yml文件设置相关内容，并重载该大厅。在此之前，相关脚本将无法使用！");
 		}
 		if(state==0){
 			try{
@@ -275,7 +278,7 @@ public class Lobby implements CycleUpdate, LobbyAPI {
 				}
 			}catch(IllegalAccessException | InvocationTargetException e){
 				e.printStackTrace();
-				Data.ConsoleInfo("尝试调取java函数"+name+"失败！");
+				CommonUtils.ConsoleInfoMsg("尝试调取java函数"+name+"失败！");
 			}
 		}
 		return null;
@@ -302,7 +305,7 @@ public class Lobby implements CycleUpdate, LobbyAPI {
 				}
 			}catch(IllegalAccessException | InvocationTargetException e){
 				e.printStackTrace();
-				Data.ConsoleInfo("尝试调取java函数"+name+"失败！");
+				CommonUtils.ConsoleInfoMsg("尝试调取java函数"+name+"失败！");
 			}
 		}
 
@@ -360,7 +363,7 @@ public class Lobby implements CycleUpdate, LobbyAPI {
 								&& StringUtils.isNotBlank(canGroup.get(0))
 								&& canGroup.contains(groupOfPlayer.getName())) {
 					ListenerCalledEvent call = new ListenerCalledEvent(name, this, p, para);
-					Data.fmain.getServer().getPluginManager().callEvent(call);
+					Fwmain.getInstance().getServer().getPluginManager().callEvent(call);
 
 					TaskExecuter executer = new TaskExecuter(task, this);
 					task.loadArgs(executer, para);
@@ -386,7 +389,7 @@ public class Lobby implements CycleUpdate, LobbyAPI {
 				}
 			}catch(IllegalAccessException | InvocationTargetException e){
 				e.printStackTrace();
-				Data.ConsoleInfo("尝试调取java监听器"+name+"失败！");
+				CommonUtils.ConsoleInfoMsg("尝试调取java监听器"+name+"失败！");
 			}
 		}
 	}
@@ -395,10 +398,10 @@ public class Lobby implements CycleUpdate, LobbyAPI {
 		this.Name = name;
 	}
 
-	Map<String,FileConfiguration> fc = new HashMap<>();
+	Map<String,FileConfiguration> fileConfigMap = new HashMap<>();
 
 	public FileConfiguration loadWorkFile(String name){
-		if (!fc.containsKey(name)) {
+		if (!fileConfigMap.containsKey(name)) {
 			File f = new File(tempFolder, name + ".yml");
 			if (!f.exists()) {
 				try {
@@ -407,18 +410,18 @@ public class Lobby implements CycleUpdate, LobbyAPI {
 					e.printStackTrace();
 				}
 			}
-			fc.put(name, Data.fmain.load(f));
+			fileConfigMap.put(name, OSUtils.loadFileConfiguration(f));
 		}
-		return fc.get(name);
+		return fileConfigMap.get(name);
 	}
 	public void saveWorkFile(String name){
-		if(fc.containsKey(name)){
+		if(fileConfigMap.containsKey(name)){
 			File f = new File(tempFolder,name+".yml");
 			try {
 				if(!f.exists()){
 					f.createNewFile();
 				}
-				fc.get(name).save(f);
+				fileConfigMap.get(name).save(f);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -429,7 +432,7 @@ public class Lobby implements CycleUpdate, LobbyAPI {
 		if(f.exists()){
 			f.delete();
 		}
-		fc.remove(name);
+		fileConfigMap.remove(name);
 	}
 
 	private boolean sproom_control = false;
@@ -459,7 +462,7 @@ public class Lobby implements CycleUpdate, LobbyAPI {
 
 
 	public void addToList(){
-		LobbyList.add(this);
+		Fwmain.getInstance().getLobbyList().add(this);
 	}
 
 	private void loadFileRecurse(File folder, JavaTaskCompiler jcompiler) throws IOException {
@@ -501,7 +504,7 @@ public class Lobby implements CycleUpdate, LobbyAPI {
 				if(direct){
 					default_macro_file = f;
 				}else{
-					macros.LoadMacro(Data.fmain.load(f), null);
+					macros.LoadMacro(OSUtils.loadFileConfiguration(f), null);
 				}
 			}
 		}
@@ -512,8 +515,8 @@ public class Lobby implements CycleUpdate, LobbyAPI {
 		loadMacro(folder,true);
 
 		if(default_macro_file!=null){
-			//Data.ConsoleInfo("正在加载Macro预设宏");
-			macros.LoadMacro(Data.fmain.load(default_macro_file), null);
+			//CommonUtils.ConsoleInfoMsg("正在加载Macro预设宏");
+			macros.LoadMacro(OSUtils.loadFileConfiguration(default_macro_file), null);
 		}else{
 			default_macro_file = new File(folder.getPath()+"/macro.yml");
 			default_macro_file.createNewFile();
@@ -525,7 +528,7 @@ public class Lobby implements CycleUpdate, LobbyAPI {
 		if(javaFunctionClass !=null){
 			try {
 				javaTaskInstance = javaFunctionClass.getConstructor().newInstance();
-				javaFunctionClass.getMethod("_setPlugin",JavaPlugin.class).invoke(javaTaskInstance,Data.fmain);
+				javaFunctionClass.getMethod("_setPlugin",JavaPlugin.class).invoke(javaTaskInstance,Fwmain.getInstance());
 			} catch (InstantiationException | InvocationTargetException | IllegalAccessException | NoSuchMethodException e) {
 				e.printStackTrace();
 			}
@@ -539,27 +542,27 @@ public class Lobby implements CycleUpdate, LobbyAPI {
 		for(Group g : grouplist){
 			g.UnLoad();
 		}
-		fc.clear();
+		fileConfigMap.clear();
 		grouplist.clear();
 		functions.clear();
 		listener.clear();
-		Data.ConsoleInfo("===== | &b正在加载大厅 "+Name+" &r| =====");
+		CommonUtils.ConsoleErrorMsg("===== | &b正在加载大厅 " + Name + " &r| =====");
 
-		if(Data.isBungee){
-			new BungeeSupport((this));
-		}
+//		if(Data.isBungee){
+//			new BungeeSupport((this));
+//		}
 
 		try{
 			loadFile(Folder);
 		}catch(IOException e){
 			e.printStackTrace();
-			Data.ConsoleInfo("文件读取失败！");
+			CommonUtils.ConsoleInfoMsg("文件读取失败！");
 		}
 
 		Default = new Group(this, "Main");
 		grouplist.add(Default);
 
-		Data.fmain.getServer().getPluginManager().registerEvents(trigger,Data.fmain);
+		Fwmain.getInstance().getServer().getPluginManager().registerEvents(trigger, Fwmain.getInstance());
 		MainCycle.registerCall(trigger);
 
 		if(isComplete()){
@@ -567,7 +570,7 @@ public class Lobby implements CycleUpdate, LobbyAPI {
 
 			for(File f : tempFolder.listFiles()){
 				if(!sproom_control && f.getName().equals("sproom_config.yml")){
-					Data.ConsoleInfo("检测到大厅"+Name+"具有独立副本配置，已生成独立副本！");
+					CommonUtils.ConsoleInfoMsg("检测到大厅"+Name+"具有独立副本配置，已生成独立副本！");
 					isSproom_control = true;
 					new Room(this,f);
 					break;
@@ -575,11 +578,11 @@ public class Lobby implements CycleUpdate, LobbyAPI {
 
 			}
 
-			Data.ConsoleInfo("===== | &a大厅 "+Name+"加载成功 &r| =====");
+			CommonUtils.ConsoleInfoMsg("===== | &a大厅 "+Name+"加载成功 &r| =====");
 			SecondCycle.registerCall(this);
 
 		}else{
-			Data.ConsoleInfo("===== | &c大厅 "+Name+"加载失败 &r| =====");
+			CommonUtils.ConsoleInfoMsg("===== | &c大厅 "+Name+"加载失败 &r| =====");
 		}
 	}
 
@@ -595,8 +598,8 @@ public class Lobby implements CycleUpdate, LobbyAPI {
 			getDefaultGroup().UnLoad();
 		}
 
-		if(LobbyList.contains(this)){
-			LobbyList.remove(this);
+		if(Fwmain.getInstance().getLobbyList().contains(this)){
+			Fwmain.getInstance().getLobbyList().remove(this);
 		}
 
 		callListener("onLobbyUnloaded",null);
@@ -659,7 +662,7 @@ public class Lobby implements CycleUpdate, LobbyAPI {
 	}
 
 	public static Lobby getLobby(String Name){
-		for(Lobby l : LobbyList){
+		for(Lobby l : Fwmain.getInstance().getLobbyList()){
 			if(l.Name.equalsIgnoreCase(Name)){
 				return l;
 			}
@@ -681,7 +684,7 @@ public class Lobby implements CycleUpdate, LobbyAPI {
 			return;
 		}
 		PlayerJoinLobbyEvent e = new PlayerJoinLobbyEvent(player,this);
-		Data.fmain.getServer().getPluginManager().callEvent(e);
+		Fwmain.getInstance().getServer().getPluginManager().callEvent(e);
 		if(!e.isCancelled()){
 			Default.JoinGroup(player);
 			callListener("onPlayerJoinLobby", player);
@@ -700,7 +703,7 @@ public class Lobby implements CycleUpdate, LobbyAPI {
 		g.LeaveGroup(player);
 
 		PlayerLeaveLobbyEvent e = new PlayerLeaveLobbyEvent(player,this);
-		Data.fmain.getServer().getPluginManager().callEvent(e);
+		Fwmain.getInstance().getServer().getPluginManager().callEvent(e);
 		callListener("onPlayerRest",null,getPlayerAmount());
 	}
 
@@ -728,7 +731,7 @@ public class Lobby implements CycleUpdate, LobbyAPI {
 
 
 	public static void AutoLeave(Player player,boolean noTel){
-		for(Lobby l : LobbyList){
+		for(Lobby l : Fwmain.getInstance().getLobbyList()){
 			if(l.getPlayerList().contains(player.getUniqueId())){
 				l.Leave(player);
 				return;
@@ -748,8 +751,8 @@ public class Lobby implements CycleUpdate, LobbyAPI {
 	}
 
 	public static void UnLoadAll() {
-		while(LobbyList.size()>0){
-			LobbyList.get(0).unLoad();
+		while(Fwmain.getInstance().getLobbyList().size()>0){
+			Fwmain.getInstance().getLobbyList().get(0).unLoad();
 			//l.ListenerRespond(new EventOnLobbyUnloaded(l,false));
 		}
 	}

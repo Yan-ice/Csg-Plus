@@ -1,15 +1,8 @@
 package org.csg.group.task.cast;
 
-import org.bukkit.Location;
-import org.csg.Data;
-
-import javax.lang.model.type.ArrayType;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 public class TypeCastFactory {

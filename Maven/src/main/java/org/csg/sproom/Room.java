@@ -8,7 +8,6 @@ import com.grinderwolf.swm.api.world.properties.SlimePropertyMap;
 import org.bukkit.*;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.csg.Data;
 import org.csg.FileMng;
 import org.csg.group.Lobby;
 
@@ -186,7 +185,7 @@ public class Room {
 	}
 	public Room(Lobby model, File config_f){
 		if(plugin==null){
-			Data.ConsoleInfo("未找到前置插件SlimeWorldManager，无法使用独立副本功能！");
+			CommonUtils.ConsoleInfoMsg("未找到前置插件SlimeWorldManager，无法使用独立副本功能！");
 			return;
 		}
 		lobby_model = model;

@@ -6,7 +6,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
-import org.csg.Data;
 
 public class Teleporter {
 	Player player;
@@ -76,15 +75,15 @@ public class Teleporter {
 				pitch = Float.parseFloat(s[5]);
 				world = Bukkit.getWorld(s[3]);
 			}else{
-				Data.ConsoleInfo(l+"似乎不是有效的坐标（参数个数错误）。");
+				CommonUtils.ConsoleInfoMsg(l+"似乎不是有效的坐标（参数个数错误）。");
 				return null;
 			}
 			if(world==null){
-				Data.ConsoleInfo(l+"坐标中的世界不存在！");
+				CommonUtils.ConsoleInfoMsg(l+"坐标中的世界不存在！");
 			}
 			return new Location(world,x,y,z,yaw,pitch);
 		}catch(Exception e){
-			Data.ConsoleInfo(l+"似乎不是有效的坐标（数据类型错误）。");
+			CommonUtils.ConsoleInfoMsg(l+"似乎不是有效的坐标（数据类型错误）。");
 			return null;
 		}
 	}
@@ -109,7 +108,7 @@ public class Teleporter {
 				pitch = Float.parseFloat(s[5]);
 				world = Bukkit.getWorld(s[3]);
 			}else{
-				Data.ConsoleInfo(l+"似乎不是有效的坐标（参数个数错误）。");
+				CommonUtils.ConsoleInfoMsg(l+"似乎不是有效的坐标（参数个数错误）。");
 				return null;
 			}
 			if(world==null){
@@ -117,7 +116,7 @@ public class Teleporter {
 			}
 			return new Location(world,x,y,z,yaw,pitch);
 		}catch(Exception e){
-			Data.ConsoleInfo(l+"似乎不是有效的坐标（数据类型错误）。");
+			CommonUtils.ConsoleInfoMsg(l+"似乎不是有效的坐标（数据类型错误）。");
 			return null;
 		}
 

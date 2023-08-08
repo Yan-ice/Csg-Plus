@@ -4,7 +4,6 @@ import com.grinderwolf.swm.api.exceptions.UnknownWorldException;
 import com.grinderwolf.swm.api.exceptions.WorldInUseException;
 import com.grinderwolf.swm.api.loaders.SlimeLoader;
 import org.bukkit.ChatColor;
-import org.csg.Data;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -26,7 +25,7 @@ public class CsgSlimeLoader implements SlimeLoader {
             os.read(dataSource);
             os.close();
         }
-        Data.ConsoleInfo(ChatColor.BLUE+"Csg-Plus SpRoom world loaded.");
+        CommonUtils.ConsoleInfoMsg(ChatColor.BLUE+"Csg-Plus SpRoom world loaded.");
         return dataSource;
     }
 
@@ -52,7 +51,7 @@ public class CsgSlimeLoader implements SlimeLoader {
         os.flush();
         os.close();
         dataSource = bytes.clone();
-        Data.ConsoleInfo(ChatColor.BLUE+"Csg-Plus SpRoom world saved.");
+        CommonUtils.ConsoleInfoMsg(ChatColor.BLUE+"Csg-Plus SpRoom world saved.");
     }
 
 

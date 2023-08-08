@@ -1,12 +1,6 @@
 package org.csg.group.task.cast;
 
-import com.grinderwolf.swm.api.exceptions.UnknownWorldException;
-import org.csg.Data;
-
-import javax.xml.stream.Location;
 import java.lang.reflect.Type;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * 此类为转化规则的基类（当接口用）

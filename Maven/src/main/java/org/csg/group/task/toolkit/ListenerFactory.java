@@ -7,7 +7,6 @@ import javassist.bytecode.SignatureAttribute;
 import javassist.bytecode.annotation.Annotation;
 import org.bukkit.event.Event;
 import org.bukkit.event.Listener;
-import org.csg.Data;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;

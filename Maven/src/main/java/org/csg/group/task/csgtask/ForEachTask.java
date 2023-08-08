@@ -1,6 +1,5 @@
 package org.csg.group.task.csgtask;
 
-import org.csg.Data;
 import org.csg.group.task.toolkit.TaskExecuter;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;

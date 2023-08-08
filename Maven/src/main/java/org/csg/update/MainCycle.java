@@ -1,6 +1,5 @@
 package org.csg.update;
 
-import org.csg.Data;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.HashSet;

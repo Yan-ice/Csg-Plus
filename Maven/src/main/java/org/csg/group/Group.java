@@ -6,11 +6,12 @@ import org.bukkit.entity.*;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
+import org.csg.Fwmain;
 
 
 public class Group implements customgo.Group{
 	public static Group SearchPlayerInGroup(Player pl){
-		for(Lobby l : Lobby.getLobbyList()){
+		for(Lobby l : Fwmain.getInstance().getLobbyList()){
 			for(Group g : l.getGroupListI()){
 				if(g.hasPlayer(pl)){
 					return g;

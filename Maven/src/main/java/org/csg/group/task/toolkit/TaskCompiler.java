@@ -1,6 +1,5 @@
 package org.csg.group.task.toolkit;
 
-import org.csg.Data;
 import org.csg.group.Lobby;
 import org.csg.group.task.csgtask.*;
 
@@ -43,7 +42,7 @@ public class TaskCompiler {
 
         public Task compile(Lobby lb, File f) {
             fileName = f.getName();
-            Data.ConsoleInfo("正在加载CustomGo脚本 "+f.getName());
+            CommonUtils.ConsoleInfoMsg("正在加载CustomGo脚本 "+f.getName());
             String path = f.getPath();
             last_one = begin;
             key_com.push(begin);
@@ -77,8 +76,8 @@ public class TaskCompiler {
                             break;
                         case "depend":
                             if(!Data.fmain.getServer().getPluginManager().isPluginEnabled(cm[1])){
-                                Data.ConsoleInfo("该大厅并未满足脚本需求的插件依赖"+cm[1]+"！");
-                                Data.ConsoleInfo("请添加所需的前置插件，并重启服务器。在此之前，相关脚本将无法使用！");
+                                CommonUtils.ConsoleInfoMsg("该大厅并未满足脚本需求的插件依赖"+cm[1]+"！");
+                                CommonUtils.ConsoleInfoMsg("请添加所需的前置插件，并重启服务器。在此之前，相关脚本将无法使用！");
                                 pass = false;
                             }
                             break;
@@ -239,7 +238,7 @@ public class TaskCompiler {
                 }
 
             }catch(TaskSyntaxError e){
-                Data.ConsoleInfo("csg脚本"+fileName+" 第"+this.line_counter+"行 出现语法错误！");
+                CommonUtils.ConsoleInfoMsg("csg脚本"+fileName+" 第"+this.line_counter+"行 出现语法错误！");
                 return;
             }
 

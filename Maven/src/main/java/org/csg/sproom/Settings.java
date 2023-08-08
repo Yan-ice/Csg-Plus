@@ -3,7 +3,6 @@ package org.csg.sproom;
 import org.bukkit.Location;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
-import org.csg.Data;
 
 import java.io.File;
 import java.io.IOException;

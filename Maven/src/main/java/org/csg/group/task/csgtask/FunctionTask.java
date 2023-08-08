@@ -1,6 +1,6 @@
 package org.csg.group.task.csgtask;
 
-import org.csg.Data;
+import org.csg.Utils.CommonUtils;
 import org.csg.group.task.toolkit.TaskExecuter;
 
 import java.util.UUID;
@@ -35,7 +35,7 @@ public class FunctionTask extends Task {
                     }
                 }
             }
-            Data.Debug(String.format("已成功读取CustomGo函数%s",name));
+            CommonUtils.ConsoleDebugMsg(String.format("已成功读取CustomGo函数%s",name));
 
         }catch(Exception e){
             e.printStackTrace();
@@ -47,7 +47,7 @@ public class FunctionTask extends Task {
     }
     public void loadArgs(TaskExecuter executer,Object[] give_args){
         if(args.length>give_args.length){
-            Data.ConsoleError("未给函数 "+name+" 提供足够的参数！");
+            CommonUtils.ConsoleErrorMsg("未给函数 "+name+" 提供足够的参数！");
             return;
         }
         for(int a = 0;a<args.length;a++){
@@ -56,7 +56,7 @@ public class FunctionTask extends Task {
     }
     @Override
     public Task execute(TaskExecuter executer, UUID striker) {
-        Data.Debug("调用函数 " +name);
+        CommonUtils.ConsoleDebugMsg("调用函数 " +name);
         return next;
     }
 
