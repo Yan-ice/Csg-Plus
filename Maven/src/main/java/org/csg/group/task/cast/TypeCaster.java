@@ -1,5 +1,8 @@
 package org.csg.group.task.cast;
 
+import org.csg.Fwmain;
+import org.csg.Utils.CommonUtils;
+
 import java.lang.reflect.Type;
 
 /**
@@ -27,7 +30,7 @@ public abstract class TypeCaster {
                 throw new ClassCastException("Cannot cast from "+ori+" to "+tar+".");
             }
         }catch(Exception e){
-            Data.Debug("Error when casting "+targetType().getName()+"["+e.getClass().getName()+"]: "+e.getMessage());
+            CommonUtils.ConsoleDebugMsg("Error when casting "+targetType().getName()+"["+e.getClass().getName()+"]: "+e.getMessage());
             return null;
         }
 
@@ -57,7 +60,7 @@ public abstract class TypeCaster {
                 throw new ClassCastException("Cannot cast from "+ori+" to "+tar+".");
             }
         }catch(Exception e){
-            Data.Debug("Error when casting "+targetType().getName()+"["+e.getClass().getName()+"]: "+e.getMessage());
+            CommonUtils.ConsoleDebugMsg("Error when casting "+targetType().getName()+"["+e.getClass().getName()+"]: "+e.getMessage());
             return null;
         }
 

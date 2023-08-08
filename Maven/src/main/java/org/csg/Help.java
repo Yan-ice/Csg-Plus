@@ -15,7 +15,7 @@ public class Help {
 	 * @param sender 要发送的对象。
 	 */
 	public static void MainHelp(CommandSender sender) {
-		sender.sendMessage(title("CsgPlusPro "+Data.Version+" 帮助"));
+		sender.sendMessage(title("CsgPlusPro "+ Fwmain.getInstance().getVersion() +" 帮助"));
 		sender.sendMessage("/csg reload              重载插件");
 		sender.sendMessage("/csg list                查看所有游戏");
 		sender.sendMessage("/csg leave               离开一个大厅");

@@ -6,6 +6,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
+import org.csg.Utils.CommonUtils;
 
 public class Teleporter {
 	Player player;
@@ -21,7 +22,7 @@ public class Teleporter {
 
 	/**
 	 * 自动检查坐标的存在性。如果存在将传送玩家。
-	 * 
+	 *
 	 * @param Loc
 	 *            将要传送的地点
 	 * @param SafeTp
@@ -37,13 +38,13 @@ public class Teleporter {
 	 */
 	public void TeleportRandom(List<Location> Loc) {
 		if(Loc != null && Loc.size()>0){
-			Location loc = Loc.get(Data.Random(0,Loc.size()));
+			Location loc = Loc.get(CommonUtils.Random(0,Loc.size()));
 			if(player!=null){
 				player.teleport(loc);
 			}
-			
+
 		}
-		
+
 		return;
 	}
 

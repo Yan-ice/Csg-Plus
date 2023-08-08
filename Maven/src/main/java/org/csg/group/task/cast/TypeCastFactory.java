@@ -1,5 +1,7 @@
 package org.csg.group.task.cast;
 
+import org.csg.Utils.CommonUtils;
+
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.HashSet;
@@ -57,7 +59,7 @@ public class TypeCastFactory {
             }
 
             if(!castAvailable((Class<?>)target)){
-                Data.ConsoleError("csg暂时不支持"+((Class<?>)target).getName()+"的类型转化！");
+                CommonUtils.ConsoleErrorMsg("csg暂时不支持"+((Class<?>)target).getName()+"的类型转化！");
                 return null;
             }
         }
@@ -68,13 +70,13 @@ public class TypeCastFactory {
             }
 
             if(!castAvailable((Class<?>)p.getRawType())){
-                Data.ConsoleError("csg暂时不支持"+((Class<?>)p.getRawType()).getName()+"的类型转化！");
+                CommonUtils.ConsoleErrorMsg("csg暂时不支持"+((Class<?>)p.getRawType()).getName()+"的类型转化！");
                 return null;
             }
         }
 
         if(!castAvailable(object.getClass())){
-            Data.ConsoleError("csg暂时不支持"+object.getClass().getName()+"的类型转化！");
+            CommonUtils.ConsoleErrorMsg("csg暂时不支持"+object.getClass().getName()+"的类型转化！");
             return null;
         }
 

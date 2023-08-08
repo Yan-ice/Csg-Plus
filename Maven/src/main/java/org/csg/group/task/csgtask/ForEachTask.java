@@ -1,5 +1,7 @@
 package org.csg.group.task.csgtask;
 
+import org.csg.Fwmain;
+import org.csg.Utils.CommonUtils;
 import org.csg.group.task.toolkit.TaskExecuter;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -73,7 +75,7 @@ public class ForEachTask extends ChooseTask {
                     }
                     if(players.size()>0){
                         int size = players.size();
-                        UUID p = players.get(Data.Random(0,size));
+                        UUID p = players.get(CommonUtils.Random(0,size));
                         players.clear();
                         players.add(p);
                     }

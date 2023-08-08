@@ -136,10 +136,10 @@ public class OSUtils {
                         loadBukkitCore(f,isPaper);
                     }else{
                         if(f.getName().endsWith(".jar")){
-                            if(Data.debug) {
+                            if(Fwmain.getInstance().isDebug()) {
                                 CommonUtils.ConsoleInfoMsg("识别到API "+f.getName());
                             }
-                            Data.bukkit_core.add(f);
+                            Fwmain.getInstance().bukkitCoreList.add(f);
                         }
                     }
                 }

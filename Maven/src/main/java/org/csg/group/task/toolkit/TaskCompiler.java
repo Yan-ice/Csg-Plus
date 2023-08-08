@@ -1,5 +1,7 @@
 package org.csg.group.task.toolkit;
 
+import org.csg.Fwmain;
+import org.csg.Utils.CommonUtils;
 import org.csg.group.Lobby;
 import org.csg.group.task.csgtask.*;
 
@@ -75,7 +77,7 @@ public class TaskCompiler {
                             field = field.concat(cm[1]+",,");
                             break;
                         case "depend":
-                            if(!Data.fmain.getServer().getPluginManager().isPluginEnabled(cm[1])){
+                            if(!Fwmain.getInstance().getServer().getPluginManager().isPluginEnabled(cm[1])){
                                 CommonUtils.ConsoleInfoMsg("该大厅并未满足脚本需求的插件依赖"+cm[1]+"！");
                                 CommonUtils.ConsoleInfoMsg("请添加所需的前置插件，并重启服务器。在此之前，相关脚本将无法使用！");
                                 pass = false;
@@ -114,7 +116,7 @@ public class TaskCompiler {
                             break;
                         case '\n':
                             if(!v_stack.empty()){
-                                Data.ConsoleError("csg脚本"+fileName+" 第"+this.line_counter+"行变量大括号不匹配(缺少})！");
+                                CommonUtils.ConsoleErrorMsg("csg脚本"+fileName+" 第"+this.line_counter+"行变量大括号不匹配(缺少})！");
                                 v_stack.clear();
                             }
                             if(annotation){
@@ -172,7 +174,7 @@ public class TaskCompiler {
                                 this.vkey.add(vkey);
                                 bu = bu.concat(String.valueOf(c));
                             }else{
-                                Data.ConsoleError("csg脚本"+fileName+" 第"+this.line_counter+"行变量大括号不匹配(缺少{)！");
+                                CommonUtils.ConsoleErrorMsg("csg脚本"+fileName+" 第"+this.line_counter+"行变量大括号不匹配(缺少{)！");
                             }
 
                             line_begin = false;

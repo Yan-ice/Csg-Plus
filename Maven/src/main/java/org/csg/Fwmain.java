@@ -1,6 +1,7 @@
 package org.csg;
 
 import lombok.Getter;
+import lombok.Setter;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -33,6 +34,7 @@ public class Fwmain extends JavaPlugin implements Listener {
 	@Getter
 	private String osName;
 
+	// 世界路径
 	@Getter
 	private String worldpath;
 
@@ -42,10 +44,18 @@ public class Fwmain extends JavaPlugin implements Listener {
 
 	// 调试模式
 	@Getter
-	private Boolean debug;
+	private boolean debug;
+
+	@Setter
+	@Getter
+	private boolean isBungee;
+
+	@Getter
+	private final String version = "1.9.6 ALPHA";
 
 	// 配置文件
-	protected static FileConfiguration optionFileConfiguration;
+	@Getter
+	protected FileConfiguration optionFileConfiguration;
 
 	// Lobby 游戏列表
 	@Getter
@@ -72,7 +82,7 @@ public class Fwmain extends JavaPlugin implements Listener {
 		osName =  OSUtils.analyseOs();
 
 		// 输出调试信息
-		if(Data.debug) {
+		if(debug) {
 			System.out.print("-------------Properties------------");
 			System.getProperties().forEach((k,v)->System.out.printf("%s: %s%n",k,v));
 			System.out.print("-----------------------------------");
@@ -104,7 +114,8 @@ public class Fwmain extends JavaPlugin implements Listener {
 			// 加载所有Lobby游戏列表
 			OSUtils.loadAllLobby(lobbyFolder);
 
-			getLogger().info("插件启动成功！ [Csg-Plus " + Data.Version + " ]");
+			// 启动信息
+			CommonUtils.ConsoleInfoMsg("插件启动成功！ [CsgPlusPro " + version + " ]");
 
 		}catch(LinkageError e){
 			getLogger().info("=====[出现链接错误！]=====");

@@ -15,7 +15,6 @@ import customgo.event.PlayerJoinLobbyEvent;
 import customgo.event.PlayerLeaveLobbyEvent;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.configuration.file.FileConfiguration;
-import org.csg.BungeeSupport;
 import org.csg.Fwmain;
 import org.csg.Utils.CommonUtils;
 import org.csg.Utils.GameMethodUtils;
@@ -32,11 +31,9 @@ import org.bukkit.*;
 import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.csg.group.task.toolkit.*;
-import org.csg.sproom.Room;
 import org.csg.update.CycleUpdate;
 import org.csg.update.MainCycle;
 import org.csg.update.SecondCycle;
-import sun.nio.ch.IOUtil;
 
 public class Lobby implements CycleUpdate, LobbyAPI {
 
@@ -567,16 +564,6 @@ public class Lobby implements CycleUpdate, LobbyAPI {
 
 		if(isComplete()){
 			callListener("onLobbyLoaded",null);
-
-			for(File f : tempFolder.listFiles()){
-				if(!sproom_control && f.getName().equals("sproom_config.yml")){
-					CommonUtils.ConsoleInfoMsg("检测到大厅"+Name+"具有独立副本配置，已生成独立副本！");
-					isSproom_control = true;
-					new Room(this,f);
-					break;
-				}
-
-			}
 
 			CommonUtils.ConsoleInfoMsg("===== | &a大厅 "+Name+"加载成功 &r| =====");
 			SecondCycle.registerCall(this);

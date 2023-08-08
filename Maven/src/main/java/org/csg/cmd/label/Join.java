@@ -7,7 +7,6 @@ import org.csg.Fwmain;
 import org.csg.cmd.Cmd;
 import org.csg.cmd.RootCmd;
 import org.csg.group.Lobby;
-import org.csg.sproom.Room;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -36,11 +35,7 @@ public class Join extends Cmd {
 
         Lobby lobby = Lobby.getLobby(args[0]);
         if (lobby != null) {
-            if(lobby.isSpRoom()){
-                Room.searchRoom(args[0]).JoinRoom(player);
-            }else{
-                lobby.Join(player);
-            }
+            lobby.Join(player);
         } else {
             player.sendMessage("游戏["+args[0]+"]不存在");
         }
@@ -62,11 +57,7 @@ public class Join extends Cmd {
         }
         Lobby lobby = Lobby.getLobby(args[0]);
         if(lobby!=null ){
-            if(lobby.isSpRoom()){
-                Room.searchRoom(args[0]).JoinRoom(target);
-            }else{
-                lobby.Join(target);
-            }
+            lobby.Join(target);
         }else{
             player.sendMessage("游戏["+args[0]+"]不存在");
         }
@@ -82,11 +73,7 @@ public class Join extends Cmd {
 
             Lobby lobby = Lobby.getLobby(args[0]);
             if(lobby!=null){
-                if(lobby.isSpRoom()){
-                    Room.searchRoom(args[0]).JoinRoom(target);
-                }else{
-                    lobby.Join(target);
-                }
+                lobby.Join(target);
             }
             else {
                 sender.sendMessage("游戏["+args[0]+"]不存在");

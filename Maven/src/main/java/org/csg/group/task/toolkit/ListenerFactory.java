@@ -7,6 +7,7 @@ import javassist.bytecode.SignatureAttribute;
 import javassist.bytecode.annotation.Annotation;
 import org.bukkit.event.Event;
 import org.bukkit.event.Listener;
+import org.csg.Utils.CommonUtils;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
@@ -97,7 +98,7 @@ public class ListenerFactory {
      */
     public static Class getListenerClass(Class<? extends Event> eventClass){
         if(eventClass.isInterface()){
-            Data.Debug(String.format("事件%s为接口，不能注册监听器!",eventClass.getName()));
+            CommonUtils.ConsoleDebugMsg(String.format("事件%s为接口，不能注册监听器!",eventClass.getName()));
             return null;
         }
         if (!listenerClasses.containsKey(eventClass.getSimpleName())){

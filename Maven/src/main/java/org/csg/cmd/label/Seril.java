@@ -5,8 +5,6 @@ import org.bukkit.entity.Player;
 import org.csg.Fwmain;
 import org.csg.cmd.Cmd;
 import org.csg.cmd.RootCmd;
-import org.csg.group.Lobby;
-import org.csg.sproom.Room;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -40,7 +38,6 @@ public class Seril extends Cmd {
             sender.sendMessage("参数不足！");
             return;
         }
-        Room.serilizeLobby(sender,args[0],args[1]);
     }
     @Override
     public List<String> playerTab(int para, String[] paras, Player player){

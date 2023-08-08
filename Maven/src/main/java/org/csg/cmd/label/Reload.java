@@ -2,6 +2,7 @@ package org.csg.cmd.label;
 
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.csg.Fwmain;
 import org.csg.cmd.Cmd;
 import org.csg.cmd.RootCmd;
 
@@ -25,15 +26,15 @@ public class Reload extends Cmd {
     }
     @Override
     public void player(Player player, String... args) {
-        Data.fmain.Reload(player);
+        Fwmain.getInstance().Reload(player);
     }
     @Override
     public void op(Player player, String... args) {
-        Data.fmain.Reload(player);
+        Fwmain.getInstance().Reload(player);
     }
     @Override
     public void console(CommandSender sender, String... args) {
-        Data.fmain.Reload(sender);
+        Fwmain.getInstance().Reload(sender);
     }
     @Override
     public List<String> playerTab(int para, String[] paras, Player player){

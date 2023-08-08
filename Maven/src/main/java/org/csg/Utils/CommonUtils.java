@@ -42,7 +42,7 @@ public class CommonUtils {
         Fwmain.getInstance().getLogger().info(ChatColor.translateAlternateColorCodes('&',"&c[错误]&r " + info));
     }
     public static void ConsoleDebugMsg(String str){
-        if(Fwmain.getInstance().getDebug()){
+        if(Fwmain.getInstance().isDebug()){
             Fwmain.getInstance().getLogger().info(ChatColor.translateAlternateColorCodes('&',"&e[调试]&r " + str));
         }
     }

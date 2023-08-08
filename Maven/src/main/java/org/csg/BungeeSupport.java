@@ -17,7 +17,7 @@ public class BungeeSupport implements Listener {
             HandlerList.unregisterAll(singleton);
             singleton = this;
         }
-        Bukkit.getPluginManager().registerEvents(this,Data.fmain);
+        Bukkit.getPluginManager().registerEvents(this, Fwmain.getInstance());
         lb = lobby;
     }
     @EventHandler

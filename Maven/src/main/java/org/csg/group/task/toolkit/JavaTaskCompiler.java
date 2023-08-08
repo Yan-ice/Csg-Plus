@@ -1,6 +1,7 @@
 package org.csg.group.task.toolkit;
 
 import lombok.Cleanup;
+import lombok.Data;
 import lombok.var;
 import org.csg.FileMng;
 import org.csg.Fwmain;
@@ -120,7 +121,7 @@ public class JavaTaskCompiler extends ClassLoader {
             while (reader.ready()) {
                 String st = reader.readLine() + "\n";
                 /** add by Tang7 23/04/12 添加仅调试模式下显示 */
-                if(Fwmain.getInstance().optionFileConf.getBoolean("Debug")) {
+                if(Fwmain.getInstance().getOptionFileConfiguration().getBoolean("Debug")) {
                     if (st.contains("setOp") || st.contains("setGameMode") || st.contains("dispatchCommand")) {
                         CommonUtils.ConsoleInfoMsg(String.format("脚本 %s 中存在可疑后门语句 %s ！如果不是，请忽略此消息。", f.getName(), st));
                     }
@@ -166,14 +167,14 @@ public class JavaTaskCompiler extends ClassLoader {
 
         StringBuilder builder = new StringBuilder(path);
 
-        for (File core : Data.bukkit_core) {
-            builder.append(SplitCharUtils.getSplitChar(Fwmain.getOsName())).append(core.getAbsolutePath());
+        for (File core : Fwmain.getInstance().getBukkitCoreList()) {
+            builder.append(SplitCharUtils.getSplitChar(Fwmain.getInstance().getOsName())).append(core.getAbsolutePath());
         }
         File plugins = new File("./plugins");
         if(plugins.exists()){
             for(File plug : plugins.listFiles()){
                 if(plug.getName().endsWith(".jar")){
-                    builder.append(SplitCharUtils.getSplitChar(Fwmain.getOsName())).append(plug.getAbsolutePath());
+                    builder.append(SplitCharUtils.getSplitChar(Fwmain.getInstance().getOsName())).append(plug.getAbsolutePath());
                 }
             }
         }
@@ -227,7 +228,7 @@ public class JavaTaskCompiler extends ClassLoader {
             }
         }
 
-        Data.Debug("加载javatask脚本出现了错误。");
+        CommonUtils.ConsoleDebugMsg("加载javatask脚本出现了错误。");
 
         //FileMng.deleteDir(dir);
         return null;

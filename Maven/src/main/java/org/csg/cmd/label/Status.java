@@ -9,8 +9,6 @@ import org.csg.cmd.Cmd;
 import org.csg.cmd.RootCmd;
 import org.csg.group.Group;
 import org.csg.group.Lobby;
-import org.csg.sproom.Reflect;
-import org.csg.sproom.Room;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -49,46 +47,10 @@ public class Status extends Cmd {
             sender.sendMessage("游戏["+args[0]+"]不存在");
             return;
         }
-        if(lobby.isSpRoom()){
-            Room r = Room.searchRoom(args[0]);
-            sender.sendMessage(ChatColor.YELLOW+"房间名： "+ChatColor.AQUA+r.getName()+ChatColor.YELLOW+"  游戏进行个数： "+r.allreflects.size()+"/"+r.getMaxReflect());
-            for(Reflect rf : r.allreflects){
-                if(rf!=null){
-                    sender.sendMessage(ChatColor.YELLOW+"  副本镜像"+rf.getId()+"： ");
-                    String pli = "";
-                    switch(rf.getStatu()){
-                        case WAITING:
-                            sender.sendMessage("    游戏状态： "+ChatColor.GREEN+"等待中！");
-                            for(java.util.UUID p : rf.getLobby().getPlayerList()){
-                                pli = pli+ Bukkit.getPlayer(p).getName()+" ";
-                            }
-                            sender.sendMessage("    游玩玩家："+pli);
-                            break;
-                        case STARTED:
-                            sender.sendMessage("    游戏状态： "+ChatColor.RED+"游戏中");
-                            for(java.util.UUID p : rf.getLobby().getPlayerList()){
-                                pli = pli+Bukkit.getPlayer(p).getName()+" ";
-                            }
-                            sender.sendMessage("    游玩玩家："+pli);
-                            break;
-                        case PREPARING:
-                            sender.sendMessage("    游戏状态： "+ChatColor.RED+"正在加载");
-                            break;
-                        case ENDED:
-                            sender.sendMessage("    处于已卸载状态，随时等待重新启用。");
-                            break;
-                        case UNLOADING:
-                            sender.sendMessage("    游戏已结束，等待所有人离开世界将卸载。");
-                            break;
-                    }
-                }
-            }
-        }else{
-            sender.sendMessage(ChatColor.BLUE+lobby.getName()+" :");
-            sender.sendMessage(ChatColor.GREEN+"默认队列："+lobby.getDefaultGroup().getName());
-            for(Group gro : lobby.getGroupListI()){
-                gro.state(sender);
-            }
+        sender.sendMessage(ChatColor.BLUE+lobby.getName()+" :");
+        sender.sendMessage(ChatColor.GREEN+"默认队列："+lobby.getDefaultGroup().getName());
+        for(Group gro : lobby.getGroupListI()){
+            gro.state(sender);
         }
     }
         @Override

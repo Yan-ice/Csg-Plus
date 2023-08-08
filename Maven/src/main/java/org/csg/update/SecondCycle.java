@@ -1,6 +1,7 @@
 package org.csg.update;
 
 import org.bukkit.scheduler.BukkitRunnable;
+import org.csg.Fwmain;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -10,7 +11,7 @@ public class SecondCycle extends BukkitRunnable {
 
 	static{
 		instance = new SecondCycle();
-		instance.runTaskTimer(Data.fmain, 20, 20);
+		instance.runTaskTimer(Fwmain.getInstance(), 20, 20);
 	}
 
 	public static Set<CycleUpdate> meth = new HashSet<CycleUpdate>();

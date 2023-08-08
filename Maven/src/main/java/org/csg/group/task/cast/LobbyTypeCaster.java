@@ -1,6 +1,7 @@
 package org.csg.group.task.cast;
 
 import org.bukkit.entity.Player;
+import org.csg.Fwmain;
 import org.csg.group.Lobby;
 
 import java.lang.reflect.Type;
@@ -26,7 +27,7 @@ public class LobbyTypeCaster extends TypeCaster{
      * @return 如果反序列化失败，请返回null。
      */
     protected Object deserializeRule(String s,  Type... typeArguments){
-        for(Lobby l : Lobby.getLobbyList()){
+        for(Lobby l : Fwmain.getInstance().getLobbyList()){
             if(l.getName().equals(s)){
                 return l;
             }

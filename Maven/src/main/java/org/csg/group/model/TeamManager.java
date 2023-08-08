@@ -5,6 +5,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
+import org.csg.Utils.CommonUtils;
 
 public class TeamManager {
 
@@ -19,7 +20,7 @@ public class TeamManager {
     public static void addTeam(String teamName) {
         // 判断是否已经存在这个队伍
         if (scoreboard.getTeam(teamName) != null) {
-            Data.ConsoleWarn("该队伍已经存在！请检查是否重复添加！");
+            CommonUtils.ConsoleWarnMsg("该队伍已经存在！请检查是否重复添加！");
         }
         scoreboard.registerNewTeam(teamName);
     }
@@ -31,7 +32,7 @@ public class TeamManager {
     public static void delTeam(String teamName) {
         // 判断是否已经存在这个队伍
         if (scoreboard.getTeam(teamName) == null) {
-            Data.ConsoleWarn("该队伍不存在！请检查是否重复删除！");
+            CommonUtils.ConsoleWarnMsg("该队伍不存在！请检查是否重复删除！");
         }
         scoreboard.getTeam(teamName).unregister();
     }
@@ -56,7 +57,7 @@ public class TeamManager {
         }
         // 判断是否已经存在这个玩家
         if (scoreboard.getEntryTeam(playerName) != null) {
-            Data.ConsoleWarn("该玩家已经存在！请检查是否重复添加！");
+            CommonUtils.ConsoleWarnMsg("该玩家已经存在！请检查是否重复添加！");
         }
         scoreboard.getTeam(teamName).addEntry(playerName);
     }
@@ -69,11 +70,11 @@ public class TeamManager {
     public static void leaveTeam(String teamName, String playerName) {
         // 判断是否已经存在这个队伍
         if (scoreboard.getTeam(teamName) == null) {
-            Data.ConsoleWarn("该队伍不存在！请先添加队伍！");
+            CommonUtils.ConsoleWarnMsg("该队伍不存在！请先添加队伍！");
         }
         // 判断是否已经存在这个玩家
         if (scoreboard.getEntryTeam(playerName) == null) {
-            Data.ConsoleWarn("该玩家不存在！请检查是否重复删除！");
+            CommonUtils.ConsoleWarnMsg("该玩家不存在！请检查是否重复删除！");
         }
         scoreboard.getTeam(teamName).removeEntry(playerName);
     }
@@ -85,7 +86,7 @@ public class TeamManager {
     public static void clear(String teamName) {
         // 判断是否已经存在这个队伍
         if (scoreboard.getTeam(teamName) == null) {
-            Data.ConsoleWarn("该队伍不存在！请先添加队伍！");
+            CommonUtils.ConsoleWarnMsg("该队伍不存在！请先添加队伍！");
         }
         scoreboard.getTeam(teamName).unregister();
         scoreboard.registerNewTeam(teamName);
@@ -99,7 +100,7 @@ public class TeamManager {
     public static int size(String teamName) {
         // 判断是否已经存在这个队伍
         if (scoreboard.getTeam(teamName) == null) {
-            Data.ConsoleWarn("该队伍不存在！请先添加队伍！");
+            CommonUtils.ConsoleWarnMsg("该队伍不存在！请先添加队伍！");
         }
         return scoreboard.getTeam(teamName).getSize();
     }
@@ -114,7 +115,7 @@ public class TeamManager {
     public static void setTeamOption(String teamName, String option, String value) {
         // 判断是否已经存在这个队伍
         if (scoreboard.getTeam(teamName) == null) {
-            Data.ConsoleWarn("该队伍不存在！请先添加队伍！");
+            CommonUtils.ConsoleWarnMsg("该队伍不存在！请先添加队伍！");
         }
         switch (option) {
             case "prefix":
@@ -141,18 +142,18 @@ public class TeamManager {
                         scoreboard.getTeam(teamName).setOption(Team.Option.NAME_TAG_VISIBILITY, Team.OptionStatus.FOR_OWN_TEAM);
                         break;
                     default:
-                        Data.ConsoleWarn("无效的选项！");
+                        CommonUtils.ConsoleWarnMsg("无效的选项！");
                 }
                 break;
             default:
-                Data.ConsoleWarn("无效的选项！");
+                CommonUtils.ConsoleWarnMsg("无效的选项！");
         }
     }
 
     public static void infoTeam(String teamName, Player targer) {
         // 判断是否已经存在这个队伍
         if (scoreboard.getTeam(teamName) == null) {
-            Data.ConsoleWarn("该队伍不存在！请先添加队伍！");
+            CommonUtils.ConsoleWarnMsg("该队伍不存在！请先添加队伍！");
         }
         if (targer != null) {
             targer.sendMessage("§7队伍名称：§a" + teamName);
