@@ -27,7 +27,7 @@ public class CommonUtils {
      * @param info
      */
     public static void ConsoleInfoMsg(String info) {
-        Fwmain.getInstance().getLogger().info(ChatColor.translateAlternateColorCodes('&',"&a[信息]&r " + info));
+        Fwmain.getInstance().getServer().getConsoleSender().sendMessage(ChatColor.translateAlternateColorCodes('&',"&a[ INFO ]&r " + info));
     }
 
     /**
@@ -35,15 +35,15 @@ public class CommonUtils {
      * @param info
      */
     public static void ConsoleWarnMsg(String info) {
-        Fwmain.getInstance().getLogger().info(ChatColor.translateAlternateColorCodes('&',"&e[警告]&r " + info));
+        Fwmain.getInstance().getServer().getConsoleSender().sendMessage(ChatColor.translateAlternateColorCodes('&',"&e[ WARN ]&r " + info));
     }
 
     public static void ConsoleErrorMsg(String info) {
-        Fwmain.getInstance().getLogger().info(ChatColor.translateAlternateColorCodes('&',"&c[错误]&r " + info));
+        Fwmain.getInstance().getServer().getConsoleSender().sendMessage(ChatColor.translateAlternateColorCodes('&',"&c[ ERROR ]&r " + info));
     }
     public static void ConsoleDebugMsg(String str){
         if(Fwmain.getInstance().isDebug()){
-            Fwmain.getInstance().getLogger().info(ChatColor.translateAlternateColorCodes('&',"&e[调试]&r " + str));
+            Fwmain.getInstance().getServer().getConsoleSender().sendMessage(ChatColor.translateAlternateColorCodes('&',"&e[ DEBUG ]&r " + str));
         }
     }
 

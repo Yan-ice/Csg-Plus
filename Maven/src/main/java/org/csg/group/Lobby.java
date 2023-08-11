@@ -543,7 +543,7 @@ public class Lobby implements CycleUpdate, LobbyAPI {
 		grouplist.clear();
 		functions.clear();
 		listener.clear();
-		CommonUtils.ConsoleErrorMsg("===== | &b正在加载大厅 " + Name + " &r| =====");
+		CommonUtils.ConsoleInfoMsg("===== [ 正在加载大厅 &2" + Name + " &r] =====");
 
 //		if(Data.isBungee){
 //			new BungeeSupport((this));
@@ -565,11 +565,11 @@ public class Lobby implements CycleUpdate, LobbyAPI {
 		if(isComplete()){
 			callListener("onLobbyLoaded",null);
 
-			CommonUtils.ConsoleInfoMsg("===== | &a大厅 "+Name+"加载成功 &r| =====");
+			CommonUtils.ConsoleInfoMsg("===== [ 大厅 "+Name+" &a加载成功 &r| =====");
 			SecondCycle.registerCall(this);
 
 		}else{
-			CommonUtils.ConsoleInfoMsg("===== | &c大厅 "+Name+"加载失败 &r| =====");
+			CommonUtils.ConsoleInfoMsg("===== [ 大厅 "+Name+" &c加载失败 &r| =====");
 		}
 	}
 
@@ -585,9 +585,7 @@ public class Lobby implements CycleUpdate, LobbyAPI {
 			getDefaultGroup().UnLoad();
 		}
 
-		if(Fwmain.getInstance().getLobbyList().contains(this)){
-			Fwmain.getInstance().getLobbyList().remove(this);
-		}
+		Fwmain.getInstance().getLobbyList().remove(this);
 
 		callListener("onLobbyUnloaded",null);
 		HandlerList.unregisterAll(trigger);

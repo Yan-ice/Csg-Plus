@@ -1,9 +1,9 @@
 package org.csg.group.task.cast;
 
-import com.grinderwolf.swm.api.exceptions.UnknownWorldException;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
+import org.csg.Utils.CommonUtils;
 
 import java.lang.reflect.Type;
 
@@ -34,16 +34,20 @@ public class LocationTypeCaster extends TypeCaster{
      * @param arg 源字符串。
      * @return 如果反序列化失败，请返回null。
      */
-    protected Object deserializeRule(String arg, Type... typeArguments) throws UnknownWorldException {
+    protected Object deserializeRule(String arg, Type... typeArguments) {
         if (arg.matches("^(-?[0-9]+ ){3}\\S+$")) {
             String[] sl = arg.split(" ");
             World w = Bukkit.getWorld(sl[3]);
-            if(w==null) throw new UnknownWorldException(sl[3]);
+            if(w==null) {
+                CommonUtils.ConsoleErrorMsg("Cannot find world "+sl[3]);
+            }
             return new Location(w, Integer.valueOf(sl[0]), Integer.valueOf(sl[1]), Integer.valueOf(sl[2]));
         }else if (arg.matches("^(-?[0-9]+ ){3}\\S+ (-?[0-9]+) (-?[0-9]+)$")) {
             String[] sl = arg.split(" ");
             World w = Bukkit.getWorld(sl[3]);
-            if(w==null) throw new UnknownWorldException(sl[3]);
+            if(w==null) {
+                CommonUtils.ConsoleErrorMsg("Cannot find world "+sl[3]);
+            }
             return new Location(w, Integer.valueOf(sl[0]), Integer.valueOf(sl[1]),
                     Integer.valueOf(sl[2]),Integer.valueOf(sl[4]),Integer.valueOf(sl[5]));
         }

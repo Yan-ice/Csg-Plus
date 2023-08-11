@@ -99,10 +99,10 @@ public class OSUtils {
         }
 
         if(in_world){
-            CommonUtils.ConsoleInfoMsg("CustomGo认为你的世界应该安装在./"+default_worldname+"中！");
+            CommonUtils.ConsoleInfoMsg("CsgPlusPro认为你的世界应该安装在./"+default_worldname+"中！");
             return "./"+default_worldname+"/";
         }else{
-            CommonUtils.ConsoleInfoMsg("CustomGo认为你的世界应该安装在根目录中！");
+            CommonUtils.ConsoleInfoMsg("CsgPlusPro认为你的世界应该安装在根目录中！");
             return "./";
         }
     }
