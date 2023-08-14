@@ -13,6 +13,9 @@ import customgo.LobbyAPI;
 import customgo.event.ListenerCalledEvent;
 import customgo.event.PlayerJoinLobbyEvent;
 import customgo.event.PlayerLeaveLobbyEvent;
+import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.csg.Fwmain;
@@ -37,19 +40,252 @@ import org.csg.update.SecondCycle;
 
 public class Lobby implements CycleUpdate, LobbyAPI {
 
+	public VarTable macros = new VarTable();
+	File default_macro_file;
 
+	private final Set<FunctionTask> functions = new HashSet<>();
+	private final Set<ListenerTask> listener = new HashSet<>();
 
-	// 全息显示
-	public FwHologram hd = new FwHologram();
+	// javaTask 反射类
+	private Class<?> javaFunctionClass;
+
+	// JavaTask 对象示例
+	private Object javaTaskInstance;
+
+	// 队列列表
+	private Set<Group> grouplist = new HashSet<>();
+
+	private Trigger trigger = new Trigger(this);
+
+	// 默认队列
+	Group Default;
+
+	@Getter
+	// 脚本文件夹
+	File Folder;
+
+	@Getter
+	// Java临时文件夹
+	File tempFolder;
+	String Name;
+
+	@Getter
+	@Setter
+	// 是否为独立房间
+	private Boolean isSproom = false;
+
+	@Getter
+	@Setter
+	// world变量的世界名称
+	private String worldName = "world";
+
 
 	// 游戏方法工具类
 	public GameMethodUtils gameMethodUtils = new GameMethodUtils(this);
 
-	public boolean open = true;
+	// 是否开启（允许加入）
+	@Setter
+	@Getter
+	public boolean canJoin = true;
+
+	public Lobby clone(boolean isSproom, String worldName){
+		return new Lobby(Folder, isSproom, worldName);
+	}
+
+	/**
+	 * 构造函数
+	 * @param folder 脚本文件夹
+	 * @param isSproom 是否为独立房间
+	 * @param worldName world变量的世界名称
+	 */
+	private Lobby(File folder, boolean isSproom, String worldName){
+		this.isSproom = isSproom;
+		this.worldName = worldName;
+
+		Folder = folder;
+		tempFolder = new File(folder,"temp");
+		if(!tempFolder.exists()){
+			tempFolder.mkdir();
+		}
+		this.Name = folder.getName();
+		load();
+	}
 
 
-	public void setCanJoin(boolean open){
-		this.open = open;
+	/**
+	 * 加载大厅
+	 */
+	public void load(){
+		Clear();
+		for(Group g : grouplist){
+			g.UnLoad();
+		}
+		fileConfigMap.clear();
+		grouplist.clear();
+		functions.clear();
+		listener.clear();
+		CommonUtils.ConsoleInfoMsg("===== [ 正在加载大厅 &2" + Name + " &r] =====");
+
+		try{
+			loadFile(Folder);
+		}catch(IOException e){
+			e.printStackTrace();
+			CommonUtils.ConsoleInfoMsg("文件读取失败！");
+		}
+
+		Default = new Group(this, "Main");
+		grouplist.add(Default);
+
+		Fwmain.getInstance().getServer().getPluginManager().registerEvents(trigger, Fwmain.getInstance());
+		MainCycle.registerCall(trigger);
+
+		if(isComplete()){
+			callListener("onLobbyLoaded",null);
+
+			CommonUtils.ConsoleInfoMsg("===== [ 大厅 "+Name+" &a加载成功 &r| =====");
+			SecondCycle.registerCall(this);
+
+		}else{
+			CommonUtils.ConsoleInfoMsg("===== [ 大厅 "+Name+" &c加载失败 &r| =====");
+		}
+	}
+
+	public void unLoad() {
+		Clear();
+		for(Group g : grouplist){
+			if(getDefaultGroup()==g){
+				continue;
+			}
+			g.UnLoad();
+		}
+		if(getDefaultGroup()!=null){
+			getDefaultGroup().UnLoad();
+		}
+
+		Fwmain.lobbyList.remove(this);
+		callListener("onLobbyUnloaded",null);
+		HandlerList.unregisterAll(trigger);
+		MainCycle.unRegisterCall(trigger);
+		SecondCycle.unRegisterCall(this);
+
+		CommonUtils.ConsoleInfoMsg("===== [ 大厅 "+Name+" &a卸载成功 &r| =====");
+	}
+
+	public Group getGroup(String Name){
+		for(Group l : grouplist){
+			if(l.getName().equals(Name)){
+				return l;
+			}
+		}
+		return null;
+	}
+
+	public void Clear(){
+
+		for(UUID p : this.getPlayerList()){
+			this.Leave(Bukkit.getPlayer(p));
+		}
+	}
+
+	public static Lobby getLobby(String Name){
+		for(Lobby l : Fwmain.lobbyList){
+			if(l.Name.equalsIgnoreCase(Name)){
+				return l;
+			}
+		}
+		return null;
+	}
+
+
+	public void Join(Player player){
+		if(getPlayerAmount()==0){
+			canJoin = true;
+		}
+		if(!canJoin){
+			player.sendMessage(ChatColor.RED+"该游戏正在进行中，无法加入！");
+			return;
+		}
+		if(Group.SearchPlayerInGroup(player)!=null){
+			player.sendMessage(ChatColor.RED+"你已经在一个游戏中了！");
+			return;
+		}
+		PlayerJoinLobbyEvent e = new PlayerJoinLobbyEvent(player,this);
+		Fwmain.getInstance().getServer().getPluginManager().callEvent(e);
+		if(!e.isCancelled()){
+			Default.JoinGroup(player);
+			callListener("onPlayerJoinLobby", player);
+		}
+
+	}
+
+	public void Leave(Player player){
+		if(player==null || !hasPlayer(player)){
+			return;
+		}
+
+		callListener("onPlayerLeaveLobby", player);
+
+		Group g = this.findGroupOfPlayer(player);
+		g.LeaveGroup(player);
+
+		PlayerLeaveLobbyEvent e = new PlayerLeaveLobbyEvent(player,this);
+		Fwmain.getInstance().getServer().getPluginManager().callEvent(e);
+		callListener("onPlayerRest",null,getPlayerAmount());
+	}
+
+	public void ChangeGroup(Player player,String groupname){
+		if(player==null || !hasPlayer(player)){
+			return;
+		}
+		Group from = Group.SearchPlayerInGroup(player);
+		if(from==null){
+			return;
+		}
+
+		if(getGroup(groupname)==null){
+			grouplist.add(new Group(this,groupname));
+		}
+
+		Group to = this.getGroup(groupname);
+		if(from==to){
+			return;
+		}
+		from.LeaveGroup(player);
+		to.JoinGroup(player);
+
+	}
+
+	public static void AutoLeave(Player player,boolean noTel){
+		for(Lobby l : Fwmain.lobbyList){
+			if(l.getPlayerList().contains(player.getUniqueId())){
+				l.Leave(player);
+				return;
+			}
+		}
+		player.sendMessage("您不在任何游戏中！");
+	}
+
+	@Override
+	public void onUpdate() {
+		callListener("onEverySecond",null);
+	}
+
+	public List<UUID> getPlayerList(){
+		List<UUID> pl = new ArrayList<>();
+		for(Group g : getGroupListI()){
+			pl.addAll(g.getPlayerList());
+
+		}
+		return pl;
+	}
+
+	public boolean hasPlayer(Player p){
+		for(Group g : getGroupListI()){
+			if(g.hasPlayer(p)){
+				return true;
+			}
+		}
+		return false;
 	}
 
 	public boolean hasMacroForLike(String key) {
@@ -210,51 +446,9 @@ public class Lobby implements CycleUpdate, LobbyAPI {
 		}
 		return state==2;
 	}
-	public VarTable macros = new VarTable();
-	File default_macro_file;
 
-	private final Set<FunctionTask> functions = new HashSet<>();
-	private final Set<ListenerTask> listener = new HashSet<>();
-	private Class<?> javaFunctionClass;
-	private Object javaTaskInstance;
 
-	private Set<Group> grouplist = new HashSet<>();
-	private Trigger trigger = new Trigger(this);
-	Group Default;
 
-	File Folder;
-	File tempFolder;
-	String Name;
-
-	private boolean isSproom_control = false;
-
-	public boolean isSpRoom(){
-		return isSproom_control;
-	}
-	public File getTempFolder(){
-		return tempFolder;
-	}
-	public File getFolder(){
-		return Folder;
-	}
-
-	public List<UUID> getPlayerList(){
-		List<UUID> pl = new ArrayList<>();
-		for(Group g : getGroupListI()){
-			pl.addAll(g.getPlayerList());
-
-		}
-		return pl;
-	}
-
-	public boolean hasPlayer(Player p){
-		for(Group g : getGroupListI()){
-			if(g.hasPlayer(p)){
-				return true;
-			}
-		}
-		return false;
-	}
 	public Object callFunction(String name, Player p, Object... para){
 		for(FunctionTask task : functions){
 			if(task.getName().equals(name)){
@@ -432,7 +626,6 @@ public class Lobby implements CycleUpdate, LobbyAPI {
 		fileConfigMap.remove(name);
 	}
 
-	private boolean sproom_control = false;
 	public Lobby(File folder){
 		Folder = folder;
 		tempFolder = new File(folder,"temp");
@@ -442,24 +635,11 @@ public class Lobby implements CycleUpdate, LobbyAPI {
 		this.Name = folder.getName();
 		load();
 	}
-	private Lobby(File folder, int p){
-		sproom_control = true;
 
-		Folder = folder;
-		tempFolder = new File(folder,"temp");
-		if(!tempFolder.exists()){
-			tempFolder.mkdir();
-		}
-		this.Name = folder.getName();
-		load();
-	}
-	public Lobby clone(){
-		return new Lobby(Folder,1);
-	}
 
 
 	public void addToList(){
-		Fwmain.getInstance().getLobbyList().add(this);
+		Fwmain.lobbyList.add(this);
 	}
 
 	private void loadFileRecurse(File folder, JavaTaskCompiler jcompiler) throws IOException {
@@ -531,67 +711,7 @@ public class Lobby implements CycleUpdate, LobbyAPI {
 			}
 		}
 	}
-	/**
-	 * 加载大厅
-	 */
-	public void load(){
-		Clear();
-		for(Group g : grouplist){
-			g.UnLoad();
-		}
-		fileConfigMap.clear();
-		grouplist.clear();
-		functions.clear();
-		listener.clear();
-		CommonUtils.ConsoleInfoMsg("===== [ 正在加载大厅 &2" + Name + " &r] =====");
 
-//		if(Data.isBungee){
-//			new BungeeSupport((this));
-//		}
-
-		try{
-			loadFile(Folder);
-		}catch(IOException e){
-			e.printStackTrace();
-			CommonUtils.ConsoleInfoMsg("文件读取失败！");
-		}
-
-		Default = new Group(this, "Main");
-		grouplist.add(Default);
-
-		Fwmain.getInstance().getServer().getPluginManager().registerEvents(trigger, Fwmain.getInstance());
-		MainCycle.registerCall(trigger);
-
-		if(isComplete()){
-			callListener("onLobbyLoaded",null);
-
-			CommonUtils.ConsoleInfoMsg("===== [ 大厅 "+Name+" &a加载成功 &r| =====");
-			SecondCycle.registerCall(this);
-
-		}else{
-			CommonUtils.ConsoleInfoMsg("===== [ 大厅 "+Name+" &c加载失败 &r| =====");
-		}
-	}
-
-	public void unLoad() {
-		Clear();
-		for(Group g : grouplist){
-			if(getDefaultGroup()==g){
-				continue;
-			}
-			g.UnLoad();
-		}
-		if(getDefaultGroup()!=null){
-			getDefaultGroup().UnLoad();
-		}
-
-		Fwmain.getInstance().getLobbyList().remove(this);
-
-		callListener("onLobbyUnloaded",null);
-		HandlerList.unregisterAll(trigger);
-		MainCycle.unRegisterCall(trigger);
-		SecondCycle.unRegisterCall(this);
-	}
 
 	public boolean isComplete(){
 		if(Default==null){
@@ -603,6 +723,7 @@ public class Lobby implements CycleUpdate, LobbyAPI {
 	public String getName(){
 		return Name;
 	}
+
 
 	public Group getDefaultGroup(){
 		return Default;
@@ -629,123 +750,6 @@ public class Lobby implements CycleUpdate, LobbyAPI {
 		return VarTable.objToString(macros.getValue(p,key));
 	}
 
-	public Group getGroup(String Name){
-		for(Group l : grouplist){
-			if(l.getName().equals(Name)){
-				return l;
-			}
-		}
-		return null;
-	}
-
-	public void Clear(){
-
-		for(UUID p : this.getPlayerList()){
-			this.Leave(Bukkit.getPlayer(p));
-		}
-		hd.ClearHologram();
-	}
-
-	public static Lobby getLobby(String Name){
-		for(Lobby l : Fwmain.getInstance().getLobbyList()){
-			if(l.Name.equalsIgnoreCase(Name)){
-				return l;
-			}
-		}
-		return null;
-	}
-
-
-	public void Join(Player player){
-		if(getPlayerAmount()==0){
-			open = true;
-		}
-		if(!open){
-			player.sendMessage(ChatColor.RED+"该游戏正在进行中，无法加入！");
-			return;
-		}
-		if(Group.SearchPlayerInGroup(player)!=null){
-			player.sendMessage(ChatColor.RED+"你已经在一个游戏中了！");
-			return;
-		}
-		PlayerJoinLobbyEvent e = new PlayerJoinLobbyEvent(player,this);
-		Fwmain.getInstance().getServer().getPluginManager().callEvent(e);
-		if(!e.isCancelled()){
-			Default.JoinGroup(player);
-			callListener("onPlayerJoinLobby", player);
-		}
-
-	}
-
-	public void Leave(Player player){
-		if(player==null || !hasPlayer(player)){
-			return;
-		}
-
-		callListener("onPlayerLeaveLobby", player);
-
-		Group g = this.findGroupOfPlayer(player);
-		g.LeaveGroup(player);
-
-		PlayerLeaveLobbyEvent e = new PlayerLeaveLobbyEvent(player,this);
-		Fwmain.getInstance().getServer().getPluginManager().callEvent(e);
-		callListener("onPlayerRest",null,getPlayerAmount());
-	}
-
-	public void ChangeGroup(Player player,String groupname){
-		if(player==null || !hasPlayer(player)){
-			return;
-		}
-		Group from = Group.SearchPlayerInGroup(player);
-		if(from==null){
-			return;
-		}
-
-		if(getGroup(groupname)==null){
-			grouplist.add(new Group(this,groupname));
-		}
-
-		Group to = this.getGroup(groupname);
-		if(from==to){
-			return;
-		}
-		from.LeaveGroup(player);
-		to.JoinGroup(player);
-
-	}
-
-
-	public static void AutoLeave(Player player,boolean noTel){
-		for(Lobby l : Fwmain.getInstance().getLobbyList()){
-			if(l.getPlayerList().contains(player.getUniqueId())){
-				l.Leave(player);
-				return;
-			}
-		}
-		player.sendMessage("您不在任何游戏中！");
-	}
-
-	public static void LoadAll(File lobby) {
-
-		for(File file : lobby.listFiles()){
-			if(file.isDirectory()){
-				new Lobby(file).addToList();
-			}
-		}
-
-	}
-
-	public static void UnLoadAll() {
-		while(Fwmain.getInstance().getLobbyList().size()>0){
-			Fwmain.getInstance().getLobbyList().get(0).unLoad();
-			//l.ListenerRespond(new EventOnLobbyUnloaded(l,false));
-		}
-	}
-
-	@Override
-	public void onUpdate() {
-		callListener("onEverySecond",null);
-	}
 
 	/**
 	 * 添加玩家键值对

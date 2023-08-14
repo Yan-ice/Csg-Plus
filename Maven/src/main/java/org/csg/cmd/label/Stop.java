@@ -36,10 +36,10 @@ public class Stop extends Cmd{
     @Override
     public void console(CommandSender sender, String... args) {
         sender.sendMessage(ChatColor.BLUE+"安全关闭所有游戏！");
-        for(Lobby l : Fwmain.getInstance().getLobbyList()){
+        for(Lobby l : Fwmain.lobbyList){
             l.Clear();
         }
-        Fwmain.getInstance().getLobbyList().clear();
+        Fwmain.lobbyList.clear();
     }
     @Override
     public List<String> playerTab(int para, String[] paras, Player player){

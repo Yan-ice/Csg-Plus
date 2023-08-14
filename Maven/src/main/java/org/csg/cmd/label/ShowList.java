@@ -36,7 +36,7 @@ public class ShowList extends Cmd {
     @Override
     public void console(CommandSender sender, String... args) {
         StringBuilder Glist = new StringBuilder();
-        List<Lobby> Lobbylist = Fwmain.getInstance().getLobbyList();
+        List<Lobby> Lobbylist = Fwmain.lobbyList;
         for (Lobby l : Lobbylist) {
             String Name;
             if (l.isComplete()) {

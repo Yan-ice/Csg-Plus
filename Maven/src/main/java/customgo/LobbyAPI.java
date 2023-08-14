@@ -62,7 +62,7 @@ public interface LobbyAPI {
     public String getName();
 
 
-    public LobbyAPI clone();
+    public LobbyAPI clone(boolean isSproom, String worldName);
 
     /**
      * 获得大厅的初始队伍。

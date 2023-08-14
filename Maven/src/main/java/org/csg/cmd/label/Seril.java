@@ -5,6 +5,8 @@ import org.bukkit.entity.Player;
 import org.csg.Fwmain;
 import org.csg.cmd.Cmd;
 import org.csg.cmd.RootCmd;
+import org.csg.group.Lobby;
+import org.csg.sproom.TemporaryWorldManager;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -34,16 +36,20 @@ public class Seril extends Cmd {
     }
     @Override
     public void console(CommandSender sender, String... args) {
-        if(args.length<2){
-            sender.sendMessage("参数不足！");
+        if(args.length != 2){
+            sender.sendMessage("参数异常！");
             return;
         }
+
+        // 创建世界
+        new TemporaryWorldManager(Fwmain.getInstance())
+                .createTemporaryWorldFromSource(args[1], Lobby.getLobby(args[0]), Arrays.asList((Player) sender));
     }
     @Override
     public List<String> playerTab(int para, String[] paras, Player player){
         List<String> args = new ArrayList<>();
         if(para == 0) {
-            Fwmain.getInstance().getLobbyList().forEach(e -> args.add(e.getName()));
+            Fwmain.lobbyList.forEach(e -> args.add(e.getName()));
         }
         return args;
     }
@@ -51,7 +57,7 @@ public class Seril extends Cmd {
     public List<String> opTab(int para, String[] paras, Player player){
         List<String> args = new ArrayList<>();
         if(para == 0) {
-            Fwmain.getInstance().getLobbyList().forEach(e -> args.add(e.getName()));
+            Fwmain.lobbyList.forEach(e -> args.add(e.getName()));
         }
         return args;
     }
@@ -59,7 +65,7 @@ public class Seril extends Cmd {
     public List<String> consoleTab(int para,String[] paras) {
         List<String> args = new ArrayList<>();
         if(para == 0) {
-            Fwmain.getInstance().getLobbyList().forEach(e -> args.add(e.getName()));
+            Fwmain.lobbyList.forEach(e -> args.add(e.getName()));
         }
         return args;
     }

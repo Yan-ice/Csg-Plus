@@ -452,19 +452,6 @@ public class CommandTask extends Task {
                     executer.endWhenNoTarget = args[0].equals("true");
                 }
                 break;
-            case "addhologram":
-                Location lo = Teleporter.stringToLoc(args[0]);
-                executer.lobby.hd.AddHologram(lo, args[1], args[2]);
-                break;
-            case "delhologram":
-                executer.lobby.hd.DelHologram(args[0]);
-                break;
-            case "edithologram":
-                executer.lobby.hd.EditHologram(args[0], args[1]);
-                break;
-            case "clearhologram":
-                executer.lobby.hd.ClearHologram();
-                break;
             case "spawnmob":
                 String[] v = args[2].split(" ");
                 if(v.length==3 && Target!=null){

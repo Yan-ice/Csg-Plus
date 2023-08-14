@@ -17,6 +17,8 @@ import org.csg.Utils.OSUtils;
 import org.csg.cmd.CsgCmd;
 import org.csg.group.Lobby;
 import org.csg.group.task.toolkit.ListenerFactory;
+import org.csg.sproom.TemporaryWorldEvent;
+import org.csg.sproom.TemporaryWorldListener;
 
 import java.io.File;
 import java.util.*;
@@ -58,8 +60,7 @@ public class Fwmain extends JavaPlugin implements Listener {
 	protected FileConfiguration optionFileConfiguration;
 
 	// Lobby 游戏列表
-	@Getter
-	private List<Lobby> lobbyList = new ArrayList<>();
+	public static List<Lobby> lobbyList = new ArrayList<>();
 
 	// 获取 Lobby 目录
 	protected File lobbyFolder = new File(getDataFolder(), "lobby");
@@ -77,7 +78,7 @@ public class Fwmain extends JavaPlugin implements Listener {
 
 		// 注册监听器
 		Bukkit.getServer().getPluginManager().registerEvents(this, this);
-
+		Bukkit.getServer().getPluginManager().registerEvents(new TemporaryWorldListener(), this);
 		//分析操作系统
 		osName =  OSUtils.analyseOs();
 
@@ -96,17 +97,9 @@ public class Fwmain extends JavaPlugin implements Listener {
 			OSUtils.checkFolder(lobbyFolder);
 			// 读取Option.yml文件
 			optionFileConfiguration = OSUtils.loadFileConfiguration(new File(getDataFolder(), "Option.yml"));
-			// 读取世界路径
-			worldpath = OSUtils.loadWorldPath();
 
-			// 判断是否为Paper
-			if(Bukkit.getVersion().contains("Paper")){
-				File root = new File("./libraries");
-				OSUtils.loadBukkitCore(root,true);
-			}else{
-				File root = new File("./");
-				OSUtils.loadBukkitCore(root,false);
-			}
+			// 加载世界目录和核心目录
+			loadWorldAndCore();
 
 			// 加载命令
 			csgCmd = new CsgCmd(Bukkit.getPluginCommand("csg"));
@@ -122,7 +115,6 @@ public class Fwmain extends JavaPlugin implements Listener {
 			getLogger().info("请检查是否有以下任何情况发生：");
 			getLogger().info("【1】用了plugman/YUM重载插件(重启解决)");
 			getLogger().info("===========================");
-
 		}
 
 	}
@@ -160,23 +152,15 @@ public class Fwmain extends JavaPlugin implements Listener {
 		// 检查插件文件夹是否存在
 		OSUtils.checkFolder(lobbyFolder);
 
-		// 读取世界路径
-		worldpath = OSUtils.loadWorldPath();
-
-		// 判断是否为Paper
-		if(Bukkit.getVersion().contains("Paper")){
-			File root = new File("./libraries");
-			OSUtils.loadBukkitCore(root,true);
-		}else{
-			File root = new File("./");
-			OSUtils.loadBukkitCore(root,false);
-		}
+		// 加载世界目录和核心目录
+		loadWorldAndCore();
 
 		// 加载所有Lobby游戏列表
 		OSUtils.loadAllLobby(lobbyFolder);
 
 		// 注册所有监听器
 		getServer().getPluginManager().registerEvents(this, this);
+		getServer().getPluginManager().registerEvents(new TemporaryWorldListener(), this);
 
 		if(sender != null){
 			sender.sendMessage("插件重载成功！");
@@ -194,8 +178,37 @@ public class Fwmain extends JavaPlugin implements Listener {
 	 * 注销所有Lobby游戏
 	 */
 	public void unloadAllLobby() {
-		for (Lobby lobby : lobbyList) {
-			lobby.unLoad();
+		while(Fwmain.lobbyList.size()>0){
+			Fwmain.lobbyList.get(0).unLoad();
 		}
+	}
+
+	/**
+	 * 加载世界和核心
+	 */
+	public void loadWorldAndCore(){
+		// 读取世界路径
+		worldpath = OSUtils.loadWorldPath();
+
+		// 判断是否为Paper
+		if(Bukkit.getVersion().contains("Paper")){
+			File root = new File("./libraries");
+			OSUtils.loadBukkitCore(root,true);
+		}else{
+			File root = new File("./");
+			OSUtils.loadBukkitCore(root,false);
+		}
+	}
+
+	/**
+	 * 获取指定的Lobby游戏
+	 */
+	public Lobby getLobby(String name) {
+		for(Lobby lobby : lobbyList){
+			if(lobby.getName().equals(name)){
+				return lobby;
+			}
+		}
+		return null;
 	}
 }

@@ -33,7 +33,7 @@ public class GroupTypeCaster extends TypeCaster{
     protected Object deserializeRule(String s, Type... typeArguments) throws Exception {
         String[] lobbyAndGroup = s.split("_");
         if (lobbyAndGroup.length == 2) {
-            for (Lobby lobby : Fwmain.getInstance().getLobbyList()) {
+            for (Lobby lobby : Fwmain.lobbyList) {
                 if (lobby.getName().equals(lobbyAndGroup[0])) {
                     return lobby.getGroupList().stream()
                             .filter(group -> lobby.getName().equals(lobbyAndGroup[1]))

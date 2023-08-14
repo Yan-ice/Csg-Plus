@@ -27,7 +27,7 @@ public class LobbyTypeCaster extends TypeCaster{
      * @return 如果反序列化失败，请返回null。
      */
     protected Object deserializeRule(String s,  Type... typeArguments){
-        for(Lobby l : Fwmain.getInstance().getLobbyList()){
+        for(Lobby l : Fwmain.lobbyList){
             if(l.getName().equals(s)){
                 return l;
             }

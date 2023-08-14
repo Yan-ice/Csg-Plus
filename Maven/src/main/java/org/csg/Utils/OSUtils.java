@@ -6,12 +6,15 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.csg.Fwmain;
 import org.csg.group.Lobby;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+import java.util.stream.Stream;
 
 public class OSUtils {
 
@@ -160,4 +163,83 @@ public class OSUtils {
         }
     }
 
+    /**
+     * 复制文件夹
+     * @param source 源文件夹
+     * @param target 目标文件夹
+     * @throws IOException IO异常
+     */
+    public static void copyDirectory(File source, File target) throws IOException {
+        if (!target.exists()) {
+            target.mkdir();
+        }
+        for (File file : source.listFiles()) {
+            File targetFile = new File(target, file.getName());
+            if (file.isDirectory()) {
+                copyDirectory(file, targetFile);
+            } else {
+                Files.copy(file.toPath(), targetFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            }
+        }
+    }
+
+    public static void copyWorld(Path source, Path target) throws IOException {
+        // 创建目标世界的文件夹
+        if(!Files.exists(target)){
+            Files.createDirectories(target);
+        }
+
+        // 复制 region 文件夹
+        Path sourceRegion = source.resolve("region");
+        Path targetRegion = target.resolve("region");
+        if(Files.exists(sourceRegion) && Files.isDirectory(sourceRegion)) {
+            if (!Files.exists(targetRegion)) {
+                Files.createDirectories(targetRegion);
+            }
+            try (Stream<Path> paths = Files.walk(sourceRegion)) {
+                paths.filter(Files::isRegularFile)
+                        .forEach(sourcePath -> {
+                            Path targetPath = targetRegion.resolve(sourceRegion.relativize(sourcePath));
+                            /*try {
+                                Files.copy(sourcePath, targetPath, StandardCopyOption.REPLACE_EXISTING);
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }*/
+                            try (
+                                    InputStream in = new BufferedInputStream(Files.newInputStream(sourcePath));
+                                    OutputStream out = new BufferedOutputStream(Files.newOutputStream(targetPath))
+                            ) {
+                                byte[] buffer = new byte[1024];
+                                int lengthRead;
+                                while ((lengthRead = in.read(buffer)) > 0) {
+                                    out.write(buffer, 0, lengthRead);
+                                    out.flush();
+                                }
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        });
+            }
+
+            // 复制 level.dat 文件
+            Path sourceLevelDat = source.resolve("level.dat");
+            Path targetLevelDat = target.resolve("level.dat");
+            if (Files.exists(sourceLevelDat) && Files.isRegularFile(sourceLevelDat)) {
+                //Files.copy(sourceLevelDat, targetLevelDat, StandardCopyOption.REPLACE_EXISTING);
+                try (
+                        InputStream in = new BufferedInputStream(Files.newInputStream(sourceLevelDat));
+                        OutputStream out = new BufferedOutputStream(Files.newOutputStream(targetLevelDat))
+                ) {
+                    byte[] buffer = new byte[1024];
+                    int lengthRead;
+                    while ((lengthRead = in.read(buffer)) > 0) {
+                        out.write(buffer, 0, lengthRead);
+                        out.flush();
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
 }

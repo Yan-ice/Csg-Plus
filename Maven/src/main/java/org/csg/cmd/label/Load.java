@@ -51,7 +51,7 @@ public class Load extends Cmd {
     public List<String> playerTab(int para, String[] paras, Player player){
         List<String> args = new ArrayList<>();
         if(para == 0) {
-            Fwmain.getInstance().getLobbyList().forEach(e -> args.add(e.getName()));
+            Fwmain.lobbyList.forEach(e -> args.add(e.getName()));
         }
         return args;
     }
@@ -59,7 +59,7 @@ public class Load extends Cmd {
     public List<String> opTab(int para, String[] paras, Player player){
         List<String> args = new ArrayList<>();
         if(para == 0) {
-            Fwmain.getInstance().getLobbyList().forEach(e -> args.add(e.getName()));
+            Fwmain.lobbyList.forEach(e -> args.add(e.getName()));
         }
         return args;
     }
@@ -67,7 +67,7 @@ public class Load extends Cmd {
     public List<String> consoleTab(int para,String[] paras) {
         List<String> args = new ArrayList<>();
         if(para == 0) {
-            Fwmain.getInstance().getLobbyList().forEach(e -> args.add(e.getName()));
+            Fwmain.lobbyList.forEach(e -> args.add(e.getName()));
         }
         return args;
     }
